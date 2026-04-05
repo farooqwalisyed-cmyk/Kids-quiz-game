@@ -74,9 +74,16 @@ const correctSound=new Audio("correct.mp3");
 const wrongSound=new Audio("wrong.mp3");
 
 function play(type){
-if(type==="click") clickSound.play();
-if(type==="correct") correctSound.play();
-if(type==="wrong") wrongSound.play();
+let sound;
+
+if(type==="click") sound = clickSound;
+if(type==="correct") sound = correctSound;
+if(type==="wrong") sound = wrongSound;
+
+if(sound){
+sound.currentTime = 0;
+sound.play().catch(()=>{});
+}
 }
 
 /* VARIABLES */
