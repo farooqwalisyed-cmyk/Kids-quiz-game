@@ -1,7 +1,9 @@
 <script>
 
 let cat="kids";
-let index=0;
+
+let questionIndex=0;
+let level=1;
 
 let score=0;
 let coins=0;
@@ -9,7 +11,7 @@ let stars=0;
 
 let questions=[];
 
-/* 🔥 FIXED SESSION SYSTEM */
+/* SESSION SYSTEM (NO REPEAT FIX) */
 let sessionPool={
 kids:[],
 math:[],
@@ -23,6 +25,25 @@ math:0,
 english:0,
 gk:0
 };
+
+/* SOUND (simple beep using browser audio) */
+function beep(type){
+let ctx=new (window.AudioContext||window.webkitAudioContext)();
+let o=ctx.createOscillator();
+let g=ctx.createGain();
+
+o.connect(g);
+g.connect(ctx.destination);
+
+if(type==="correct"){
+o.frequency.value=700;
+}else{
+o.frequency.value=200;
+}
+
+o.start();
+o.stop(ctx.currentTime+0.15);
+}
 
 /* UI */
 function show(id){
@@ -39,7 +60,7 @@ kids:[
 {q:"Lion sound?",a:"Roar",o:["Roar","Buzz","Meow","Bark"]},
 {q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
 {q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
-{q:"Sun is?",a:"Hot",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
+{q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
 {q:"Moon appears at?",a:"Night",o:["Night","Morning","Noon","Evening"]},
 {q:"Tree gives?",a:"Oxygen",o:["Oxygen","Milk","Water","Fire"]},
 {q:"Baby dog?",a:"Puppy",o:["Puppy","Kitten","Cub","Calf"]}
@@ -99,12 +120,13 @@ function setCat(c){
 cat=c;
 }
 
-/* START GAME (FIXED NO REPEAT FINAL) */
+/* START GAME (PRO SYSTEM) */
 function startGame(){
 
 score=0;
 coins=0;
 stars=0;
+questionIndex=0;
 
 /* CREATE SESSION ONCE */
 if(sessionPool[cat].length===0){
@@ -118,25 +140,37 @@ sessionPool[cat]=shuffle(DB[cat]);
 sessionIndex[cat]=0;
 }
 
-index=sessionIndex[cat];
 questions=sessionPool[cat];
+questionIndex=sessionIndex[cat];
+
+level=1;
 
 show("game");
-load();
+loadQuestion();
+}
+
+/* LEVEL SYSTEM */
+function updateLevel(){
+if(questionIndex>0 && questionIndex%5===0){
+level++;
+}
 }
 
 /* LOAD QUESTION */
-function load(){
+function loadQuestion(){
 
-if(index>=questions.length){
+if(questionIndex>=questions.length){
 alert("🎉 Category Completed!");
 show("menu");
 return;
 }
 
-let q=questions[index];
+updateLevel();
 
-document.getElementById("q").innerText=q.q;
+let q=questions[questionIndex];
+
+document.getElementById("q").innerText=
+"Level "+level+" | "+q.q;
 
 let box=document.getElementById("options");
 box.innerHTML="";
@@ -151,16 +185,18 @@ btn.onclick=()=>{
 if(opt===q.a){
 btn.style.background="green";
 score+=10;
-coins+=10;
+coins+=5;
 stars+=1;
+beep("correct");
 }else{
 btn.style.background="red";
+beep("wrong");
 }
 
 setTimeout(()=>{
-index++;
-sessionIndex[cat]=index;
-load();
+questionIndex++;
+sessionIndex[cat]=questionIndex;
+loadQuestion();
 },500);
 
 };
@@ -168,11 +204,11 @@ load();
 box.appendChild(btn);
 });
 
-update();
+updateUI();
 }
 
-/* UPDATE UI */
-function update(){
+/* UI UPDATE */
+function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
