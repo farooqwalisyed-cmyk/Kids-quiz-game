@@ -1,3 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kids Quiz Pro</title>
+
+<style>
+body{
+font-family:Arial;
+margin:0;
+background:linear-gradient(135deg,#c2e9fb,#a1c4fd);
+text-align:center;
+}
+
+.screen{display:none;padding:20px;}
+.active{display:block;animation:fade 0.3s;}
+
+@keyframes fade{
+from{opacity:0;transform:scale(0.95);}
+to{opacity:1;transform:scale(1);}
+}
+
+.card{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+button{
+padding:12px;
+margin:6px;
+border:none;
+border-radius:12px;
+font-size:16px;
+background:#4a6cf7;
+color:white;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:active{transform:scale(0.95);}
+
+.option{
+display:block;
+width:85%;
+margin:10px auto;
+background:#fff;
+color:#333;
+border:2px solid #4a6cf7;
+}
+
+.level-btn{width:120px;}
+
+.topbar{
+font-size:18px;
+margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+<h1>🎮 Kids Quiz Pro</h1>
+<input id="name" placeholder="Enter Name"><br><br>
+<button onclick="goCategories()">Start Game</button>
+</div>
+
+<!-- CATEGORY -->
+<div id="categories" class="screen">
+<h2>Select Category</h2>
+<button onclick="openLevels('kids')">Kids</button>
+<button onclick="openLevels('math')">Math</button>
+<button onclick="openLevels('english')">English</button>
+<button onclick="openLevels('gk')">GK</button>
+</div>
+
+<!-- LEVEL -->
+<div id="levels" class="screen">
+<h2>Select Level</h2>
+<div id="levelBox"></div>
+<button onclick="goHome()">Back</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+<div class="card">
+
+<div class="topbar">
+👤 <span id="player"></span><br>
+⭐ Score: <span id="score">0</span> |
+🪙 Coins: <span id="coins">0</span> |
+🏆 Stars: <span id="stars">0</span>
+</div>
+
+<h2 id="q">Question</h2>
+<div id="options"></div>
+
+<br>
+<button onclick="goHome()">Exit</button>
+
+</div>
+</div>
+
+<!-- 🔊 SOUND -->
+<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
 <script>
 
 let player="",category="",level=1;
@@ -5,13 +117,11 @@ let score=0,coins=0,stars=0;
 
 let currentQuestions=[];
 let qIndex=0;
+let usedQuestions=new Set();
 
-/* ✅ GLOBAL USED TRACKER (KEY FIX) */
-let usedQuestions = new Set();
-
-/* DATABASE (EXPANDED + UNIQUE SAFE) */
-const DB = {
-kids: [
+/* DATABASE */
+const DB={
+kids:[
 "Dog says?|Bark|Bark,Meow,Roar,Buzz",
 "Cat says?|Meow|Meow,Bark,Roar,Buzz",
 "Cow gives?|Milk|Milk,Egg,Water,Honey",
@@ -20,43 +130,31 @@ kids: [
 "Bird can?|Fly|Fly,Swim,Run,Sleep",
 "Lion is?|King|King,Doctor,Teacher,Farmer",
 "Duck says?|Quack|Quack,Bark,Meow,Roar",
-"Horse runs?|Fast|Fast,Slow,Fly,Crawl",
 "Elephant is?|Big|Big,Small,Tiny,Light"
 ],
 
-math: [
+math:[
 "2+2=?|4|4,3,5,6",
 "5+3=?|8|8,7,9,10",
 "10-5=?|5|5,4,6,7",
 "6+2=?|8|8,7,9,10",
 "9-3=?|6|6,5,7,8",
-"4+4=?|8|8,7,9,6",
-"7+2=?|9|9,8,10,11",
-"3+5=?|8|8,7,9,6",
-"8-2=?|6|6,5,7,8",
 "1+1=?|2|2,3,4,5"
 ],
 
-english: [
+english:[
 "A for?|Apple|Apple,Ball,Cat,Dog",
 "B for?|Ball|Ball,Cat,Dog,Ant",
 "C for?|Cat|Cat,Dog,Bat,Rat",
 "D for?|Dog|Dog,Cat,Cow,Hen",
-"E for?|Elephant|Elephant,Fish,Goat,Hen",
-"F for?|Fish|Fish,Apple,Ball,Dog",
-"G for?|Goat|Goat,Cat,Dog,Ant",
-"H for?|Hen|Hen,Fish,Ball,Dog"
+"E for?|Elephant|Elephant,Fish,Goat,Hen"
 ],
 
-gk: [
+gk:[
 "Sun is?|Hot|Hot,Cold,Wet,Dry",
 "Sky color?|Blue|Blue,Red,Green,Black",
 "We drink?|Water|Water,Milk,Oil,Juice",
-"Earth is?|Round|Round,Flat,Square,Triangle",
-"We breathe?|Air|Air,Water,Fire,Stone",
-"Moon gives?|Light|Light,Heat,Smoke,Sound",
-"Sun rises in?|East|East,West,North,South",
-"Grass color?|Green|Green,Red,Blue,Black"
+"Earth is?|Round|Round,Flat,Square,Triangle"
 ]
 };
 
@@ -66,17 +164,22 @@ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-function goHome(){show("home");}
+function goHome(){show("home");playClick();}
+
+function playClick(){
+document.getElementById("clickSound").play();
+}
 
 function goCategories(){
 player=document.getElementById("name").value;
-if(!player){alert("Enter Name");return;}
+if(!player)return;
+playClick();
 show("categories");
 }
 
-/* LEVELS */
 function openLevels(cat){
 category=cat;
+playClick();
 show("levels");
 
 let box=document.getElementById("levelBox");
@@ -84,51 +187,38 @@ box.innerHTML="";
 
 for(let i=1;i<=5;i++){
 let b=document.createElement("button");
+b.className="level-btn";
 b.innerText="Level "+i;
 b.onclick=()=>startGame(i);
 box.appendChild(b);
 }
 }
 
-/* 🔥 CORE ENGINE (NO REPEAT EVER FIXED) */
+/* 🔥 NO REPEAT ENGINE */
 function startGame(lv){
 
 level=lv;
 score=0;coins=0;stars=0;
 
-/* build clean pool */
 let pool = DB[category].map(x=>{
-let parts=x.split("|");
-return {
-q:parts[0],
-a:parts[1],
-o:parts[2].split(",")
-};
+let p=x.split("|");
+return {q:p[0],a:p[1],o:p[2].split(",")};
 });
 
-/* remove used questions */
-pool = pool.filter(q => !usedQuestions.has(q.q));
+pool = pool.filter(q=>!usedQuestions.has(q.q));
 
-/* if empty → reset ALL */
 if(pool.length===0){
 usedQuestions.clear();
 pool = DB[category].map(x=>{
-let parts=x.split("|");
-return {
-q:parts[0],
-a:parts[1],
-o:parts[2].split(",")
-};
+let p=x.split("|");
+return {q:p[0],a:p[1],o:p[2].split(",")};
 });
 }
 
-/* shuffle */
 pool.sort(()=>Math.random()-0.5);
 
-/* take 3 questions */
 currentQuestions = pool.slice(0,3);
 
-/* mark used */
 currentQuestions.forEach(q=>usedQuestions.add(q.q));
 
 qIndex=0;
@@ -169,20 +259,21 @@ if(opt===q.a){
 score+=10;
 coins+=5;
 stars+=1;
-btn.style.background="green";
+document.getElementById("correctSound").play();
+btn.style.background="lightgreen";
 }else{
-btn.style.background="red";
+document.getElementById("wrongSound").play();
+btn.style.background="salmon";
 }
 
 updateUI();
-setTimeout(load,500);
+setTimeout(load,600);
 };
 
 box.appendChild(btn);
 });
 }
 
-/* UI */
 function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
@@ -190,3 +281,6 @@ document.getElementById("stars").innerText=stars;
 }
 
 </script>
+
+</body>
+</html>
