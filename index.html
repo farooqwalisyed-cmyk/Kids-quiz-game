@@ -1,106 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz PRO</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#667eea;
-color:white;
-text-align:center;
-}
-
-h1{background:#ff4d6d;padding:10px;margin:0;}
-
-.screen{display:none;padding:20px;}
-.active{display:block;}
-
-.card{
-background:white;
-color:black;
-padding:20px;
-border-radius:15px;
-max-width:500px;
-margin:auto;
-}
-
-button{
-padding:12px;
-margin:10px;
-border:none;
-border-radius:10px;
-background:#4a90e2;
-color:white;
-width:80%;
-font-size:16px;
-cursor:pointer;
-}
-
-.correct{background:green!important;}
-.wrong{background:red!important;}
-
-.stats{
-display:flex;
-justify-content:space-around;
-font-weight:bold;
-margin-bottom:10px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>🎮 Kids Quiz PRO</h1>
-
-<!-- HOME -->
-<div id="home" class="screen active">
-<div class="card">
-<h2>Enter Name</h2>
-<input id="username" placeholder="Your name">
-<br><br>
-<button onclick="startApp()">Start</button>
-</div>
-</div>
-
-<!-- MENU -->
-<div id="menu" class="screen">
-<div class="card">
-<h2>Select Category</h2>
-
-<button onclick="setCat('kids')">Kids</button>
-<button onclick="setCat('math')">Math</button>
-<button onclick="setCat('english')">English</button>
-<button onclick="setCat('gk')">GK</button>
-
-<h3>Levels</h3>
-
-<button onclick="startLevel(1)">Level 1</button>
-<button onclick="startLevel(2)">Level 2</button>
-<button onclick="startLevel(3)">Level 3</button>
-
-</div>
-</div>
-
-<!-- GAME -->
-<div id="game" class="screen">
-<div class="card">
-
-<div class="stats">
-<div>⭐ <span id="score">0</span></div>
-<div>🪙 <span id="coins">0</span></div>
-<div>🏆 <span id="stars">0</span></div>
-</div>
-
-<h2 id="q"></h2>
-<div id="options"></div>
-
-</div>
-</div>
-
 <script>
 
 /* STATE */
@@ -113,6 +10,14 @@ let coins=0;
 let stars=0;
 
 let questions=[];
+
+/* USED QUESTION TRACKER (FIX) */
+let usedQuestions={
+kids:[],
+math:[],
+english:[],
+gk:[]
+};
 
 /* UI */
 function show(id){
@@ -192,7 +97,7 @@ const LEVELS={
 3:10
 };
 
-/* SHUFFLE FUNCTION (FIX FOR REPEATING BUG) */
+/* REAL SHUFFLE */
 function shuffleArray(arr){
 let a=[...arr];
 for(let i=a.length-1;i>0;i--){
@@ -202,7 +107,7 @@ let j=Math.floor(Math.random()*(i+1));
 return a;
 }
 
-/* START LEVEL */
+/* START LEVEL (ANTI REPEAT FIX) */
 function startLevel(l){
 
 level=l;
@@ -211,15 +116,31 @@ score=0;
 coins=0;
 stars=0;
 
-/* FIXED: NO REPEATING QUESTIONS */
-questions=shuffleArray(DB[cat]).slice(0,LEVELS[level]);
+/* GET UNUSED QUESTIONS ONLY */
+let pool=DB[cat].filter(q=>{
+return !usedQuestions[cat].includes(q.q);
+});
+
+/* IF NOT ENOUGH LEFT → RESET */
+if(pool.length<LEVELS[level]){
+usedQuestions[cat]=[];
+pool=DB[cat];
+}
+
+/* SHUFFLE + PICK */
+questions=shuffleArray(pool).slice(0,LEVELS[level]);
+
+/* SAVE USED QUESTIONS */
+questions.forEach(q=>{
+usedQuestions[cat].push(q.q);
+});
 
 updateStats();
 show("game");
 load();
 }
 
-/* LOAD QUESTION */
+/* LOAD */
 function load(){
 
 if(index>=questions.length){
@@ -234,7 +155,6 @@ document.getElementById("q").innerText=q.q;
 let optionsDiv=document.getElementById("options");
 optionsDiv.innerHTML="";
 
-/* safe shuffle options */
 let shuffled=shuffleArray(q.o);
 
 shuffled.forEach(opt=>{
@@ -276,6 +196,3 @@ document.getElementById("stars").innerText=stars;
 }
 
 </script>
-
-</body>
-</html>
