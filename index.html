@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz Pro</title>
+<title>Quiz Pro Fixed</title>
 
 <style>
 body{
@@ -13,8 +13,6 @@ body{
   color:white;
   text-align:center;
 }
-
-h1{margin:15px;}
 
 .topbar{
   display:flex;
@@ -27,7 +25,7 @@ h1{margin:15px;}
 .card{
   background:white;
   color:black;
-  margin:20px;
+  margin:15px;
   padding:20px;
   border-radius:20px;
   box-shadow:0 10px 20px rgba(0,0,0,0.3);
@@ -59,6 +57,18 @@ button{
   width:0%;
   background:#2ecc71;
 }
+
+.nav{
+  display:flex;
+  justify-content:space-around;
+  margin-top:10px;
+}
+
+.nav button{
+  width:45%;
+  background:#333;
+  color:white;
+}
 </style>
 </head>
 
@@ -70,10 +80,10 @@ button{
   <div>📘 Level <span id="level">1</span></div>
 </div>
 
-<h1>🎮 Kids Quiz PRO</h1>
+<h2>🎮 Quiz Pro</h2>
 
 <div id="menu" class="card">
-  <h2>Select Category</h2>
+  <h3>Select Category</h3>
   <button onclick="startGame('gk')">🌍 GK</button>
   <button onclick="startGame('math')">➕ Math</button>
   <button onclick="startGame('english')">🔤 English</button>
@@ -81,53 +91,49 @@ button{
 
 <div id="game" class="card" style="display:none;">
   <div class="progress"><div id="bar" class="bar"></div></div>
-  <h2 id="question"></h2>
+
+  <h3 id="question"></h3>
   <div id="options"></div>
+
+  <div class="nav">
+    <button onclick="goHome()">🏠 Home</button>
+    <button onclick="nextQ()">➡ Next</button>
+  </div>
 </div>
 
 <script>
 
 let data = {
-  // 🌍 GK (Kids + GK merged here)
-  gk: [
-    {q:"Capital of India?", a:["Delhi","Mumbai","Kolkata","Chennai"], c:"Delhi"},
-    {q:"National Animal of India?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
-    {q:"How many days in a year?", a:["365","360","400","300"], c:"365"},
-    {q:"Sun rises in?", a:["East","West","North","South"], c:"East"},
-    {q:"Largest planet?", a:["Earth","Mars","Jupiter","Venus"], c:"Jupiter"},
-    {q:"National Bird of India?", a:["Peacock","Parrot","Eagle","Sparrow"], c:"Peacock"},
-    {q:"Water freezes at?", a:["0°C","10°C","100°C","50°C"], c:"0°C"},
-    {q:"How many states in India?", a:["28","29","30","27"], c:"28"},
-    {q:"Opposite of Hot?", a:["Cold","Warm","Heat","Boil"], c:"Cold"},
-    {q:"A for?", a:["Apple","Ball","Cat","Dog"], c:"Apple"}
+  gk:[
+    {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:"Delhi"},
+    {q:"National Animal?",a:["Tiger","Lion","Dog","Elephant"],c:"Tiger"},
+    {q:"Sun rises in?",a:["East","West","North","South"],c:"East"},
+    {q:"Water freezes at?",a:["0°C","10°C","100°C","50°C"],c:"0°C"},
+    {q:"Largest planet?",a:["Jupiter","Mars","Earth","Venus"],c:"Jupiter"},
+    {q:"National Bird?",a:["Peacock","Parrot","Eagle","Sparrow"],c:"Peacock"},
+    {q:"How many days in year?",a:["365","360","400","300"],c:"365"}
   ],
-
-  math: [
-    {q:"2 + 3 = ?", a:["5","6","7","8"], c:"5"},
-    {q:"10 - 6 = ?", a:["4","5","3","6"], c:"4"},
-    {q:"4 × 2 = ?", a:["6","7","8","9"], c:"8"},
-    {q:"12 ÷ 3 = ?", a:["2","3","4","5"], c:"4"}
+  math:[
+    {q:"2 + 2 = ?",a:["3","4","5","6"],c:"4"},
+    {q:"5 + 3 = ?",a:["6","7","8","9"],c:"8"},
+    {q:"10 - 6 = ?",a:["3","4","5","6"],c:"4"},
+    {q:"4 × 2 = ?",a:["6","7","8","9"],c:"8"}
   ],
-
-  english: [
-    {q:"A for ?", a:["Apple","Ball","Cat","Dog"], c:"Apple"},
-    {q:"B for ?", a:["Ball","Apple","Cat","Dog"], c:"Ball"},
-    {q:"C for ?", a:["Cat","Dog","Ant","Bat"], c:"Cat"},
-    {q:"Opposite of Big?", a:["Small","Tall","Long","Wide"], c:"Small"}
+  english:[
+    {q:"A for ?",a:["Apple","Ball","Cat","Dog"],c:"Apple"},
+    {q:"B for ?",a:["Ball","Apple","Cat","Dog"],c:"Ball"},
+    {q:"Opposite of Big?",a:["Small","Tall","Long","Wide"],c:"Small"},
+    {q:"C for ?",a:["Cat","Dog","Ant","Bat"],c:"Cat"}
   ]
 };
 
-let used = {};
-let index = 0;
-let coins = 0;
-let stars = 0;
-let level = 1;
-let currentCat = "";
+let cat="",used=[],index=0;
+let coins=0,stars=0,level=1;
+let currentQ=null;
 
-function startGame(cat){
-  currentCat = cat;
-
-  if(!used[cat]) used[cat] = [];
+function startGame(c){
+  cat=c;
+  if(!used[cat]) used[cat]=[];
 
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="block";
@@ -135,46 +141,55 @@ function startGame(cat){
   loadQ();
 }
 
-function loadQ(){
-  let qlist = data[currentCat];
+function goHome(){
+  document.getElementById("game").style.display="none";
+  document.getElementById("menu").style.display="block";
+}
 
-  // reset if all used
-  if(used[currentCat].length >= qlist.length){
-    used[currentCat] = [];
+function loadQ(){
+
+  let list=data[cat];
+
+  if(used[cat].length>=list.length){
+    used[cat]=[];
     level++;
+    document.getElementById("level").innerText=level;
     alert("🎉 Level Up!");
-    document.getElementById("level").innerText = level;
   }
 
   do{
-    index = Math.floor(Math.random() * qlist.length);
-  }while(used[currentCat].includes(index));
+    index=Math.floor(Math.random()*list.length);
+  }while(used[cat].includes(index));
 
-  used[currentCat].push(index);
+  used[cat].push(index);
 
-  let q = qlist[index];
+  currentQ=list[index];
 
-  document.getElementById("question").innerText = q.q;
+  document.getElementById("question").innerText=currentQ.q;
 
-  let opt = document.getElementById("options");
-  opt.innerHTML = "";
+  let opt=document.getElementById("options");
+  opt.innerHTML="";
 
-  document.getElementById("bar").style.width =
-    (used[currentCat].length / qlist.length) * 100 + "%";
+  document.getElementById("bar").style.width=
+    (used[cat].length/list.length)*100+"%";
 
-  q.a.forEach(o=>{
-    let b = document.createElement("button");
-    b.innerText = o;
-    b.className = "option";
-    b.onclick = ()=>check(o,q.c,b);
+  currentQ.a.forEach(o=>{
+    let b=document.createElement("button");
+    b.innerText=o;
+    b.className="option";
+    b.onclick=()=>check(o,b);
     opt.appendChild(b);
   });
 }
 
-function check(sel,ans,btn){
-  if(sel === ans){
+function nextQ(){
+  loadQ();
+}
+
+function check(sel,btn){
+  if(sel===currentQ.c){
     btn.classList.add("correct");
-    coins += 10;
+    coins+=10;
     stars++;
     sound(true);
   }else{
@@ -182,19 +197,19 @@ function check(sel,ans,btn){
     sound(false);
   }
   updateUI();
-  setTimeout(loadQ,700);
+  setTimeout(loadQ,600);
 }
 
 function updateUI(){
-  document.getElementById("coins").innerText = coins;
-  document.getElementById("stars").innerText = stars;
-  document.getElementById("level").innerText = level;
+  document.getElementById("coins").innerText=coins;
+  document.getElementById("stars").innerText=stars;
+  document.getElementById("level").innerText=level;
 }
 
 function sound(ok){
-  let ctx = new AudioContext();
-  let o = ctx.createOscillator();
-  o.frequency.value = ok ? 700 : 200;
+  let ctx=new AudioContext();
+  let o=ctx.createOscillator();
+  o.frequency.value=ok?700:200;
   o.connect(ctx.destination);
   o.start();
   setTimeout(()=>o.stop(),150);
