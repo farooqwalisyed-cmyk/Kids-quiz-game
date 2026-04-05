@@ -7,7 +7,9 @@
 body{
 font-family:Arial;
 text-align:center;
-background:#f5f5f5;
+background:#f2f2f2;
+margin:0;
+padding:0;
 }
 
 .screen{display:none;padding:20px;}
@@ -21,6 +23,7 @@ border-radius:8px;
 background:#4CAF50;
 color:white;
 font-size:16px;
+cursor:pointer;
 }
 
 #q{
@@ -35,6 +38,7 @@ font-weight:bold;
 
 <!-- MENU -->
 <div id="menu" class="screen active">
+
 <h1>🎮 Kids Quiz Game</h1>
 
 <button onclick="setCat('kids')">Kids</button>
@@ -43,12 +47,15 @@ font-weight:bold;
 <button onclick="setCat('gk')">GK</button>
 
 <br><br>
+
 <button onclick="startGame()">Start Game</button>
 
 <br><br>
+
 Score: <span id="score">0</span><br>
 Coins: <span id="coins">0</span><br>
 Stars: <span id="stars">0</span>
+
 </div>
 
 <!-- GAME -->
@@ -58,46 +65,27 @@ Stars: <span id="stars">0</span>
 
 <div id="options"></div>
 
-<br><br>
+<br>
 <button onclick="show('menu')">Exit</button>
 
 <br><br>
-Score: <span id="score">0</span><br>
-Coins: <span id="coins">0</span><br>
-Stars: <span id="stars">0</span>
+
+Score: <span id="score2">0</span><br>
+Coins: <span id="coins2">0</span><br>
+Stars: <span id="stars2">0</span>
 
 </div>
 
 <script>
 
 let cat="kids";
-let questionIndex=0;
+let index=0;
 
 let score=0;
 let coins=0;
 let stars=0;
 
 let questions=[];
-
-let sessionPool={
-kids:[],
-math:[],
-english:[],
-gk:[]
-};
-
-let sessionIndex={
-kids:0,
-math:0,
-english:0,
-gk:0
-};
-
-/* UI */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
 
 /* DATA */
 const DB={
@@ -153,6 +141,11 @@ gk:[
 ]
 };
 
+/* CATEGORY */
+function setCat(c){
+cat=c;
+}
+
 /* SHUFFLE */
 function shuffle(a){
 let arr=[...a];
@@ -163,40 +156,30 @@ let j=Math.floor(Math.random()*(i+1));
 return arr;
 }
 
-/* CATEGORY */
-function setCat(c){
-cat=c;
-}
-
 /* START GAME */
 function startGame(){
 
+index=0;
 score=0;
 coins=0;
 stars=0;
-questionIndex=0;
 
-if(sessionPool[cat].length===0){
-sessionPool[cat]=shuffle(DB[cat]);
-sessionIndex[cat]=0;
-}
-
-if(sessionIndex[cat]>=sessionPool[cat].length){
-sessionPool[cat]=shuffle(DB[cat]);
-sessionIndex[cat]=0;
-}
-
-questions=sessionPool[cat];
-questionIndex=sessionIndex[cat];
+questions=shuffle(DB[cat]);
 
 show("game");
 load();
 }
 
-/* LOAD */
+/* LOAD QUESTION */
 function load(){
 
-let q=questions[questionIndex];
+if(index>=questions.length){
+alert("🎉 Finished!");
+show("menu");
+return;
+}
+
+let q=questions[index];
 
 document.getElementById("q").innerText=q.q;
 
@@ -220,19 +203,37 @@ btn.style.background="red";
 }
 
 setTimeout(()=>{
-questionIndex++;
-sessionIndex[cat]=questionIndex;
+index++;
 load();
 },400);
 
+updateUI();
 };
 
 box.appendChild(btn);
 });
 
+updateUI();
+}
+
+/* UI UPDATE */
+function updateUI(){
+
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
+
+document.getElementById("score2").innerText=score;
+document.getElementById("coins2").innerText=coins;
+document.getElementById("stars2").innerText=stars;
+}
+
+/* SCREEN SWITCH */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>{
+s.classList.remove("active");
+});
+document.getElementById(id).classList.add("active");
 }
 
 </script>
