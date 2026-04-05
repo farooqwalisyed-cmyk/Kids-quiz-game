@@ -1,30 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kids Quiz Game Pro</title>
+
+<style>
+body{
+font-family: Arial;
+text-align:center;
+background:#f2f6ff;
+margin:0;
+}
+
+.screen{display:none;padding:20px;}
+.active{display:block;}
+
+button{
+padding:10px;
+margin:5px;
+border:none;
+border-radius:8px;
+background:#4a6cf7;
+color:white;
+font-size:16px;
+}
+
+.option{
+display:block;
+width:80%;
+margin:10px auto;
+background:#fff;
+color:#333;
+border:2px solid #4a6cf7;
+}
+
+.level-btn{width:120px;}
+
+.card{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:12px;
+box-shadow:0 0 10px #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+<h1>🎮 Kids Quiz Game Pro</h1>
+<input id="name" placeholder="Enter Name"><br><br>
+<button onclick="goCategories()">Start Game</button>
+</div>
+
+<!-- CATEGORY -->
+<div id="categories" class="screen">
+<h2>Select Category</h2>
+<button onclick="openLevels('kids')">Kids</button>
+<button onclick="openLevels('math')">Math</button>
+<button onclick="openLevels('english')">English</button>
+<button onclick="openLevels('gk')">GK</button>
+</div>
+
+<!-- LEVEL -->
+<div id="levels" class="screen">
+<h2>Select Level</h2>
+<div id="levelBox"></div>
+<button onclick="goHome()">Back</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+<div class="card">
+<h3>👤 <span id="player"></span></h3>
+
+<h2 id="q">Question</h2>
+
+<div id="options"></div>
+
+<hr>
+
+<p>
+Score: <span id="score">0</span> |
+Coins: <span id="coins">0</span> |
+Stars: <span id="stars">0</span>
+</p>
+
+<button onclick="goHome()">Exit</button>
+</div>
+</div>
+
 <script>
 
-let player="";
-let category="";
-let level=1;
-
+/* PLAYER DATA */
+let player="",category="",level=1;
 let score=0,coins=0,stars=0;
 
 let questionPool=[];
 let currentIndex=0;
 
-/* GLOBAL QUEUE SYSTEM (FIXED) */
-let bank={
-kids:[],
-math:[],
-english:[],
-gk:[]
-};
+/* NO REPEAT ENGINE */
+let bank={kids:[],math:[],english:[],gk:[]};
+let indexPointer={kids:0,math:0,english:0,gk:0};
 
-let indexPointer={
-kids:0,
-math:0,
-english:0,
-gk:0
-};
-
-/* DATABASE */
+/* DATABASE (NO REPEAT SAFE) */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
@@ -36,19 +117,7 @@ kids:[
 {q:"Lion is?",a:"King",o:["King","Doctor","Teacher","Farmer"]},
 {q:"Duck says?",a:"Quack",o:["Quack","Bark","Meow","Roar"]},
 {q:"Horse runs?",a:"Fast",o:["Fast","Slow","Fly","Crawl"]},
-{q:"Elephant is?",a:"Big",o:["Big","Small","Tiny","Light"]},
-
-{q:"Tiger is?",a:"Wild",o:["Wild","Pet","Small","Soft"]},
-{q:"Goat gives?",a:"Milk",o:["Milk","Egg","Honey","Water"]},
-{q:"Sheep gives?",a:"Wool",o:["Wool","Milk","Egg","Oil"]},
-{q:"Frog lives in?",a:"Water",o:["Water","Desert","Fire","Sky"]},
-{q:"Snake is?",a:"Slithers",o:["Slithers","Flies","Jumps","Swims"]},
-
-{q:"Bee gives?",a:"Honey",o:["Honey","Milk","Egg","Water"]},
-{q:"Ant is?",a:"Small",o:["Small","Big","Tall","Heavy"]},
-{q:"Zebra has?",a:"Stripes",o:["Stripes","Dots","Lines","Circles"]},
-{q:"Rabbit is?",a:"Fast",o:["Fast","Slow","Big","Heavy"]},
-{q:"Owl sleeps in?",a:"Day",o:["Day","Night","Morning","Evening"]}
+{q:"Elephant is?",a:"Big",o:["Big","Small","Tiny","Light"]}
 ],
 
 math:[
@@ -87,10 +156,17 @@ gk:[
 ]
 };
 
-/* START */
+/* NAV */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function goHome(){show("home");}
+
 function goCategories(){
 player=document.getElementById("name").value;
-if(player===""){alert("Enter name");return;}
+if(player===""){alert("Enter Name");return;}
 show("categories");
 }
 
@@ -111,40 +187,36 @@ box.appendChild(b);
 }
 }
 
-/* 🔥 FIXED CORE ENGINE */
+/* 🔥 MAIN ENGINE (NO REPEAT FIXED) */
 function startGame(lv){
 
 level=lv;
 score=0;coins=0;stars=0;
 
-/* CREATE FULL SHUFFLED BANK ONCE */
 if(bank[category].length===0){
+bank[category]=[...DB[category]];
 
-let arr=DB[category].slice();
-
-/* shuffle */
-for(let i=arr.length-1;i>0;i--){
+for(let i=bank[category].length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1));
-[arr[i],arr[j]]=[arr[j],arr[i]];
+[bank[category][i],bank[category][j]]=
+[bank[category][j],bank[category][i]];
 }
 
-bank[category]=arr;
 indexPointer[category]=0;
 }
 
-/* STRICT SEQUENTIAL PICK */
+/* TAKE UNIQUE 3 */
 let start=indexPointer[category];
 let end=start+3;
 
-questionPool = bank[category].slice(start,end);
+questionPool=bank[category].slice(start,end);
 
-/* MOVE POINTER */
 indexPointer[category]+=3;
 
-/* RESET ONLY WHEN FULLY USED */
-if(questionPool.length===0){
+/* RESET AFTER FULL USE */
+if(indexPointer[category]>=bank[category].length){
 bank[category]=[];
-return startGame(level);
+indexPointer[category]=0;
 }
 
 currentIndex=0;
@@ -154,7 +226,7 @@ load();
 updateUI();
 }
 
-/* LOAD */
+/* LOAD QUESTION */
 function load(){
 
 if(currentIndex>=questionPool.length){
@@ -205,14 +277,7 @@ document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
 }
 
-/* NAV */
-function goHome(){
-show("home");
-}
-
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
 </script>
+
+</body>
+</html>
