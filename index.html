@@ -21,22 +21,25 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 
 <h1>🎮 Kids Quiz PRO</h1>
 
+<!-- HOME -->
 <div id="home" class="screen active">
 <div class="card">
 <h2>Enter Name</h2>
-<input id="name" placeholder="Your name">
+<input id="username" placeholder="Your name">
 <br><br>
 <button onclick="startApp()">Start</button>
 </div>
 </div>
 
+<!-- MENU -->
 <div id="menu" class="screen">
 <div class="card">
-<h2>Select Category</h2>
-<button onclick="startQuiz()">Start Quiz</button>
+<h2>Start Game</h2>
+<button onclick="startQuiz()">Play Quiz</button>
 </div>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
 <div class="card">
 <h2 id="q"></h2>
@@ -46,7 +49,7 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 
 <script>
 
-/* SOUND SYSTEM FINAL */
+/* 🔊 SOUND SYSTEM (FINAL FIX) */
 let clickSound=new Audio("click.mp3");
 let correctSound=new Audio("correct.mp3");
 let wrongSound=new Audio("wrong.mp3");
@@ -80,7 +83,7 @@ wrongSound.play();
 }
 }
 
-/* GAME */
+/* 🎮 GAME LOGIC */
 
 let index=0;
 
@@ -98,7 +101,7 @@ document.getElementById(id).classList.add("active");
 }
 
 function startApp(){
-let userName=document.getElementById("name").value;
+let userName=document.getElementById("username").value;
 
 if(!userName){
 alert("Enter name");
