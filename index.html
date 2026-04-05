@@ -1,146 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz PRO</title>
-
-<style>
-body{font-family:Arial;text-align:center;background:#667eea;color:white;}
-.screen{display:none;padding:20px;}
-.active{display:block;}
-button{padding:10px;margin:10px;border:none;border-radius:10px;background:#4a90e2;color:white;}
-.card{background:white;color:black;padding:20px;border-radius:15px;}
-.correct{background:green!important;}
-.wrong{background:red!important;}
-</style>
+<title>Test</title>
 </head>
-
 <body>
 
-<h1>🎮 Kids Quiz PRO</h1>
-
-<div id="home" class="screen active">
-<div class="card">
-<input id="name" placeholder="Enter Name">
-<button onclick="startApp()">Start</button>
-</div>
-</div>
-
-<div id="menu" class="screen">
-<div class="card">
-<button onclick="startLevel()">Start Quiz</button>
-</div>
-</div>
-
-<div id="game" class="screen">
-<div class="card">
-<h2 id="q"></h2>
-<div id="options"></div>
-</div>
-</div>
+<h1>Game Working ✅</h1>
+<button onclick="play()">Click Me</button>
 
 <script>
-
-/* SOUND FIX */
-let clickSound=new Audio("click.mp3");
-let correctSound=new Audio("correct.mp3");
-let wrongSound=new Audio("wrong.mp3");
-
-let audioReady=false;
-
-document.body.addEventListener("click",()=>{
-if(!audioReady){
-clickSound.play().then(()=>{
-clickSound.pause();
-clickSound.currentTime=0;
-audioReady=true;
-}).catch(()=>{});
+function play(){
+alert("Working!");
 }
-});
-
-function play(type){
-if(!audioReady) return;
-
-if(type==="click"){
-clickSound.currentTime=0;
-clickSound.play();
-}
-if(type==="correct"){
-correctSound.currentTime=0;
-correctSound.play();
-}
-if(type==="wrong"){
-wrongSound.currentTime=0;
-wrongSound.play();
-}
-}
-
-/* GAME */
-
-let index=0;
-
-const questions=[
-{q:"2+2=?",a:"4",o:["4","5","6","7"]},
-{q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
-{q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Yellow"]}
-];
-
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-function startApp(){
-if(!name.value){alert("Enter name");return;}
-show("menu");
-}
-
-function startLevel(){
-index=0;
-show("game");
-load();
-}
-
-function load(){
-
-if(index>=questions.length){
-alert("Completed!");
-show("menu");
-return;
-}
-
-let q=questions[index];
-document.getElementById("q").innerText=q.q;
-
-let optionsDiv=document.getElementById("options");
-optionsDiv.innerHTML="";
-
-q.o.forEach(opt=>{
-let b=document.createElement("button");
-b.innerText=opt;
-
-b.onclick=()=>{
-play("click");
-
-if(opt===q.a){
-b.classList.add("correct");
-play("correct");
-}else{
-b.classList.add("wrong");
-play("wrong");
-}
-
-setTimeout(()=>{
-index++;
-load();
-},500);
-};
-
-optionsDiv.appendChild(b);
-});
-}
-
 </script>
 
 </body>
