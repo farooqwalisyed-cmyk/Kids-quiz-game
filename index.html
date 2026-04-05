@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Pro Fixed</title>
+<title>Quiz Pro Ultimate</title>
 
 <style>
 body{
@@ -28,7 +28,6 @@ body{
   margin:15px;
   padding:20px;
   border-radius:20px;
-  box-shadow:0 10px 20px rgba(0,0,0,0.3);
 }
 
 button{
@@ -38,19 +37,17 @@ button{
   border:none;
   border-radius:12px;
   font-size:16px;
-  cursor:pointer;
 }
 
-.option{background:#f1f1f1;}
-.correct{background:#2ecc71 !important; color:white;}
-.wrong{background:#e74c3c !important; color:white;}
+.option{background:#eee;}
+.correct{background:#2ecc71 !important;color:white;}
+.wrong{background:#e74c3c !important;color:white;}
 
 .progress{
   height:10px;
   background:#ddd;
   border-radius:10px;
   overflow:hidden;
-  margin:10px;
 }
 .bar{
   height:10px;
@@ -61,9 +58,7 @@ button{
 .nav{
   display:flex;
   justify-content:space-around;
-  margin-top:10px;
 }
-
 .nav button{
   width:45%;
   background:#333;
@@ -74,22 +69,34 @@ button{
 
 <body>
 
-<div class="topbar">
-  <div>⭐ <span id="stars">0</span></div>
-  <div>🪙 <span id="coins">0</span></div>
-  <div>📘 Level <span id="level">1</span></div>
+<!-- NAME SCREEN -->
+<div id="nameScreen" class="card">
+  <h2>👋 Enter Your Name</h2>
+  <input id="nameInput" placeholder="Your name" style="padding:10px;width:80%;border-radius:10px;">
+  <br>
+  <button onclick="saveName()">Start Game</button>
 </div>
 
-<h2>🎮 Quiz Pro</h2>
-
-<div id="menu" class="card">
+<!-- MENU -->
+<div id="menu" class="card" style="display:none;">
+  <h2>Welcome <span id="playerName"></span> 🎮</h2>
   <h3>Select Category</h3>
   <button onclick="startGame('gk')">🌍 GK</button>
   <button onclick="startGame('math')">➕ Math</button>
   <button onclick="startGame('english')">🔤 English</button>
 </div>
 
+<!-- GAME -->
 <div id="game" class="card" style="display:none;">
+
+  <div class="topbar">
+    <div>⭐ <span id="stars">0</span></div>
+    <div>🪙 <span id="coins">0</span></div>
+    <div>📘 Level <span id="level">1</span></div>
+  </div>
+
+  <p id="levelText"></p>
+
   <div class="progress"><div id="bar" class="bar"></div></div>
 
   <h3 id="question"></h3>
@@ -99,11 +106,21 @@ button{
     <button onclick="goHome()">🏠 Home</button>
     <button onclick="nextQ()">➡ Next</button>
   </div>
+
 </div>
 
 <script>
 
-let data = {
+let player="";
+let cat="";
+let level=1;
+let qIndex=0;
+let used=[];
+let coins=0;
+let stars=0;
+let currentQ=null;
+
+let data={
   gk:[
     {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:"Delhi"},
     {q:"National Animal?",a:["Tiger","Lion","Dog","Elephant"],c:"Tiger"},
@@ -122,22 +139,27 @@ let data = {
   english:[
     {q:"A for ?",a:["Apple","Ball","Cat","Dog"],c:"Apple"},
     {q:"B for ?",a:["Ball","Apple","Cat","Dog"],c:"Ball"},
-    {q:"Opposite of Big?",a:["Small","Tall","Long","Wide"],c:"Small"},
+    {q:"Opposite Big?",a:["Small","Tall","Long","Wide"],c:"Small"},
     {q:"C for ?",a:["Cat","Dog","Ant","Bat"],c:"Cat"}
   ]
 };
 
-let cat="",used=[],index=0;
-let coins=0,stars=0,level=1;
-let currentQ=null;
+function saveName(){
+  player=document.getElementById("nameInput").value;
+  if(player==="") return;
+
+  document.getElementById("nameScreen").style.display="none";
+  document.getElementById("menu").style.display="block";
+
+  document.getElementById("playerName").innerText=player;
+}
 
 function startGame(c){
   cat=c;
-  if(!used[cat]) used[cat]=[];
-
+  level=1;
+  used=[];
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="block";
-
   loadQ();
 }
 
@@ -150,28 +172,29 @@ function loadQ(){
 
   let list=data[cat];
 
-  if(used[cat].length>=list.length){
-    used[cat]=[];
+  if(used.length>=list.length){
     level++;
-    document.getElementById("level").innerText=level;
+    used=[];
     alert("🎉 Level Up!");
   }
 
   do{
-    index=Math.floor(Math.random()*list.length);
-  }while(used[cat].includes(index));
+    qIndex=Math.floor(Math.random()*list.length);
+  }while(used.includes(qIndex));
 
-  used[cat].push(index);
+  used.push(qIndex);
 
-  currentQ=list[index];
+  currentQ=list[qIndex];
 
   document.getElementById("question").innerText=currentQ.q;
+  document.getElementById("level").innerText=level;
+  document.getElementById("levelText").innerText="Level "+level+" - "+cat.toUpperCase();
 
   let opt=document.getElementById("options");
   opt.innerHTML="";
 
   document.getElementById("bar").style.width=
-    (used[cat].length/list.length)*100+"%";
+    (used.length/list.length)*100+"%";
 
   currentQ.a.forEach(o=>{
     let b=document.createElement("button");
