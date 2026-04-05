@@ -1,8 +1,6 @@
 <script>
 
-/* STATE */
 let cat="kids";
-let level=1;
 let index=0;
 
 let score=0;
@@ -11,29 +9,18 @@ let stars=0;
 
 let questions=[];
 
-/* USED QUESTION TRACKER (FIX) */
+/* GLOBAL MEMORY (TRUE FIX) */
 let usedQuestions={
-kids:[],
-math:[],
-english:[],
-gk:[]
+kids:new Set(),
+math:new Set(),
+english:new Set(),
+gk:new Set()
 };
 
 /* UI */
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-}
-
-/* START */
-function startApp(){
-let name=document.getElementById("username").value;
-if(!name){alert("Enter name");return;}
-show("menu");
-}
-
-function setCat(c){
-cat=c;
 }
 
 /* DATABASE */
@@ -90,74 +77,62 @@ gk:[
 ]
 };
 
-/* LEVEL SIZE */
-const LEVELS={
-1:4,
-2:6,
-3:10
-};
-
-/* REAL SHUFFLE */
-function shuffleArray(arr){
-let a=[...arr];
-for(let i=a.length-1;i>0;i--){
+/* SHUFFLE */
+function shuffle(a){
+let arr=[...a];
+for(let i=arr.length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
+[arr[i],arr[j]]=[arr[j],arr[i]];
 }
-return a;
+return arr;
 }
 
-/* START LEVEL (ANTI REPEAT FIX) */
-function startLevel(l){
+/* START CATEGORY */
+function setCat(c){
+cat=c;
+}
 
-level=l;
+/* START GAME (FIXED NO REPEAT) */
+function startGame(){
+
+let pool=DB[cat].filter(q=>{
+return !usedQuestions[cat].has(q.q);
+});
+
+/* IF ALL USED → RESET */
+if(pool.length===0){
+usedQuestions[cat]=new Set();
+pool=DB[cat];
+}
+
+questions=shuffle(pool);
 index=0;
+
 score=0;
 coins=0;
 stars=0;
 
-/* GET UNUSED QUESTIONS ONLY */
-let pool=DB[cat].filter(q=>{
-return !usedQuestions[cat].includes(q.q);
-});
-
-/* IF NOT ENOUGH LEFT → RESET */
-if(pool.length<LEVELS[level]){
-usedQuestions[cat]=[];
-pool=DB[cat];
-}
-
-/* SHUFFLE + PICK */
-questions=shuffleArray(pool).slice(0,LEVELS[level]);
-
-/* SAVE USED QUESTIONS */
-questions.forEach(q=>{
-usedQuestions[cat].push(q.q);
-});
-
-updateStats();
 show("game");
 load();
 }
 
-/* LOAD */
+/* LOAD QUESTION */
 function load(){
 
 if(index>=questions.length){
-alert("🎉 Level Completed!");
+alert("🎉 Category Completed!");
 show("menu");
 return;
 }
 
 let q=questions[index];
+
 document.getElementById("q").innerText=q.q;
 
-let optionsDiv=document.getElementById("options");
-optionsDiv.innerHTML="";
+let box=document.getElementById("options");
+box.innerHTML="";
 
-let shuffled=shuffleArray(q.o);
-
-shuffled.forEach(opt=>{
+shuffle(q.o).forEach(opt=>{
 
 let btn=document.createElement("button");
 btn.innerText=opt;
@@ -165,16 +140,15 @@ btn.innerText=opt;
 btn.onclick=()=>{
 
 if(opt===q.a){
-btn.classList.add("correct");
+btn.style.background="green";
 score+=10;
-coins+=15;
+coins+=10;
 stars+=1;
 }else{
-btn.classList.add("wrong");
-score=Math.max(0,score-3);
+btn.style.background="red";
 }
 
-updateStats();
+usedQuestions[cat].add(q.q);
 
 setTimeout(()=>{
 index++;
@@ -183,13 +157,14 @@ load();
 
 };
 
-optionsDiv.appendChild(btn);
+box.appendChild(btn);
 });
 
+update();
 }
 
 /* STATS */
-function updateStats(){
+function update(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
