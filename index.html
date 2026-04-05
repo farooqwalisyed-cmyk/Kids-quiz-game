@@ -68,10 +68,20 @@ input{padding:12px;width:85%;border-radius:10px;border:none;margin:10px;}
 
 <script>
 
-/* SOUND */
+*/ SOUND */
 const clickSound=new Audio("click.mp3");
 const correctSound=new Audio("correct.mp3");
 const wrongSound=new Audio("wrong.mp3");
+  let audioUnlocked = false;
+
+document.body.addEventListener("click", () => {
+if(!audioUnlocked){
+clickSound.play().catch(()=>{});
+clickSound.pause();
+clickSound.currentTime = 0;
+audioUnlocked = true;
+}
+});
 
 function play(type){
 let sound;
