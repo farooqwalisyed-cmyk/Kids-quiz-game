@@ -1,3 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kids Quiz Game Pro</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#dbeafe,#fef9c3);
+}
+
+.screen{display:none;padding:20px;}
+.active{display:block;}
+
+.header{
+background:white;
+padding:15px;
+text-align:center;
+font-size:20px;
+font-weight:bold;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.card{
+background:white;
+margin:20px auto;
+padding:20px;
+border-radius:15px;
+max-width:420px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+button{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:12px;
+font-size:16px;
+cursor:pointer;
+background:#3b82f6;
+color:white;
+}
+
+button:hover{background:#2563eb;}
+
+.option{background:#10b981;}
+
+.stats{
+display:flex;
+justify-content:space-around;
+margin-top:10px;
+font-weight:bold;
+}
+
+.levels{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.level-btn{background:#f59e0b;}
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+<div class="header">🎮 Kids Quiz Game Pro</div>
+
+<div class="card">
+<h3>👤 Enter Name</h3>
+<input id="name" style="padding:10px;width:90%;border-radius:10px;border:1px solid #ccc;">
+<br><br>
+<button onclick="goCategories()">Start Game</button>
+</div>
+</div>
+
+<!-- CATEGORIES -->
+<div id="categories" class="screen">
+<div class="header">Choose Category</div>
+
+<div class="card">
+<button onclick="openLevels('kids')">🐶 Kids</button>
+<button onclick="openLevels('math')">➕ Math</button>
+<button onclick="openLevels('english')">🔤 English</button>
+<button onclick="openLevels('gk')">🌍 GK</button>
+</div>
+</div>
+
+<!-- LEVELS -->
+<div id="levels" class="screen">
+<div class="header">Select Level</div>
+
+<div class="card">
+<div class="levels" id="levelBox"></div>
+<br>
+<button onclick="backCat()">⬅ Back</button>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+<div class="header">Quiz Time 🎯</div>
+
+<div class="card">
+
+<h3 id="player"></h3>
+<h2 id="q"></h2>
+
+<div id="options"></div>
+
+<div class="stats">
+<div>⭐ <span id="stars">0</span></div>
+<div>💰 <span id="coins">0</span></div>
+<div>🏆 <span id="score">0</span></div>
+</div>
+
+<br>
+<button onclick="goHome()">Exit</button>
+</div>
+</div>
+
 <script>
 
 let player="";
@@ -9,7 +136,7 @@ let score=0,coins=0,stars=0;
 let questionPool=[];
 let currentIndex=0;
 
-/* CLEAN QUESTION BANK (EXPANDED PER LEVEL STYLE) */
+/* QUESTION BANK */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
@@ -18,8 +145,10 @@ kids:[
 {q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
 {q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
 {q:"Lion is?",a:"King",o:["King","Doctor","Teacher","Farmer"]},
+{q:"Duck says?",a:"Quack",o:["Quack","Meow","Bark","Roar"]},
 {q:"Elephant is?",a:"Big",o:["Big","Small","Fast","Tiny"]},
-{q:"Duck says?",a:"Quack",o:["Quack","Meow","Bark","Roar"]}
+{q:"Hen gives?",a:"Egg",o:["Egg","Milk","Water","Oil"]},
+{q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]}
 ],
 
 math:[
@@ -30,7 +159,9 @@ math:[
 {q:"4+4=?",a:"8",o:["8","9","7","6"]},
 {q:"6+2=?",a:"8",o:["8","7","9","10"]},
 {q:"9-3=?",a:"6",o:["6","5","7","8"]},
-{q:"7+1=?",a:"8",o:["8","9","7","6"]}
+{q:"7+1=?",a:"8",o:["8","9","7","6"]},
+{q:"10+0=?",a:"10",o:["10","9","8","7"]},
+{q:"1+1=?",a:"2",o:["2","3","4","5"]}
 ],
 
 english:[
@@ -41,7 +172,9 @@ english:[
 {q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hen"]},
 {q:"F for?",a:"Fish",o:["Fish","Apple","Ball","Dog"]},
 {q:"G for?",a:"Goat",o:["Goat","Cat","Dog","Ant"]},
-{q:"H for?",a:"Hen",o:["Hen","Fish","Ball","Dog"]}
+{q:"H for?",a:"Hen",o:["Hen","Fish","Ball","Dog"]},
+{q:"I for?",a:"Ice",o:["Ice","Ink","Iron","Igloo"]},
+{q:"J for?",a:"Jug",o:["Jug","Jam","Jet","Joy"]}
 ],
 
 gk:[
@@ -52,7 +185,9 @@ gk:[
 {q:"We breathe?",a:"Air",o:["Air","Water","Fire","Stone"]},
 {q:"Moon gives?",a:"Light",o:["Light","Heat","Smoke","Sound"]},
 {q:"Sun rises in?",a:"East",o:["East","West","North","South"]},
-{q:"Rain comes from?",a:"Clouds",o:["Clouds","Sun","Fire","Stone"]}
+{q:"Rain comes from?",a:"Clouds",o:["Clouds","Sun","Fire","Stone"]},
+{q:"Sky at night?",a:"Dark",o:["Dark","Bright","Hot","Green"]},
+{q:"Grass color?",a:"Green",o:["Green","Red","Blue","Black"]}
 ]
 };
 
@@ -63,7 +198,7 @@ if(player===""){alert("Enter name");return;}
 show("categories");
 }
 
-/* CATEGORY */
+/* CATEGORIES */
 function openLevels(cat){
 category=cat;
 show("levels");
@@ -80,7 +215,7 @@ box.appendChild(b);
 }
 }
 
-/* START LEVEL */
+/* START GAME - LEVEL SPLIT SYSTEM */
 function startGame(lv){
 
 level=lv;
@@ -88,14 +223,21 @@ score=0;
 coins=0;
 stars=0;
 
-/* 🔥 IMPORTANT FIX: fresh copy per level */
-questionPool = DB[category].slice();
+let all = DB[category].slice();
 
-/* shuffle strongly */
-for(let i=questionPool.length-1;i>0;i--){
+/* shuffle */
+for(let i=all.length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1));
-[questionPool[i],questionPool[j]]=[questionPool[j],questionPool[i]];
+[all[i],all[j]]=[all[j],all[i]];
 }
+
+/* 2 QUESTIONS PER LEVEL (CHANGE IF YOU WANT) */
+let perLevel = 2;
+
+let start = (level-1)*perLevel;
+let end = start + perLevel;
+
+questionPool = all.slice(start,end);
 
 currentIndex=0;
 
@@ -104,11 +246,11 @@ load();
 updateUI();
 }
 
-/* LOAD QUESTION (NO REPEAT ENGINE) */
+/* LOAD QUESTION */
 function load(){
 
 if(currentIndex >= questionPool.length){
-alert("🎉 Level Completed - No Repeat Guaranteed!");
+alert("🎉 Level Completed!");
 show("levels");
 return;
 }
@@ -161,9 +303,16 @@ function goHome(){
 show("home");
 }
 
+function backCat(){
+show("categories");
+}
+
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
 </script>
+
+</body>
+</html>
