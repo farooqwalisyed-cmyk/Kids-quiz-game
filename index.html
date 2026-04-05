@@ -9,12 +9,19 @@ let stars=0;
 
 let questions=[];
 
-/* GLOBAL MEMORY (TRUE FIX) */
-let usedQuestions={
-kids:new Set(),
-math:new Set(),
-english:new Set(),
-gk:new Set()
+/* 🔥 FIXED SESSION SYSTEM */
+let sessionPool={
+kids:[],
+math:[],
+english:[],
+gk:[]
+};
+
+let sessionIndex={
+kids:0,
+math:0,
+english:0,
+gk:0
 };
 
 /* UI */
@@ -32,7 +39,7 @@ kids:[
 {q:"Lion sound?",a:"Roar",o:["Roar","Buzz","Meow","Bark"]},
 {q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
 {q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
-{q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
+{q:"Sun is?",a:"Hot",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
 {q:"Moon appears at?",a:"Night",o:["Night","Morning","Noon","Evening"]},
 {q:"Tree gives?",a:"Oxygen",o:["Oxygen","Milk","Water","Fire"]},
 {q:"Baby dog?",a:"Puppy",o:["Puppy","Kitten","Cub","Calf"]}
@@ -87,30 +94,32 @@ let j=Math.floor(Math.random()*(i+1));
 return arr;
 }
 
-/* START CATEGORY */
+/* SET CATEGORY */
 function setCat(c){
 cat=c;
 }
 
-/* START GAME (FIXED NO REPEAT) */
+/* START GAME (FIXED NO REPEAT FINAL) */
 function startGame(){
-
-let pool=DB[cat].filter(q=>{
-return !usedQuestions[cat].has(q.q);
-});
-
-/* IF ALL USED → RESET */
-if(pool.length===0){
-usedQuestions[cat]=new Set();
-pool=DB[cat];
-}
-
-questions=shuffle(pool);
-index=0;
 
 score=0;
 coins=0;
 stars=0;
+
+/* CREATE SESSION ONCE */
+if(sessionPool[cat].length===0){
+sessionPool[cat]=shuffle(DB[cat]);
+sessionIndex[cat]=0;
+}
+
+/* RESET IF FINISHED */
+if(sessionIndex[cat]>=sessionPool[cat].length){
+sessionPool[cat]=shuffle(DB[cat]);
+sessionIndex[cat]=0;
+}
+
+index=sessionIndex[cat];
+questions=sessionPool[cat];
 
 show("game");
 load();
@@ -148,10 +157,9 @@ stars+=1;
 btn.style.background="red";
 }
 
-usedQuestions[cat].add(q.q);
-
 setTimeout(()=>{
 index++;
+sessionIndex[cat]=index;
 load();
 },500);
 
@@ -163,7 +171,7 @@ box.appendChild(btn);
 update();
 }
 
-/* STATS */
+/* UPDATE UI */
 function update(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
