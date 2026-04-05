@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Kids Quiz Game</title>
+<title>Kids Quiz Pro</title>
 
 <style>
 body{
 font-family: Arial;
 text-align:center;
-background:#f2f2f2;
+background: linear-gradient(135deg,#dbeafe,#fef9c3);
 margin:0;
 padding:0;
 }
@@ -16,21 +16,68 @@ padding:0;
 .screen{display:none;padding:20px;}
 .active{display:block;}
 
+.card{
+background:white;
+padding:20px;
+margin:20px auto;
+border-radius:15px;
+max-width:400px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+h1{
+color:#1e3a8a;
+}
+
 button{
 padding:12px 18px;
-margin:8px;
+width:100%;
+max-width:250px;
+margin:8px auto;
 border:none;
-border-radius:8px;
-background:#4CAF50;
+border-radius:12px;
+background:#3b82f6;
 color:white;
 font-size:16px;
 cursor:pointer;
+transition:0.2s;
+display:block;
 }
 
-h1,h2{margin:10px;}
+button:hover{
+transform:scale(1.03);
+background:#2563eb;
+}
+
+.option{
+background:#10b981;
+}
+
+.option.wrong{
+background:#ef4444;
+}
+
+.option.correct{
+background:#22c55e;
+}
+
 .stats{
-font-size:18px;
 margin-top:10px;
+font-weight:bold;
+}
+
+#options{
+display:flex;
+flex-direction:column;
+gap:10px;
+align-items:center;
+}
+
+input{
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
+width:80%;
 }
 </style>
 </head>
@@ -40,20 +87,22 @@ margin-top:10px;
 <!-- MENU -->
 <div id="menu" class="screen active">
 
-<h1>🎮 Kids Quiz Game</h1>
+<div class="card">
 
-<input id="nameInput" placeholder="Enter your name" style="padding:10px;border-radius:8px;border:1px solid #ccc;">
+<h1>🎮 Kids Quiz Pro</h1>
 
-<br><br>
-
-<button onclick="startGame()">Start Game</button>
+<input id="nameInput" placeholder="Enter your name">
 
 <br><br>
+
+<button onclick="startGame()">Start Game 🚀</button>
 
 <div class="stats">
-Score: <span id="score">0</span><br>
-Coins: <span id="coins">0</span><br>
+Score: <span id="score">0</span> |
+Coins: <span id="coins">0</span> |
 Stars: <span id="stars">0</span>
+</div>
+
 </div>
 
 </div>
@@ -61,17 +110,17 @@ Stars: <span id="stars">0</span>
 <!-- GAME -->
 <div id="game" class="screen">
 
-<h2 id="playerName"></h2>
+<div class="card">
+
+<h2 id="player"></h2>
 
 <h2 id="question">Question</h2>
 
 <div id="options"></div>
 
-<br>
-
 <div class="stats">
-Score: <span id="score2">0</span><br>
-Coins: <span id="coins2">0</span><br>
+Score: <span id="score2">0</span> |
+Coins: <span id="coins2">0</span> |
 Stars: <span id="stars2">0</span>
 </div>
 
@@ -81,85 +130,91 @@ Stars: <span id="stars2">0</span>
 
 </div>
 
+</div>
+
 <script>
 
-let questions = [
-{q:"Dog says?", a:"Bark", o:["Bark","Meow","Roar","Buzz"]},
-{q:"Cat says?", a:"Meow", o:["Meow","Bark","Roar","Buzz"]},
-{q:"Cow gives?", a:"Milk", o:["Milk","Egg","Water","Honey"]},
-{q:"Lion sound?", a:"Roar", o:["Roar","Buzz","Meow","Bark"]},
-{q:"Fish lives in?", a:"Water", o:["Water","Sky","Land","Tree"]},
-{q:"Bird can?", a:"Fly", o:["Fly","Swim","Run","Sleep"]},
-{q:"Sun is?", a:"Hot", o:["Hot","Cold","Wet","Dry"]},
-{q:"Moon appears at?", a:"Night", o:["Night","Morning","Noon","Evening"]},
-{q:"Baby dog?", a:"Puppy", o:["Puppy","Kitten","Cub","Calf"]},
-{q:"2 + 2 = ?", a:"4", o:["4","3","5","6"]}
+let questions=[
+{q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
+{q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
+{q:"Cow gives?",a:"Milk",o:["Milk","Egg","Water","Honey"]},
+{q:"Lion sound?",a:"Roar",o:["Roar","Buzz","Meow","Bark"]},
+{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
+{q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
+{q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
+{q:"Moon appears at?",a:"Night",o:["Night","Morning","Noon","Evening"]},
+{q:"Baby dog?",a:"Puppy",o:["Puppy","Kitten","Cub","Calf"]},
+{q:"2+2=?",a:"4",o:["4","3","5","6"]}
 ];
 
-let index = 0;
-let score = 0;
-let coins = 0;
-let stars = 0;
-let player = "";
+let index=0;
+let score=0;
+let coins=0;
+let stars=0;
+let player="";
 
 function startGame(){
 
-player = document.getElementById("nameInput").value;
+player=document.getElementById("nameInput").value;
 
-if(player === ""){
-alert("Please enter your name!");
+if(player===""){
+alert("Enter your name!");
 return;
 }
 
-index = 0;
-score = 0;
-coins = 0;
-stars = 0;
+index=0;
+score=0;
+coins=0;
+stars=0;
 
 show("game");
-loadQuestion();
+load();
 updateUI();
 }
 
-function loadQuestion(){
+function load(){
 
-if(index >= questions.length){
-alert("🎉 Game Finished! Well done " + player);
+if(index>=questions.length){
+alert("🎉 Well done "+player);
 show("menu");
 return;
 }
 
-let q = questions[index];
+let q=questions[index];
 
-document.getElementById("playerName").innerText = "👤 " + player;
+document.getElementById("player").innerText="👤 "+player;
+document.getElementById("question").innerText=q.q;
 
-document.getElementById("question").innerText = q.q;
+let box=document.getElementById("options");
+box.innerHTML="";
 
-let box = document.getElementById("options");
-box.innerHTML = "";
+let opts=shuffle([...q.o]);
 
-let options = shuffle([...q.o]);
+opts.forEach(opt=>{
+let btn=document.createElement("button");
+btn.classList.add("option");
+btn.innerText=opt;
 
-options.forEach(opt=>{
-let btn = document.createElement("button");
-btn.innerText = opt;
+btn.onclick=()=>{
 
-btn.onclick = function(){
+let buttons=document.querySelectorAll(".option");
 
-if(opt === q.a){
-score += 10;
-coins += 5;
-stars += 1;
-btn.style.background="green";
+buttons.forEach(b=>b.disabled=true);
+
+if(opt===q.a){
+btn.classList.add("correct");
+score+=10;
+coins+=5;
+stars+=1;
 }else{
-btn.style.background="red";
+btn.classList.add("wrong");
 }
 
 setTimeout(()=>{
 index++;
 updateUI();
-loadQuestion();
-},400);
+load();
+},700);
 
 };
 
@@ -168,14 +223,13 @@ box.appendChild(btn);
 }
 
 function updateUI(){
+document.getElementById("score").innerText=score;
+document.getElementById("coins").innerText=coins;
+document.getElementById("stars").innerText=stars;
 
-document.getElementById("score").innerText = score;
-document.getElementById("coins").innerText = coins;
-document.getElementById("stars").innerText = stars;
-
-document.getElementById("score2").innerText = score;
-document.getElementById("coins2").innerText = coins;
-document.getElementById("stars2").innerText = stars;
+document.getElementById("score2").innerText=score;
+document.getElementById("coins2").innerText=coins;
+document.getElementById("stars2").innerText=stars;
 }
 
 function goMenu(){
@@ -189,12 +243,12 @@ s.classList.remove("active");
 document.getElementById(id).classList.add("active");
 }
 
-function shuffle(arr){
-for(let i=arr.length-1;i>0;i--){
+function shuffle(a){
+for(let i=a.length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1));
-[arr[i],arr[j]]=[arr[j],arr[i]];
+[a[i],a[j]]=[a[j],a[i]];
 }
-return arr;
+return a;
 }
 
 </script>
