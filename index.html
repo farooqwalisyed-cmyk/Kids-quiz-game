@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Kids Quiz Adventure</title>
+<title>Kids Quiz Adventure Pro</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#c7d2fe,#fef9c3);
+background:linear-gradient(135deg,#dbeafe,#fef9c3);
 }
 
 .screen{display:none;padding:20px;}
@@ -74,57 +74,41 @@ background:#f59e0b;
 
 <!-- HOME -->
 <div id="home" class="screen active">
-
-<div class="header">🎮 Kids Quiz Adventure</div>
+<div class="header">🎮 Kids Quiz Adventure Pro</div>
 
 <div class="card">
-
-<h3>👤 Enter Name</h3>
+<h3>👤 Enter Your Name</h3>
 <input id="name" style="padding:10px;width:90%;border-radius:10px;border:1px solid #ccc;">
-
 <br><br>
-
-<button onclick="goCategories()">Start</button>
-
+<button onclick="goCategories()">Start Game</button>
 </div>
-
 </div>
 
 <!-- CATEGORIES -->
 <div id="categories" class="screen">
-
 <div class="header">Choose Category</div>
 
 <div class="card">
-
-<button onclick="openLevels('kids')">Kids 🐶</button>
-<button onclick="openLevels('math')">Math ➕</button>
-<button onclick="openLevels('english')">English 🔤</button>
-<button onclick="openLevels('gk')">GK 🌍</button>
-
+<button onclick="openLevels('kids')">🐶 Kids</button>
+<button onclick="openLevels('math')">➕ Math</button>
+<button onclick="openLevels('english')">🔤 English</button>
+<button onclick="openLevels('gk')">🌍 GK</button>
 </div>
-
 </div>
 
 <!-- LEVELS -->
 <div id="levels" class="screen">
-
 <div class="header">Select Level</div>
 
 <div class="card">
-
 <div class="levels" id="levelBox"></div>
-
 <br>
 <button onclick="backCat()">⬅ Back</button>
-
 </div>
-
 </div>
 
 <!-- GAME -->
 <div id="game" class="screen">
-
 <div class="header">Quiz Time 🎯</div>
 
 <div class="card">
@@ -142,9 +126,7 @@ background:#f59e0b;
 
 <br>
 <button onclick="goHome()">Exit</button>
-
 </div>
-
 </div>
 
 <script>
@@ -155,43 +137,56 @@ let level=1;
 
 let score=0,coins=0,stars=0;
 
+let questionPool=[];
+let currentIndex=0;
+
+/* QUESTIONS DATABASE */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
 {q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
 {q:"Cow gives?",a:"Milk",o:["Milk","Egg","Water","Honey"]},
 {q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
-{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]}
+{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
+{q:"Lion is?",a:"King",o:["King","Doctor","Teacher","Farmer"]}
 ],
+
 math:[
 {q:"2+2=?",a:"4",o:["4","3","5","6"]},
 {q:"5-2=?",a:"3",o:["3","2","4","5"]},
 {q:"3+3=?",a:"6",o:["6","5","7","8"]},
 {q:"10-5=?",a:"5",o:["5","4","6","7"]},
-{q:"4+4=?",a:"8",o:["8","9","7","6"]}
+{q:"4+4=?",a:"8",o:["8","9","7","6"]},
+{q:"6+2=?",a:"8",o:["8","7","9","10"]}
 ],
+
 english:[
 {q:"A for?",a:"Apple",o:["Apple","Ball","Cat","Dog"]},
 {q:"B for?",a:"Ball",o:["Ball","Cat","Dog","Ant"]},
 {q:"C for?",a:"Cat",o:["Cat","Dog","Bat","Rat"]},
 {q:"D for?",a:"Dog",o:["Dog","Cat","Cow","Hen"]},
-{q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hen"]}
+{q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hen"]},
+{q:"F for?",a:"Fish",o:["Fish","Apple","Ball","Dog"]}
 ],
+
 gk:[
 {q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
 {q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Black"]},
 {q:"We drink?",a:"Water",o:["Water","Milk","Oil","Juice"]},
 {q:"Earth is?",a:"Round",o:["Round","Flat","Square","Triangle"]},
-{q:"We breathe?",a:"Air",o:["Air","Water","Fire","Stone"]}
+{q:"We breathe?",a:"Air",o:["Air","Water","Fire","Stone"]},
+{q:"Moon gives?",a:"Light",o:["Light","Heat","Smoke","Sound"]}
 ]
 };
 
+/* HOME */
 function goCategories(){
 player=document.getElementById("name").value;
 if(player===""){alert("Enter name");return;}
 show("categories");
 }
 
+/* CATEGORY → LEVELS */
 function openLevels(cat){
 category=cat;
 show("levels");
@@ -208,18 +203,35 @@ box.appendChild(b);
 }
 }
 
+/* START GAME */
 function startGame(lv){
 level=lv;
-score=0;coins=0;stars=0;
+
+score=0;
+coins=0;
+stars=0;
+
+questionPool=[...DB[category]];
+questionPool.sort(()=>Math.random()-0.5);
+
+currentIndex=0;
 
 show("game");
 load();
 updateUI();
 }
 
+/* LOAD QUESTION (NO REPEAT FIX) */
 function load(){
 
-let q=DB[category][Math.floor(Math.random()*DB[category].length)];
+if(currentIndex >= questionPool.length){
+alert("🎉 Level Completed!");
+show("levels");
+return;
+}
+
+let q=questionPool[currentIndex];
+currentIndex++;
 
 document.getElementById("player").innerText="👤 "+player;
 document.getElementById("q").innerText=q.q;
@@ -245,20 +257,23 @@ btn.style.background="#22c55e";
 btn.style.background="#ef4444";
 }
 
-setTimeout(()=>load(),700);
 updateUI();
+
+setTimeout(()=>load(),600);
 };
 
 box.appendChild(btn);
 });
 }
 
+/* UI UPDATE */
 function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
 }
 
+/* NAVIGATION */
 function goHome(){
 show("home");
 }
