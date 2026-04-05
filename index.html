@@ -2,284 +2,226 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kids Quiz Pro</title>
 
 <style>
 body{
-font-family:Arial;
-margin:0;
-background:linear-gradient(135deg,#c2e9fb,#a1c4fd);
-text-align:center;
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  color:white;
+  text-align:center;
 }
 
-.screen{display:none;padding:20px;}
-.active{display:block;animation:fade 0.3s;}
+h1{
+  margin:15px 0;
+}
 
-@keyframes fade{
-from{opacity:0;transform:scale(0.95);}
-to{opacity:1;transform:scale(1);}
+.topbar{
+  display:flex;
+  justify-content:space-around;
+  background:rgba(0,0,0,0.3);
+  padding:10px;
+  font-size:14px;
 }
 
 .card{
-background:white;
-padding:20px;
-margin:20px;
-border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  background:white;
+  color:black;
+  margin:20px;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.3);
+  animation:fade 0.4s ease-in;
+}
+
+@keyframes fade{
+  from{opacity:0; transform:scale(0.9);}
+  to{opacity:1; transform:scale(1);}
 }
 
 button{
-padding:12px;
-margin:6px;
-border:none;
-border-radius:12px;
-font-size:16px;
-background:#4a6cf7;
-color:white;
-cursor:pointer;
-transition:0.2s;
+  padding:12px;
+  margin:8px;
+  width:80%;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
 }
-
-button:active{transform:scale(0.95);}
 
 .option{
-display:block;
-width:85%;
-margin:10px auto;
-background:#fff;
-color:#333;
-border:2px solid #4a6cf7;
+  background:#f1f1f1;
 }
 
-.level-btn{width:120px;}
+.option:hover{
+  background:#ddd;
+}
 
-.topbar{
-font-size:18px;
-margin-bottom:10px;
+.correct{background:#2ecc71 !important; color:white;}
+.wrong{background:#e74c3c !important; color:white;}
+
+.progress{
+  height:10px;
+  background:#ddd;
+  border-radius:10px;
+  overflow:hidden;
+  margin:10px;
+}
+
+.bar{
+  height:10px;
+  width:0%;
+  background:#2ecc71;
+}
+
+.small{
+  font-size:12px;
+  opacity:0.8;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HOME -->
-<div id="home" class="screen active">
-<h1>🎮 Kids Quiz Pro</h1>
-<input id="name" placeholder="Enter Name"><br><br>
-<button onclick="goCategories()">Start Game</button>
-</div>
-
-<!-- CATEGORY -->
-<div id="categories" class="screen">
-<h2>Select Category</h2>
-<button onclick="openLevels('kids')">Kids</button>
-<button onclick="openLevels('math')">Math</button>
-<button onclick="openLevels('english')">English</button>
-<button onclick="openLevels('gk')">GK</button>
-</div>
-
-<!-- LEVEL -->
-<div id="levels" class="screen">
-<h2>Select Level</h2>
-<div id="levelBox"></div>
-<button onclick="goHome()">Back</button>
-</div>
-
-<!-- GAME -->
-<div id="game" class="screen">
-<div class="card">
-
 <div class="topbar">
-👤 <span id="player"></span><br>
-⭐ Score: <span id="score">0</span> |
-🪙 Coins: <span id="coins">0</span> |
-🏆 Stars: <span id="stars">0</span>
+  <div>⭐ <span id="stars">0</span></div>
+  <div>🪙 <span id="coins">0</span></div>
+  <div>📘 Level <span id="level">1</span></div>
 </div>
 
-<h2 id="q">Question</h2>
-<div id="options"></div>
+<h1>🎮 Kids Quiz PRO</h1>
 
-<br>
-<button onclick="goHome()">Exit</button>
-
+<div id="menu" class="card">
+  <h2>Select Category</h2>
+  <button onclick="startGame('math')">➕ Math</button>
+  <button onclick="startGame('gk')">🌍 GK</button>
+  <button onclick="startGame('english')">🔤 English</button>
+  <p class="small">Pro Version v2 🚀</p>
 </div>
-</div>
 
-<!-- 🔊 SOUND -->
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+<div id="game" class="card" style="display:none;">
+  <div class="progress"><div id="bar" class="bar"></div></div>
+  <h2 id="question"></h2>
+  <div id="options"></div>
+</div>
 
 <script>
-
-let player="",category="",level=1;
-let score=0,coins=0,stars=0;
-
-let currentQuestions=[];
-let qIndex=0;
-let usedQuestions=new Set();
-
-/* DATABASE */
-const DB={
-kids:[
-"Dog says?|Bark|Bark,Meow,Roar,Buzz",
-"Cat says?|Meow|Meow,Bark,Roar,Buzz",
-"Cow gives?|Milk|Milk,Egg,Water,Honey",
-"Hen gives?|Egg|Egg,Milk,Water,Oil",
-"Fish lives in?|Water|Water,Sky,Land,Tree",
-"Bird can?|Fly|Fly,Swim,Run,Sleep",
-"Lion is?|King|King,Doctor,Teacher,Farmer",
-"Duck says?|Quack|Quack,Bark,Meow,Roar",
-"Elephant is?|Big|Big,Small,Tiny,Light"
-],
-
-math:[
-"2+2=?|4|4,3,5,6",
-"5+3=?|8|8,7,9,10",
-"10-5=?|5|5,4,6,7",
-"6+2=?|8|8,7,9,10",
-"9-3=?|6|6,5,7,8",
-"1+1=?|2|2,3,4,5"
-],
-
-english:[
-"A for?|Apple|Apple,Ball,Cat,Dog",
-"B for?|Ball|Ball,Cat,Dog,Ant",
-"C for?|Cat|Cat,Dog,Bat,Rat",
-"D for?|Dog|Dog,Cat,Cow,Hen",
-"E for?|Elephant|Elephant,Fish,Goat,Hen"
-],
-
-gk:[
-"Sun is?|Hot|Hot,Cold,Wet,Dry",
-"Sky color?|Blue|Blue,Red,Green,Black",
-"We drink?|Water|Water,Milk,Oil,Juice",
-"Earth is?|Round|Round,Flat,Square,Triangle"
-]
+let data = {
+ math:[
+  {q:"2 + 3 = ?", a:["5","6","7","8"], c:"5"},
+  {q:"10 - 6 = ?", a:["4","5","3","6"], c:"4"},
+  {q:"4 × 2 = ?", a:["6","7","8","9"], c:"8"},
+  {q:"12 ÷ 3 = ?", a:["2","3","4","5"], c:"4"}
+ ],
+ gk:[
+  {q:"Capital of India?", a:["Delhi","Mumbai","Goa","Kolkata"], c:"Delhi"},
+  {q:"National Animal?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
+  {q:"How many days in a year?", a:["365","360","400","300"], c:"365"},
+  {q:"Sun rises in?", a:["East","West","North","South"], c:"East"}
+ ],
+ english:[
+  {q:"A for ?", a:["Apple","Ball","Cat","Dog"], c:"Apple"},
+  {q:"Opposite of Big?", a:["Small","Tall","Long","Wide"], c:"Small"},
+  {q:"B for ?", a:["Ball","Apple","Cat","Dog"], c:"Ball"},
+  {q:"C for ?", a:["Cat","Dog","Ant","Bat"], c:"Cat"}
+ ]
 };
 
-/* NAV */
-function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+let cat="", used=[], level=1, index=0;
+let coins=0, stars=0, correctCount=0;
+
+function loadSave(){
+  coins = parseInt(localStorage.getItem("coins")||0);
+  stars = parseInt(localStorage.getItem("stars")||0);
+  level = parseInt(localStorage.getItem("level")||1);
+  updateUI();
 }
 
-function goHome(){show("home");playClick();}
-
-function playClick(){
-document.getElementById("clickSound").play();
+function save(){
+  localStorage.setItem("coins",coins);
+  localStorage.setItem("stars",stars);
+  localStorage.setItem("level",level);
 }
 
-function goCategories(){
-player=document.getElementById("name").value;
-if(!player)return;
-playClick();
-show("categories");
+function startGame(c){
+  cat=c;
+  used=[];
+  correctCount=0;
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
+  loadQ();
 }
 
-function openLevels(cat){
-category=cat;
-playClick();
-show("levels");
+function loadQ(){
+  let qlist=data[cat];
 
-let box=document.getElementById("levelBox");
-box.innerHTML="";
+  if(used.length>=qlist.length){
+    level++;
+    save();
+    alert("🎉 Level Up!");
+    document.getElementById("level").innerText=level;
+    startGame(cat);
+    return;
+  }
 
-for(let i=1;i<=5;i++){
-let b=document.createElement("button");
-b.className="level-btn";
-b.innerText="Level "+i;
-b.onclick=()=>startGame(i);
-box.appendChild(b);
-}
-}
+  do{
+    index=Math.floor(Math.random()*qlist.length);
+  }while(used.includes(index));
 
-/* 🔥 NO REPEAT ENGINE */
-function startGame(lv){
+  used.push(index);
 
-level=lv;
-score=0;coins=0;stars=0;
+  let q=qlist[index];
+  document.getElementById("question").innerText=q.q;
 
-let pool = DB[category].map(x=>{
-let p=x.split("|");
-return {q:p[0],a:p[1],o:p[2].split(",")};
-});
+  let opt=document.getElementById("options");
+  opt.innerHTML="";
 
-pool = pool.filter(q=>!usedQuestions.has(q.q));
+  let progress = (used.length/qlist.length)*100;
+  document.getElementById("bar").style.width=progress+"%";
 
-if(pool.length===0){
-usedQuestions.clear();
-pool = DB[category].map(x=>{
-let p=x.split("|");
-return {q:p[0],a:p[1],o:p[2].split(",")};
-});
+  q.a.forEach(o=>{
+    let b=document.createElement("button");
+    b.innerText=o;
+    b.className="option";
+    b.onclick=()=>check(o,q.c,b);
+    opt.appendChild(b);
+  });
 }
 
-pool.sort(()=>Math.random()-0.5);
-
-currentQuestions = pool.slice(0,3);
-
-currentQuestions.forEach(q=>usedQuestions.add(q.q));
-
-qIndex=0;
-
-show("game");
-load();
-updateUI();
-}
-
-/* LOAD */
-function load(){
-
-if(qIndex>=currentQuestions.length){
-alert("Level Completed 🎉");
-show("levels");
-return;
-}
-
-let q=currentQuestions[qIndex];
-qIndex++;
-
-document.getElementById("player").innerText=player;
-document.getElementById("q").innerText=q.q;
-
-let box=document.getElementById("options");
-box.innerHTML="";
-
-q.o.sort(()=>Math.random()-0.5);
-
-q.o.forEach(opt=>{
-let btn=document.createElement("button");
-btn.className="option";
-btn.innerText=opt;
-
-btn.onclick=()=>{
-
-if(opt===q.a){
-score+=10;
-coins+=5;
-stars+=1;
-document.getElementById("correctSound").play();
-btn.style.background="lightgreen";
-}else{
-document.getElementById("wrongSound").play();
-btn.style.background="salmon";
-}
-
-updateUI();
-setTimeout(load,600);
-};
-
-box.appendChild(btn);
-});
+function check(sel,ans,btn){
+  if(sel===ans){
+    btn.classList.add("correct");
+    coins+=10;
+    stars++;
+    correctCount++;
+    sound(true);
+  }else{
+    btn.classList.add("wrong");
+    sound(false);
+  }
+  updateUI();
+  save();
+  setTimeout(loadQ,700);
 }
 
 function updateUI(){
-document.getElementById("score").innerText=score;
-document.getElementById("coins").innerText=coins;
-document.getElementById("stars").innerText=stars;
+  document.getElementById("coins").innerText=coins;
+  document.getElementById("stars").innerText=stars;
+  document.getElementById("level").innerText=level;
 }
 
+function sound(ok){
+  let ctx=new AudioContext();
+  let o=ctx.createOscillator();
+  o.frequency.value=ok?700:200;
+  o.connect(ctx.destination);
+  o.start();
+  setTimeout(()=>o.stop(),150);
+}
+
+loadSave();
 </script>
 
 </body>
