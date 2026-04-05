@@ -34,8 +34,16 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 <!-- MENU -->
 <div id="menu" class="screen">
 <div class="card">
-<h2>Start Game</h2>
-<button onclick="startQuiz()">Play Quiz</button>
+<h2>Select Category</h2>
+<button onclick="setCat('kids')">Kids</button>
+<button onclick="setCat('math')">Math</button>
+<button onclick="setCat('english')">English</button>
+<button onclick="setCat('gk')">GK</button>
+
+<h3>Levels</h3>
+<button onclick="startLevel(1)">Level 1</button>
+<button onclick="startLevel(2)">Level 2</button>
+<button onclick="startLevel(3)">Level 3</button>
 </div>
 </div>
 
@@ -49,7 +57,7 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 
 <script>
 
-/* 🔊 SOUND SYSTEM (FINAL FIX) */
+/* 🔊 SOUND SYSTEM */
 let clickSound=new Audio("click.mp3");
 let correctSound=new Audio("correct.mp3");
 let wrongSound=new Audio("wrong.mp3");
@@ -83,17 +91,11 @@ wrongSound.play();
 }
 }
 
-/* 🎮 GAME LOGIC */
+/* GAME */
 
-let index=0;
+let cat="kids",level=1,index=0;
 
-const questions=[
-{q:"2+2=?",a:"4",o:["4","5","6","7"]},
-{q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
-{q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Yellow"]},
-{q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
-{q:"5-2=?",a:"3",o:["3","4","5","6"]}
-];
+function setCat(c){cat=c;}
 
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -102,25 +104,64 @@ document.getElementById(id).classList.add("active");
 
 function startApp(){
 let userName=document.getElementById("username").value;
-
-if(!userName){
-alert("Enter name");
-return;
-}
-
+if(!userName){alert("Enter name");return;}
 show("menu");
 }
 
-function startQuiz(){
+/* QUESTIONS */
+
+function getData(){
+
+if(cat==="kids"){
+return [
+{q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
+{q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
+{q:"Cow gives?",a:"Milk",o:["Milk","Egg","Water","Honey"]}
+];
+}
+
+if(cat==="math"){
+return [
+{q:"2+2=?",a:"4",o:["4","5","6","7"]},
+{q:"5-3=?",a:"2",o:["2","3","4","5"]},
+{q:"3+3=?",a:"6",o:["6","5","7","8"]}
+];
+}
+
+if(cat==="english"){
+return [
+{q:"A for?",a:"Apple",o:["Apple","Ball","Cat","Dog"]},
+{q:"B for?",a:"Ball",o:["Ball","Pen","Chair","Table"]},
+{q:"C for?",a:"Cat",o:["Cat","Dog","Ball","Car"]}
+];
+}
+
+if(cat==="gk"){
+return [
+{q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Yellow"]},
+{q:"Sun gives?",a:"Light",o:["Light","Water","Food","Air"]},
+{q:"We drink?",a:"Water",o:["Water","Milk","Juice","Tea"]}
+];
+}
+
+}
+
+/* START LEVEL */
+
+function startLevel(l){
+level=l;
 index=0;
+questions=getData();
 show("game");
 load();
 }
 
+let questions=[];
+
 function load(){
 
 if(index>=questions.length){
-alert("🎉 Quiz Completed!");
+alert("🎉 Level Completed!");
 show("menu");
 return;
 }
