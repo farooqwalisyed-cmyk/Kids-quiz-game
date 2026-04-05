@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Pro Ultimate</title>
+<title>Kids Quiz PRO</title>
 
 <style>
 body{
@@ -14,17 +14,23 @@ body{
   text-align:center;
 }
 
+.screen{
+  display:none;
+  padding:20px;
+}
+
 .card{
   background:white;
   color:black;
-  margin:20px;
+  margin:20px auto;
   padding:20px;
   border-radius:20px;
+  max-width:500px;
 }
 
 button{
   padding:12px;
-  margin:8px;
+  margin:10px;
   width:80%;
   border:none;
   border-radius:12px;
@@ -68,24 +74,30 @@ button{
 
 <body>
 
-<!-- NAME SCREEN (FORCED FIRST) -->
-<div id="nameScreen" class="card">
-  <h2>👋 Enter Your Name</h2>
-  <input id="nameInput" placeholder="Your name" style="padding:10px;width:80%;border-radius:10px;">
-  <br>
-  <button onclick="startApp()">Start Game</button>
+<!-- NAME SCREEN -->
+<div id="nameScreen" class="screen" style="display:block;">
+  <div class="card">
+    <h2>👋 Enter Your Name</h2>
+    <input id="nameInput" placeholder="Your name"
+    style="padding:10px;width:80%;border-radius:10px;">
+    <br>
+    <button onclick="goMenu()">Start</button>
+  </div>
 </div>
 
 <!-- MENU -->
-<div id="menu" class="card" style="display:none;">
-  <h2>Welcome <span id="playerName"></span> 🎮</h2>
-  <button onclick="startGame('gk')">🌍 GK</button>
-  <button onclick="startGame('math')">➕ Math</button>
-  <button onclick="startGame('english')">🔤 English</button>
+<div id="menuScreen" class="screen">
+  <div class="card">
+    <h2>Welcome <span id="playerName"></span> 🎮</h2>
+    <h3>Select Category</h3>
+    <button onclick="startGame('gk')">🌍 GK</button>
+    <button onclick="startGame('math')">➕ Math</button>
+    <button onclick="startGame('english')">🔤 English</button>
+  </div>
 </div>
 
 <!-- GAME -->
-<div id="game" class="card" style="display:none;">
+<div id="gameScreen" class="screen">
 
   <div class="topbar">
     <div>⭐ <span id="stars">0</span></div>
@@ -93,23 +105,28 @@ button{
     <div>📘 Level <span id="level">1</span></div>
   </div>
 
-  <p id="levelText"></p>
+  <div class="card">
 
-  <div class="progress"><div id="bar" class="bar"></div></div>
+    <p id="levelText"></p>
 
-  <h3 id="question"></h3>
-  <div id="options"></div>
+    <div class="progress">
+      <div id="bar" class="bar"></div>
+    </div>
 
-  <div class="nav">
-    <button onclick="goHome()">🏠 Home</button>
-    <button onclick="nextQ()">➡ Next</button>
+    <h3 id="question"></h3>
+    <div id="options"></div>
+
+    <div class="nav">
+      <button onclick="goHome()">🏠 Home</button>
+      <button onclick="nextQ()">➡ Next</button>
+    </div>
+
   </div>
-
 </div>
 
 <script>
 
-let player="",cat="",level=1,qIndex=0;
+let player="",cat="",level=1,index=0;
 let used=[],coins=0,stars=0,currentQ=null;
 
 let data={
@@ -117,32 +134,32 @@ let data={
     {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:"Delhi"},
     {q:"National Animal?",a:["Tiger","Lion","Dog","Elephant"],c:"Tiger"},
     {q:"Sun rises in?",a:["East","West","North","South"],c:"East"},
-    {q:"Water freezes at?",a:["0°C","10°C","100°C","50°C"],c:"0°C"},
-    {q:"Largest planet?",a:["Jupiter","Mars","Earth","Venus"],c:"Jupiter"}
+    {q:"Largest planet?",a:["Jupiter","Mars","Earth","Venus"],c:"Jupiter"},
+    {q:"Water freezes at?",a:["0°C","10°C","100°C","50°C"],c:"0°C"}
   ],
   math:[
     {q:"2 + 2 = ?",a:["3","4","5","6"],c:"4"},
     {q:"5 + 3 = ?",a:["6","7","8","9"],c:"8"},
-    {q:"10 - 6 = ?",a:["3","4","5","6"],c:"4"}
+    {q:"10 - 6 = ?",a:["3","4","5","6"],c:"4"},
+    {q:"4 × 2 = ?",a:["6","7","8","9"],c:"8"}
   ],
   english:[
     {q:"A for ?",a:["Apple","Ball","Cat","Dog"],c:"Apple"},
     {q:"B for ?",a:["Ball","Apple","Cat","Dog"],c:"Ball"},
+    {q:"C for ?",a:["Cat","Dog","Ant","Bat"],c:"Cat"},
     {q:"Opposite Big?",a:["Small","Tall","Long","Wide"],c:"Small"}
   ]
 };
 
-function startApp(){
+function goMenu(){
   player=document.getElementById("nameInput").value.trim();
-
   if(player===""){
-    alert("Please enter your name");
+    alert("Enter name");
     return;
   }
 
   document.getElementById("nameScreen").style.display="none";
-  document.getElementById("menu").style.display="block";
-
+  document.getElementById("menuScreen").style.display="block";
   document.getElementById("playerName").innerText=player;
 }
 
@@ -150,14 +167,18 @@ function startGame(c){
   cat=c;
   level=1;
   used=[];
-  document.getElementById("menu").style.display="none";
-  document.getElementById("game").style.display="block";
+
+  show("gameScreen");
   loadQ();
 }
 
 function goHome(){
-  document.getElementById("game").style.display="none";
-  document.getElementById("menu").style.display="block";
+  show("menuScreen");
+}
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";
 }
 
 function loadQ(){
@@ -171,16 +192,17 @@ function loadQ(){
   }
 
   do{
-    qIndex=Math.floor(Math.random()*list.length);
-  }while(used.includes(qIndex));
+    index=Math.floor(Math.random()*list.length);
+  }while(used.includes(index));
 
-  used.push(qIndex);
+  used.push(index);
 
-  currentQ=list[qIndex];
+  currentQ=list[index];
 
   document.getElementById("question").innerText=currentQ.q;
   document.getElementById("level").innerText=level;
-  document.getElementById("levelText").innerText="Level "+level+" - "+cat.toUpperCase();
+  document.getElementById("levelText").innerText=
+    "Level "+level+" - "+cat.toUpperCase();
 
   let opt=document.getElementById("options");
   opt.innerHTML="";
