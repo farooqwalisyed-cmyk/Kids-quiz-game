@@ -9,7 +9,6 @@ font-family:Arial;
 text-align:center;
 background:#f2f2f2;
 margin:0;
-padding:0;
 }
 
 .screen{display:none;padding:20px;}
@@ -25,28 +24,14 @@ color:white;
 font-size:16px;
 cursor:pointer;
 }
-
-#q{
-font-size:22px;
-margin:20px;
-font-weight:bold;
-}
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
 <div id="menu" class="screen active">
 
 <h1>🎮 Kids Quiz Game</h1>
-
-<button onclick="setCat('kids')">Kids</button>
-<button onclick="setCat('math')">Math</button>
-<button onclick="setCat('english')">English</button>
-<button onclick="setCat('gk')">GK</button>
-
-<br><br>
 
 <button onclick="startGame()">Start Game</button>
 
@@ -58,177 +43,80 @@ Stars: <span id="stars">0</span>
 
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
 
-<h2 id="q">Question</h2>
-
+<h2 id="q"></h2>
 <div id="options"></div>
 
 <br>
 <button onclick="show('menu')">Exit</button>
 
-<br><br>
-
-Score: <span id="score2">0</span><br>
-Coins: <span id="coins2">0</span><br>
-Stars: <span id="stars2">0</span>
-
 </div>
 
 <script>
 
-let cat="kids";
-let index=0;
-
-let score=0;
-let coins=0;
-let stars=0;
-
-let questions=[];
-
-/* DATA */
-const DB={
-kids:[
+let questions=[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
 {q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
 {q:"Cow gives?",a:"Milk",o:["Milk","Egg","Water","Honey"]},
 {q:"Lion sound?",a:"Roar",o:["Roar","Buzz","Meow","Bark"]},
-{q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
-{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
-{q:"Sun is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
-{q:"Moon appears at?",a:"Night",o:["Night","Morning","Noon","Evening"]},
-{q:"Tree gives?",a:"Oxygen",o:["Oxygen","Milk","Water","Fire"]},
-{q:"Baby dog?",a:"Puppy",o:["Puppy","Kitten","Cub","Calf"]}
-],
+{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]}
+];
 
-math:[
-{q:"2+2=?",a:"4",o:["4","5","6","7"]},
-{q:"5-3=?",a:"2",o:["2","3","4","5"]},
-{q:"3+3=?",a:"6",o:["6","5","7","8"]},
-{q:"10-5=?",a:"5",o:["5","6","7","8"]},
-{q:"4+1=?",a:"5",o:["5","6","7","8"]},
-{q:"6-2=?",a:"4",o:["4","5","6","7"]},
-{q:"7+1=?",a:"8",o:["8","9","10","7"]},
-{q:"9-4=?",a:"5",o:["5","4","3","2"]},
-{q:"8+2=?",a:"10",o:["10","9","8","7"]},
-{q:"1+3=?",a:"4",o:["4","5","6","7"]}
-],
+let index=0;
+let score=0;
+let coins=0;
+let stars=0;
 
-english:[
-{q:"A for?",a:"Apple",o:["Apple","Ball","Cat","Dog"]},
-{q:"B for?",a:"Ball",o:["Ball","Pen","Chair","Table"]},
-{q:"C for?",a:"Cat",o:["Cat","Dog","Ball","Car"]},
-{q:"D for?",a:"Dog",o:["Dog","Apple","Ball","Car"]},
-{q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hat"]},
-{q:"F for?",a:"Fish",o:["Fish","Lion","Tiger","Dog"]},
-{q:"G for?",a:"Goat",o:["Goat","Hat","Ice","Jug"]},
-{q:"H for?",a:"Hat",o:["Hat","Goat","Fish","Dog"]},
-{q:"I for?",a:"Ice",o:["Ice","Jug","Kite","Lion"]},
-{q:"J for?",a:"Jug",o:["Jug","Ice","Hat","Goat"]}
-],
-
-gk:[
-{q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Yellow"]},
-{q:"Sun gives?",a:"Light",o:["Light","Water","Food","Air"]},
-{q:"We drink?",a:"Water",o:["Water","Milk","Juice","Tea"]},
-{q:"National animal?",a:"Tiger",o:["Tiger","Lion","Dog","Cat"]},
-{q:"National bird?",a:"Peacock",o:["Peacock","Crow","Sparrow","Eagle"]},
-{q:"Earth shape?",a:"Round",o:["Round","Flat","Square","Triangle"]},
-{q:"Fire is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
-{q:"Plants need?",a:"Water",o:["Water","Fire","Air","Stone"]},
-{q:"We breathe?",a:"Air",o:["Air","Water","Fire","Soil"]}
-]
-};
-
-/* CATEGORY */
-function setCat(c){
-cat=c;
-}
-
-/* SHUFFLE */
-function shuffle(a){
-let arr=[...a];
-for(let i=arr.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[arr[i],arr[j]]=[arr[j],arr[i]];
-}
-return arr;
-}
-
-/* START GAME */
 function startGame(){
-
 index=0;
 score=0;
 coins=0;
 stars=0;
-
-questions=shuffle(DB[cat]);
-
 show("game");
 load();
 }
 
-/* LOAD QUESTION */
 function load(){
 
 if(index>=questions.length){
-alert("🎉 Finished!");
+alert("Game Finished!");
 show("menu");
 return;
 }
 
 let q=questions[index];
-
 document.getElementById("q").innerText=q.q;
 
 let box=document.getElementById("options");
 box.innerHTML="";
 
-shuffle(q.o).forEach(opt=>{
-
+q.o.forEach(opt=>{
 let btn=document.createElement("button");
 btn.innerText=opt;
 
 btn.onclick=()=>{
-
 if(opt===q.a){
-btn.style.background="green";
 score+=10;
 coins+=5;
 stars+=1;
-}else{
-btn.style.background="red";
 }
 
-setTimeout(()=>{
 index++;
-load();
-},400);
-
 updateUI();
+load();
 };
 
 box.appendChild(btn);
 });
-
-updateUI();
 }
 
-/* UI UPDATE */
 function updateUI(){
-
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
 document.getElementById("stars").innerText=stars;
-
-document.getElementById("score2").innerText=score;
-document.getElementById("coins2").innerText=coins;
-document.getElementById("stars2").innerText=stars;
 }
 
-/* SCREEN SWITCH */
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>{
 s.classList.remove("active");
