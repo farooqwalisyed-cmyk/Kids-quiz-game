@@ -19,9 +19,9 @@ h1{color:#4f46e5}
 input{
 padding:10px;
 width:80%;
+margin:10px;
 border-radius:10px;
 border:1px solid #ccc;
-margin:10px;
 }
 
 button{
@@ -105,14 +105,12 @@ let player="";
 let category="";
 let level=1;
 
-/* SCORE */
 let score=0,coins=0,stars=0;
 
-/* GAME */
 let questionPool=[];
 let currentIndex=0;
 
-/* 🔥 FIXED QUEUE SYSTEM (NO REPEAT EVER) */
+/* QUEUE SYSTEM (NO REPEAT) */
 let questionQueue={
 kids:[],
 math:[],
@@ -127,19 +125,31 @@ english:0,
 gk:0
 };
 
-/* DATABASE */
+/* DATABASE (EXPANDED KIDS FIXED) */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
 {q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
 {q:"Cow gives?",a:"Milk",o:["Milk","Egg","Water","Honey"]},
-{q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
-{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
-{q:"Lion is?",a:"King",o:["King","Doctor","Teacher","Farmer"]},
 {q:"Hen gives?",a:"Egg",o:["Egg","Milk","Water","Oil"]},
+{q:"Fish lives in?",a:"Water",o:["Water","Sky","Land","Tree"]},
+{q:"Bird can?",a:"Fly",o:["Fly","Swim","Run","Sleep"]},
+{q:"Lion is?",a:"King",o:["King","Doctor","Teacher","Farmer"]},
 {q:"Duck says?",a:"Quack",o:["Quack","Bark","Meow","Roar"]},
-{q:"Frog jumps?",a:"Yes",o:["Yes","No","Maybe","Never"]},
-{q:"Horse runs?",a:"Fast",o:["Fast","Slow","Fly","Crawl"]}
+{q:"Horse runs?",a:"Fast",o:["Fast","Slow","Fly","Crawl"]},
+{q:"Elephant is?",a:"Big",o:["Big","Small","Tiny","Light"]},
+
+{q:"Tiger is?",a:"Wild",o:["Wild","Pet","Small","Soft"]},
+{q:"Goat gives?",a:"Milk",o:["Milk","Egg","Honey","Water"]},
+{q:"Sheep gives?",a:"Wool",o:["Wool","Milk","Egg","Oil"]},
+{q:"Frog lives in?",a:"Water",o:["Water","Desert","Fire","Sky"]},
+{q:"Snake is?",a:"Slithers",o:["Slithers","Flies","Jumps","Swims"]},
+
+{q:"Ant is?",a:"Small",o:["Small","Big","Tall","Heavy"]},
+{q:"Bee gives?",a:"Honey",o:["Honey","Milk","Egg","Water"]},
+{q:"Owl sleeps in?",a:"Day",o:["Day","Night","Morning","Evening"]},
+{q:"Zebra has?",a:"Stripes",o:["Stripes","Dots","Lines","Circles"]},
+{q:"Rabbit is?",a:"Fast",o:["Fast","Slow","Big","Heavy"]}
 ],
 
 math:[
@@ -200,18 +210,17 @@ box.appendChild(b);
 }
 }
 
-/* 🔥 START GAME (NO REPEAT LOGIC FIXED) */
+/* START GAME */
 function startGame(lv){
 
 level=lv;
 score=0;coins=0;stars=0;
 
-/* CREATE SHUFFLED QUEUE ONLY ONCE */
 if(questionQueue[category].length===0){
 
 let arr=DB[category].slice();
 
-/* SHUFFLE */
+/* shuffle */
 for(let i=arr.length-1;i>0;i--){
 let j=Math.floor(Math.random()*(i+1));
 [arr[i],arr[j]]=[arr[j],arr[i]];
@@ -221,7 +230,7 @@ questionQueue[category]=arr;
 usedIndex[category]=0;
 }
 
-/* GET NEXT 3 QUESTIONS */
+/* TAKE 3 QUESTIONS PER LEVEL */
 questionPool = questionQueue[category].slice(
 usedIndex[category],
 usedIndex[category]+3
@@ -229,7 +238,7 @@ usedIndex[category]+3
 
 usedIndex[category]+=3;
 
-/* RESET IF FINISHED */
+/* RESET IF END */
 if(questionPool.length===0){
 questionQueue[category]=[];
 return startGame(level);
@@ -242,7 +251,7 @@ load();
 updateUI();
 }
 
-/* LOAD QUESTION */
+/* LOAD */
 function load(){
 
 if(currentIndex>=questionPool.length){
@@ -286,7 +295,7 @@ box.appendChild(btn);
 });
 }
 
-/* UPDATE UI */
+/* UI */
 function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
