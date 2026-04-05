@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz Pro</title>
+<title>GK Quiz Pro</title>
 
 <style>
 body{
   margin:0;
   font-family: Arial;
-  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  background: linear-gradient(135deg,#141e30,#243b55);
   color:white;
   text-align:center;
 }
 
-h1{
-  margin:15px 0;
-}
+h1{margin:15px;}
 
 .topbar{
   display:flex;
@@ -33,12 +31,6 @@ h1{
   padding:20px;
   border-radius:20px;
   box-shadow:0 10px 20px rgba(0,0,0,0.3);
-  animation:fade 0.4s ease-in;
-}
-
-@keyframes fade{
-  from{opacity:0; transform:scale(0.9);}
-  to{opacity:1; transform:scale(1);}
 }
 
 button{
@@ -51,14 +43,7 @@ button{
   cursor:pointer;
 }
 
-.option{
-  background:#f1f1f1;
-}
-
-.option:hover{
-  background:#ddd;
-}
-
+.option{background:#f1f1f1;}
 .correct{background:#2ecc71 !important; color:white;}
 .wrong{background:#e74c3c !important; color:white;}
 
@@ -69,16 +54,10 @@ button{
   overflow:hidden;
   margin:10px;
 }
-
 .bar{
   height:10px;
   width:0%;
   background:#2ecc71;
-}
-
-.small{
-  font-size:12px;
-  opacity:0.8;
 }
 </style>
 </head>
@@ -91,14 +70,11 @@ button{
   <div>📘 Level <span id="level">1</span></div>
 </div>
 
-<h1>🎮 Kids Quiz PRO</h1>
+<h1>🌍 GK Quiz PRO</h1>
 
 <div id="menu" class="card">
-  <h2>Select Category</h2>
-  <button onclick="startGame('math')">➕ Math</button>
-  <button onclick="startGame('gk')">🌍 GK</button>
-  <button onclick="startGame('english')">🔤 English</button>
-  <p class="small">Pro Version v2 🚀</p>
+  <h2>Start GK Quiz</h2>
+  <button onclick="startGame()">▶ Start Game</button>
 </div>
 
 <div id="game" class="card" style="display:none;">
@@ -108,78 +84,49 @@ button{
 </div>
 
 <script>
-let data = {
- math:[
-  {q:"2 + 3 = ?", a:["5","6","7","8"], c:"5"},
-  {q:"10 - 6 = ?", a:["4","5","3","6"], c:"4"},
-  {q:"4 × 2 = ?", a:["6","7","8","9"], c:"8"},
-  {q:"12 ÷ 3 = ?", a:["2","3","4","5"], c:"4"}
- ],
- gk:[
-  {q:"Capital of India?", a:["Delhi","Mumbai","Goa","Kolkata"], c:"Delhi"},
-  {q:"National Animal?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
+let data = [
+  {q:"Capital of India?", a:["Delhi","Mumbai","Kolkata","Chennai"], c:"Delhi"},
+  {q:"National Animal of India?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
   {q:"How many days in a year?", a:["365","360","400","300"], c:"365"},
-  {q:"Sun rises in?", a:["East","West","North","South"], c:"East"}
- ],
- english:[
-  {q:"A for ?", a:["Apple","Ball","Cat","Dog"], c:"Apple"},
-  {q:"Opposite of Big?", a:["Small","Tall","Long","Wide"], c:"Small"},
-  {q:"B for ?", a:["Ball","Apple","Cat","Dog"], c:"Ball"},
-  {q:"C for ?", a:["Cat","Dog","Ant","Bat"], c:"Cat"}
- ]
-};
+  {q:"Sun rises in?", a:["East","West","North","South"], c:"East"},
+  {q:"Largest planet?", a:["Earth","Mars","Jupiter","Venus"], c:"Jupiter"},
+  {q:"National Bird of India?", a:["Peacock","Parrot","Eagle","Sparrow"], c:"Peacock"},
+  {q:"Which is ocean?", a:["Pacific","Sahara","Gobi","Thar"], c:"Pacific"},
+  {q:"Water freezes at?", a:["0°C","10°C","100°C","50°C"], c:"0°C"},
+  {q:"How many states in India?", a:["28","29","30","27"], c:"28"},
+  {q:"Who is Prime Minister of India?", a:["Narendra Modi","Rahul Gandhi","APJ Abdul Kalam","Vajpayee"], c:"Narendra Modi"}
+];
 
-let cat="", used=[], level=1, index=0;
-let coins=0, stars=0, correctCount=0;
+let used=[], index=0;
+let coins=0, stars=0, level=1;
 
-function loadSave(){
-  coins = parseInt(localStorage.getItem("coins")||0);
-  stars = parseInt(localStorage.getItem("stars")||0);
-  level = parseInt(localStorage.getItem("level")||1);
-  updateUI();
-}
-
-function save(){
-  localStorage.setItem("coins",coins);
-  localStorage.setItem("stars",stars);
-  localStorage.setItem("level",level);
-}
-
-function startGame(c){
-  cat=c;
+function startGame(){
   used=[];
-  correctCount=0;
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="block";
   loadQ();
 }
 
 function loadQ(){
-  let qlist=data[cat];
-
-  if(used.length>=qlist.length){
+  if(used.length>=data.length){
     level++;
-    save();
     alert("🎉 Level Up!");
-    document.getElementById("level").innerText=level;
-    startGame(cat);
-    return;
+    used=[];
   }
 
   do{
-    index=Math.floor(Math.random()*qlist.length);
+    index=Math.floor(Math.random()*data.length);
   }while(used.includes(index));
 
   used.push(index);
 
-  let q=qlist[index];
+  let q=data[index];
   document.getElementById("question").innerText=q.q;
 
   let opt=document.getElementById("options");
   opt.innerHTML="";
 
-  let progress = (used.length/qlist.length)*100;
-  document.getElementById("bar").style.width=progress+"%";
+  document.getElementById("bar").style.width=(used.length/data.length)*100+"%";
 
   q.a.forEach(o=>{
     let b=document.createElement("button");
@@ -195,14 +142,12 @@ function check(sel,ans,btn){
     btn.classList.add("correct");
     coins+=10;
     stars++;
-    correctCount++;
     sound(true);
   }else{
     btn.classList.add("wrong");
     sound(false);
   }
   updateUI();
-  save();
   setTimeout(loadQ,700);
 }
 
@@ -220,8 +165,6 @@ function sound(ok){
   o.start();
   setTimeout(()=>o.stop(),150);
 }
-
-loadSave();
 </script>
 
 </body>
