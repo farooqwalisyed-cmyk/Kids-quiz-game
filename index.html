@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Kids Quiz Game</title>
+<title>Kids Quiz Game PRO</title>
 
 <style>
 body{
 font-family:Arial;
 margin:0;
-background:#f0f4ff;
+background:#eef2ff;
 text-align:center;
 }
 
@@ -19,9 +19,9 @@ h1{color:#4f46e5}
 input{
 padding:10px;
 width:80%;
-margin:10px;
 border-radius:10px;
 border:1px solid #ccc;
+margin:10px;
 }
 
 button{
@@ -32,10 +32,17 @@ border-radius:10px;
 background:#4f46e5;
 color:white;
 font-weight:bold;
+cursor:pointer;
 }
 
 .level-btn{background:#10b981}
-.option{display:block;width:80%;margin:10px auto;background:#6366f1}
+
+.option{
+display:block;
+width:80%;
+margin:10px auto;
+background:#6366f1;
+}
 
 .topbar{
 background:white;
@@ -93,25 +100,34 @@ Stars: <span id="stars">0</span>
 
 <script>
 
-/* PLAYER DATA */
+/* PLAYER */
 let player="";
 let category="";
 let level=1;
 
+/* SCORE */
 let score=0,coins=0,stars=0;
 
+/* GAME */
 let questionPool=[];
 let currentIndex=0;
 
-/* NO REPEAT TRACKER */
-let usedQuestions={
-kids:new Set(),
-math:new Set(),
-english:new Set(),
-gk:new Set()
+/* 🔥 FIXED QUEUE SYSTEM (NO REPEAT EVER) */
+let questionQueue={
+kids:[],
+math:[],
+english:[],
+gk:[]
 };
 
-/* QUESTION BANK (EXTENDED) */
+let usedIndex={
+kids:0,
+math:0,
+english:0,
+gk:0
+};
+
+/* DATABASE */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
@@ -132,7 +148,9 @@ math:[
 {q:"10-5=?",a:"5",o:["5","4","6","7"]},
 {q:"6+2=?",a:"8",o:["8","7","9","10"]},
 {q:"9-3=?",a:"6",o:["6","5","7","8"]},
-{q:"4+4=?",a:"8",o:["8","7","9","6"]}
+{q:"4+4=?",a:"8",o:["8","7","9","6"]},
+{q:"7+2=?",a:"9",o:["9","8","10","11"]},
+{q:"3+5=?",a:"8",o:["8","7","9","6"]}
 ],
 
 english:[
@@ -140,7 +158,10 @@ english:[
 {q:"B for?",a:"Ball",o:["Ball","Cat","Dog","Ant"]},
 {q:"C for?",a:"Cat",o:["Cat","Dog","Bat","Rat"]},
 {q:"D for?",a:"Dog",o:["Dog","Cat","Cow","Hen"]},
-{q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hen"]}
+{q:"E for?",a:"Elephant",o:["Elephant","Fish","Goat","Hen"]},
+{q:"F for?",a:"Fish",o:["Fish","Apple","Ball","Dog"]},
+{q:"G for?",a:"Goat",o:["Goat","Cat","Dog","Ant"]},
+{q:"H for?",a:"Hen",o:["Hen","Fish","Ball","Dog"]}
 ],
 
 gk:[
@@ -148,11 +169,14 @@ gk:[
 {q:"Sky color?",a:"Blue",o:["Blue","Red","Green","Black"]},
 {q:"We drink?",a:"Water",o:["Water","Milk","Oil","Juice"]},
 {q:"Earth is?",a:"Round",o:["Round","Flat","Square","Triangle"]},
-{q:"We breathe?",a:"Air",o:["Air","Water","Fire","Stone"]}
+{q:"We breathe?",a:"Air",o:["Air","Water","Fire","Stone"]},
+{q:"Moon gives?",a:"Light",o:["Light","Heat","Smoke","Sound"]},
+{q:"Sun rises in?",a:"East",o:["East","West","North","South"]},
+{q:"Grass color?",a:"Green",o:["Green","Red","Blue","Black"]}
 ]
 };
 
-/* START */
+/* HOME */
 function goCategories(){
 player=document.getElementById("name").value;
 if(player===""){alert("Enter name");return;}
@@ -176,32 +200,40 @@ box.appendChild(b);
 }
 }
 
-/* START GAME */
+/* 🔥 START GAME (NO REPEAT LOGIC FIXED) */
 function startGame(lv){
 
 level=lv;
 score=0;coins=0;stars=0;
 
-questionPool=[];
+/* CREATE SHUFFLED QUEUE ONLY ONCE */
+if(questionQueue[category].length===0){
 
-/* REMOVE USED QUESTIONS */
-let available = DB[category].filter(q => !usedQuestions[category].has(q.q));
-
-if(available.length===0){
-usedQuestions[category].clear();
-available = DB[category].slice();
-}
+let arr=DB[category].slice();
 
 /* SHUFFLE */
-available.sort(()=>Math.random()-0.5);
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
 
-/* TAKE 3 QUESTIONS */
-questionPool = available.slice(0,3);
+questionQueue[category]=arr;
+usedIndex[category]=0;
+}
 
-/* MARK USED */
-questionPool.forEach(q=>{
-usedQuestions[category].add(q.q);
-});
+/* GET NEXT 3 QUESTIONS */
+questionPool = questionQueue[category].slice(
+usedIndex[category],
+usedIndex[category]+3
+);
+
+usedIndex[category]+=3;
+
+/* RESET IF FINISHED */
+if(questionPool.length===0){
+questionQueue[category]=[];
+return startGame(level);
+}
 
 currentIndex=0;
 
@@ -254,7 +286,7 @@ box.appendChild(btn);
 });
 }
 
-/* UPDATE */
+/* UPDATE UI */
 function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
