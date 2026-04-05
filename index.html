@@ -6,15 +6,49 @@
 <title>Kids Quiz PRO</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#667eea;color:white;text-align:center;}
+body{
+margin:0;
+font-family:Arial;
+background:#667eea;
+color:white;
+text-align:center;
+}
+
 h1{background:#ff4d6d;padding:10px;margin:0;}
+
 .screen{display:none;padding:20px;}
 .active{display:block;}
-.card{background:white;color:black;padding:20px;border-radius:15px;}
-button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e2;color:white;width:80%;}
+
+.card{
+background:white;
+color:black;
+padding:20px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+}
+
+button{
+padding:12px;
+margin:10px;
+border:none;
+border-radius:10px;
+background:#4a90e2;
+color:white;
+width:80%;
+font-size:16px;
+cursor:pointer;
+}
+
 .correct{background:green!important;}
 .wrong{background:red!important;}
-.stats{display:flex;justify-content:space-around;font-weight:bold;margin-bottom:10px;}
+
+.stats{
+display:flex;
+justify-content:space-around;
+font-weight:bold;
+margin-bottom:10px;
+}
 </style>
 </head>
 
@@ -22,6 +56,7 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 
 <h1>🎮 Kids Quiz PRO</h1>
 
+<!-- HOME -->
 <div id="home" class="screen active">
 <div class="card">
 <h2>Enter Name</h2>
@@ -31,21 +66,26 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 </div>
 </div>
 
+<!-- MENU -->
 <div id="menu" class="screen">
 <div class="card">
 <h2>Select Category</h2>
+
 <button onclick="setCat('kids')">Kids</button>
 <button onclick="setCat('math')">Math</button>
 <button onclick="setCat('english')">English</button>
 <button onclick="setCat('gk')">GK</button>
 
 <h3>Levels</h3>
+
 <button onclick="startLevel(1)">Level 1</button>
 <button onclick="startLevel(2)">Level 2</button>
 <button onclick="startLevel(3)">Level 3</button>
+
 </div>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
 <div class="card">
 
@@ -63,51 +103,36 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 
 <script>
 
-/* SOUND */
-let clickSound=new Audio("click.mp3");
-let correctSound=new Audio("correct.mp3");
-let wrongSound=new Audio("wrong.mp3");
+/* STATE */
+let cat="kids";
+let level=1;
+let index=0;
 
-let audioReady=false;
-document.body.addEventListener("click",()=>{
-if(!audioReady){
-clickSound.play().then(()=>{
-clickSound.pause();
-clickSound.currentTime=0;
-audioReady=true;
-}).catch(()=>{});
-}
-});
+let score=0;
+let coins=0;
+let stars=0;
 
-function play(type){
-if(!audioReady) return;
-if(type==="click"){clickSound.currentTime=0;clickSound.play();}
-if(type==="correct"){correctSound.currentTime=0;correctSound.play();}
-if(type==="wrong"){wrongSound.currentTime=0;wrongSound.play();}
-}
+let questions=[];
 
-/* GAME */
-
-let cat="kids",level=1,index=0;
-let score=0,coins=0,stars=0;
-
-function setCat(c){cat=c;}
-
+/* UI SWITCH */
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+/* START */
 function startApp(){
-let userName=document.getElementById("username").value;
-if(!userName){alert("Enter name");return;}
+let name=document.getElementById("username").value;
+if(!name){alert("Enter name");return;}
 show("menu");
 }
 
-/* QUESTIONS DATABASE */
+function setCat(c){
+cat=c;
+}
 
+/* DATABASE */
 const DB={
-
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
 {q:"Cat says?",a:"Meow",o:["Meow","Bark","Roar","Buzz"]},
@@ -156,30 +181,34 @@ gk:[
 {q:"Earth shape?",a:"Round",o:["Round","Flat","Square","Triangle"]},
 {q:"Fire is?",a:"Hot",o:["Hot","Cold","Wet","Dry"]},
 {q:"Plants need?",a:"Water",o:["Water","Fire","Air","Stone"]},
-{q:"Day after night?",a:"Morning",o:["Morning","Evening","Noon","Night"]},
 {q:"We breathe?",a:"Air",o:["Air","Water","Fire","Soil"]}
 ]
-
 };
 
-/* LEVEL CONTROL */
+/* LEVEL SIZE */
+const LEVELS={
+1:4,
+2:6,
+3:10
+};
 
+/* START LEVEL */
 function startLevel(l){
+
 level=l;
 index=0;
 score=0;
 coins=0;
 stars=0;
 
-questions = DB[cat].slice(0, level*3 + 2); // more questions per level
+questions=[...DB[cat]].slice(0,LEVELS[level]);
 
 updateStats();
 show("game");
 load();
 }
 
-let questions=[];
-
+/* LOAD QUESTION */
 function load(){
 
 if(index>=questions.length){
@@ -194,22 +223,24 @@ document.getElementById("q").innerText=q.q;
 let optionsDiv=document.getElementById("options");
 optionsDiv.innerHTML="";
 
-q.o.sort(()=>Math.random()-0.5);
+/* safe shuffle */
+let shuffled=[...q.o].sort(()=>Math.random()-0.5);
 
-q.o.forEach(opt=>{
-let b=document.createElement("button");
-b.innerText=opt;
+shuffled.forEach(opt=>{
 
-b.onclick=()=>{
-play("click");
+let btn=document.createElement("button");
+btn.innerText=opt;
+
+btn.onclick=()=>{
 
 if(opt===q.a){
-b.classList.add("correct");
-play("correct");
-score++;coins+=10;stars++;
+btn.classList.add("correct");
+score+=10;
+coins+=15;
+stars+=1;
 }else{
-b.classList.add("wrong");
-play("wrong");
+btn.classList.add("wrong");
+score=Math.max(0,score-3);
 }
 
 updateStats();
@@ -218,12 +249,15 @@ setTimeout(()=>{
 index++;
 load();
 },500);
+
 };
 
-optionsDiv.appendChild(b);
+optionsDiv.appendChild(btn);
 });
+
 }
 
+/* UPDATE STATS */
 function updateStats(){
 document.getElementById("score").innerText=score;
 document.getElementById("coins").innerText=coins;
