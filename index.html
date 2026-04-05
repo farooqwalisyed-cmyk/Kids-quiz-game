@@ -27,12 +27,10 @@ font-size:16px;
 cursor:pointer;
 }
 
-button:hover{
-background:#45a049;
-}
-
-h1,h2{
-margin-top:20px;
+h1,h2{margin:10px;}
+.stats{
+font-size:18px;
+margin-top:10px;
 }
 </style>
 </head>
@@ -41,25 +39,44 @@ margin-top:20px;
 
 <!-- MENU -->
 <div id="menu" class="screen active">
+
 <h1>🎮 Kids Quiz Game</h1>
+
+<input id="nameInput" placeholder="Enter your name" style="padding:10px;border-radius:8px;border:1px solid #ccc;">
+
+<br><br>
 
 <button onclick="startGame()">Start Game</button>
 
 <br><br>
 
+<div class="stats">
 Score: <span id="score">0</span><br>
 Coins: <span id="coins">0</span><br>
 Stars: <span id="stars">0</span>
 </div>
 
+</div>
+
 <!-- GAME -->
 <div id="game" class="screen">
+
+<h2 id="playerName"></h2>
 
 <h2 id="question">Question</h2>
 
 <div id="options"></div>
 
 <br>
+
+<div class="stats">
+Score: <span id="score2">0</span><br>
+Coins: <span id="coins2">0</span><br>
+Stars: <span id="stars2">0</span>
+</div>
+
+<br>
+
 <button onclick="goMenu()">Exit</button>
 
 </div>
@@ -83,8 +100,17 @@ let index = 0;
 let score = 0;
 let coins = 0;
 let stars = 0;
+let player = "";
 
 function startGame(){
+
+player = document.getElementById("nameInput").value;
+
+if(player === ""){
+alert("Please enter your name!");
+return;
+}
+
 index = 0;
 score = 0;
 coins = 0;
@@ -98,12 +124,14 @@ updateUI();
 function loadQuestion(){
 
 if(index >= questions.length){
-alert("🎉 Game Finished!");
+alert("🎉 Game Finished! Well done " + player);
 show("menu");
 return;
 }
 
 let q = questions[index];
+
+document.getElementById("playerName").innerText = "👤 " + player;
 
 document.getElementById("question").innerText = q.q;
 
@@ -140,9 +168,14 @@ box.appendChild(btn);
 }
 
 function updateUI(){
+
 document.getElementById("score").innerText = score;
 document.getElementById("coins").innerText = coins;
 document.getElementById("stars").innerText = stars;
+
+document.getElementById("score2").innerText = score;
+document.getElementById("coins2").innerText = coins;
+document.getElementById("stars2").innerText = stars;
 }
 
 function goMenu(){
