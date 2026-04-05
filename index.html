@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GK Quiz Pro</title>
+<title>Kids Quiz Pro</title>
 
 <style>
 body{
   margin:0;
   font-family: Arial;
-  background: linear-gradient(135deg,#141e30,#243b55);
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   text-align:center;
 }
@@ -19,7 +19,7 @@ h1{margin:15px;}
 .topbar{
   display:flex;
   justify-content:space-around;
-  background:rgba(0,0,0,0.3);
+  background:rgba(0,0,0,0.4);
   padding:10px;
   font-size:14px;
 }
@@ -70,11 +70,13 @@ button{
   <div>📘 Level <span id="level">1</span></div>
 </div>
 
-<h1>🌍 GK Quiz PRO</h1>
+<h1>🎮 Kids Quiz PRO</h1>
 
 <div id="menu" class="card">
-  <h2>Start GK Quiz</h2>
-  <button onclick="startGame()">▶ Start Game</button>
+  <h2>Select Category</h2>
+  <button onclick="startGame('gk')">🌍 GK</button>
+  <button onclick="startGame('math')">➕ Math</button>
+  <button onclick="startGame('english')">🔤 English</button>
 </div>
 
 <div id="game" class="card" style="display:none;">
@@ -84,63 +86,95 @@ button{
 </div>
 
 <script>
-let data = [
-  {q:"Capital of India?", a:["Delhi","Mumbai","Kolkata","Chennai"], c:"Delhi"},
-  {q:"National Animal of India?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
-  {q:"How many days in a year?", a:["365","360","400","300"], c:"365"},
-  {q:"Sun rises in?", a:["East","West","North","South"], c:"East"},
-  {q:"Largest planet?", a:["Earth","Mars","Jupiter","Venus"], c:"Jupiter"},
-  {q:"National Bird of India?", a:["Peacock","Parrot","Eagle","Sparrow"], c:"Peacock"},
-  {q:"Which is ocean?", a:["Pacific","Sahara","Gobi","Thar"], c:"Pacific"},
-  {q:"Water freezes at?", a:["0°C","10°C","100°C","50°C"], c:"0°C"},
-  {q:"How many states in India?", a:["28","29","30","27"], c:"28"},
-  {q:"Who is Prime Minister of India?", a:["Narendra Modi","Rahul Gandhi","APJ Abdul Kalam","Vajpayee"], c:"Narendra Modi"}
-];
 
-let used=[], index=0;
-let coins=0, stars=0, level=1;
+let data = {
+  // 🌍 GK (Kids + GK merged here)
+  gk: [
+    {q:"Capital of India?", a:["Delhi","Mumbai","Kolkata","Chennai"], c:"Delhi"},
+    {q:"National Animal of India?", a:["Tiger","Lion","Elephant","Dog"], c:"Tiger"},
+    {q:"How many days in a year?", a:["365","360","400","300"], c:"365"},
+    {q:"Sun rises in?", a:["East","West","North","South"], c:"East"},
+    {q:"Largest planet?", a:["Earth","Mars","Jupiter","Venus"], c:"Jupiter"},
+    {q:"National Bird of India?", a:["Peacock","Parrot","Eagle","Sparrow"], c:"Peacock"},
+    {q:"Water freezes at?", a:["0°C","10°C","100°C","50°C"], c:"0°C"},
+    {q:"How many states in India?", a:["28","29","30","27"], c:"28"},
+    {q:"Opposite of Hot?", a:["Cold","Warm","Heat","Boil"], c:"Cold"},
+    {q:"A for?", a:["Apple","Ball","Cat","Dog"], c:"Apple"}
+  ],
 
-function startGame(){
-  used=[];
+  math: [
+    {q:"2 + 3 = ?", a:["5","6","7","8"], c:"5"},
+    {q:"10 - 6 = ?", a:["4","5","3","6"], c:"4"},
+    {q:"4 × 2 = ?", a:["6","7","8","9"], c:"8"},
+    {q:"12 ÷ 3 = ?", a:["2","3","4","5"], c:"4"}
+  ],
+
+  english: [
+    {q:"A for ?", a:["Apple","Ball","Cat","Dog"], c:"Apple"},
+    {q:"B for ?", a:["Ball","Apple","Cat","Dog"], c:"Ball"},
+    {q:"C for ?", a:["Cat","Dog","Ant","Bat"], c:"Cat"},
+    {q:"Opposite of Big?", a:["Small","Tall","Long","Wide"], c:"Small"}
+  ]
+};
+
+let used = {};
+let index = 0;
+let coins = 0;
+let stars = 0;
+let level = 1;
+let currentCat = "";
+
+function startGame(cat){
+  currentCat = cat;
+
+  if(!used[cat]) used[cat] = [];
+
   document.getElementById("menu").style.display="none";
   document.getElementById("game").style.display="block";
+
   loadQ();
 }
 
 function loadQ(){
-  if(used.length>=data.length){
+  let qlist = data[currentCat];
+
+  // reset if all used
+  if(used[currentCat].length >= qlist.length){
+    used[currentCat] = [];
     level++;
     alert("🎉 Level Up!");
-    used=[];
+    document.getElementById("level").innerText = level;
   }
 
   do{
-    index=Math.floor(Math.random()*data.length);
-  }while(used.includes(index));
+    index = Math.floor(Math.random() * qlist.length);
+  }while(used[currentCat].includes(index));
 
-  used.push(index);
+  used[currentCat].push(index);
 
-  let q=data[index];
-  document.getElementById("question").innerText=q.q;
+  let q = qlist[index];
 
-  let opt=document.getElementById("options");
-  opt.innerHTML="";
+  document.getElementById("question").innerText = q.q;
 
-  document.getElementById("bar").style.width=(used.length/data.length)*100+"%";
+  let opt = document.getElementById("options");
+  opt.innerHTML = "";
+
+  document.getElementById("bar").style.width =
+    (used[currentCat].length / qlist.length) * 100 + "%";
 
   q.a.forEach(o=>{
-    let b=document.createElement("button");
-    b.innerText=o;
-    b.className="option";
-    b.onclick=()=>check(o,q.c,b);
+    let b = document.createElement("button");
+    b.innerText = o;
+    b.className = "option";
+    b.onclick = ()=>check(o,q.c,b);
     opt.appendChild(b);
   });
 }
 
 function check(sel,ans,btn){
-  if(sel===ans){
+  if(sel === ans){
     btn.classList.add("correct");
-    coins+=10;
+    coins += 10;
     stars++;
     sound(true);
   }else{
@@ -152,19 +186,20 @@ function check(sel,ans,btn){
 }
 
 function updateUI(){
-  document.getElementById("coins").innerText=coins;
-  document.getElementById("stars").innerText=stars;
-  document.getElementById("level").innerText=level;
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("stars").innerText = stars;
+  document.getElementById("level").innerText = level;
 }
 
 function sound(ok){
-  let ctx=new AudioContext();
-  let o=ctx.createOscillator();
-  o.frequency.value=ok?700:200;
+  let ctx = new AudioContext();
+  let o = ctx.createOscillator();
+  o.frequency.value = ok ? 700 : 200;
   o.connect(ctx.destination);
   o.start();
   setTimeout(()=>o.stop(),150);
 }
+
 </script>
 
 </body>
