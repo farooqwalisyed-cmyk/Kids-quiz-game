@@ -1,106 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Kids Quiz Game PRO</title>
-
-<style>
-body{
-font-family:Arial;
-margin:0;
-background:#eef2ff;
-text-align:center;
-}
-
-.screen{display:none;padding:20px;}
-.active{display:block;}
-
-h1{color:#4f46e5}
-
-input{
-padding:10px;
-width:80%;
-margin:10px;
-border-radius:10px;
-border:1px solid #ccc;
-}
-
-button{
-padding:10px 15px;
-margin:8px;
-border:none;
-border-radius:10px;
-background:#4f46e5;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
-
-.level-btn{background:#10b981}
-
-.option{
-display:block;
-width:80%;
-margin:10px auto;
-background:#6366f1;
-}
-
-.topbar{
-background:white;
-padding:10px;
-margin-bottom:10px;
-border-radius:10px;
-}
-</style>
-</head>
-
-<body>
-
-<!-- HOME -->
-<div id="home" class="screen active">
-<h1>🎮 Kids Quiz Game</h1>
-<input id="name" placeholder="Enter your name">
-<br>
-<button onclick="goCategories()">Start Game</button>
-</div>
-
-<!-- CATEGORIES -->
-<div id="categories" class="screen">
-<h2>Choose Category</h2>
-<button onclick="openLevels('kids')">Kids</button>
-<button onclick="openLevels('math')">Math</button>
-<button onclick="openLevels('english')">English</button>
-<button onclick="openLevels('gk')">GK</button>
-<br><br>
-<button onclick="goHome()">Back</button>
-</div>
-
-<!-- LEVELS -->
-<div id="levels" class="screen">
-<h2>Choose Level</h2>
-<div id="levelBox"></div>
-<br>
-<button onclick="goHome()">Home</button>
-</div>
-
-<!-- GAME -->
-<div id="game" class="screen">
-
-<div class="topbar">
-👤 <span id="player"></span><br>
-Score: <span id="score">0</span> |
-Coins: <span id="coins">0</span> |
-Stars: <span id="stars">0</span>
-</div>
-
-<h2 id="q"></h2>
-<div id="options"></div>
-
-<button onclick="goHome()">Exit</button>
-</div>
-
 <script>
 
-/* PLAYER */
 let player="";
 let category="";
 let level=1;
@@ -110,22 +9,22 @@ let score=0,coins=0,stars=0;
 let questionPool=[];
 let currentIndex=0;
 
-/* QUEUE SYSTEM (NO REPEAT) */
-let questionQueue={
+/* GLOBAL QUEUE SYSTEM (FIXED) */
+let bank={
 kids:[],
 math:[],
 english:[],
 gk:[]
 };
 
-let usedIndex={
+let indexPointer={
 kids:0,
 math:0,
 english:0,
 gk:0
 };
 
-/* DATABASE (EXPANDED KIDS FIXED) */
+/* DATABASE */
 const DB={
 kids:[
 {q:"Dog says?",a:"Bark",o:["Bark","Meow","Roar","Buzz"]},
@@ -145,11 +44,11 @@ kids:[
 {q:"Frog lives in?",a:"Water",o:["Water","Desert","Fire","Sky"]},
 {q:"Snake is?",a:"Slithers",o:["Slithers","Flies","Jumps","Swims"]},
 
-{q:"Ant is?",a:"Small",o:["Small","Big","Tall","Heavy"]},
 {q:"Bee gives?",a:"Honey",o:["Honey","Milk","Egg","Water"]},
-{q:"Owl sleeps in?",a:"Day",o:["Day","Night","Morning","Evening"]},
+{q:"Ant is?",a:"Small",o:["Small","Big","Tall","Heavy"]},
 {q:"Zebra has?",a:"Stripes",o:["Stripes","Dots","Lines","Circles"]},
-{q:"Rabbit is?",a:"Fast",o:["Fast","Slow","Big","Heavy"]}
+{q:"Rabbit is?",a:"Fast",o:["Fast","Slow","Big","Heavy"]},
+{q:"Owl sleeps in?",a:"Day",o:["Day","Night","Morning","Evening"]}
 ],
 
 math:[
@@ -160,7 +59,9 @@ math:[
 {q:"9-3=?",a:"6",o:["6","5","7","8"]},
 {q:"4+4=?",a:"8",o:["8","7","9","6"]},
 {q:"7+2=?",a:"9",o:["9","8","10","11"]},
-{q:"3+5=?",a:"8",o:["8","7","9","6"]}
+{q:"3+5=?",a:"8",o:["8","7","9","6"]},
+{q:"8-2=?",a:"6",o:["6","5","7","8"]},
+{q:"1+1=?",a:"2",o:["2","3","4","5"]}
 ],
 
 english:[
@@ -186,7 +87,7 @@ gk:[
 ]
 };
 
-/* HOME */
+/* START */
 function goCategories(){
 player=document.getElementById("name").value;
 if(player===""){alert("Enter name");return;}
@@ -210,13 +111,14 @@ box.appendChild(b);
 }
 }
 
-/* START GAME */
+/* 🔥 FIXED CORE ENGINE */
 function startGame(lv){
 
 level=lv;
 score=0;coins=0;stars=0;
 
-if(questionQueue[category].length===0){
+/* CREATE FULL SHUFFLED BANK ONCE */
+if(bank[category].length===0){
 
 let arr=DB[category].slice();
 
@@ -226,21 +128,22 @@ let j=Math.floor(Math.random()*(i+1));
 [arr[i],arr[j]]=[arr[j],arr[i]];
 }
 
-questionQueue[category]=arr;
-usedIndex[category]=0;
+bank[category]=arr;
+indexPointer[category]=0;
 }
 
-/* TAKE 3 QUESTIONS PER LEVEL */
-questionPool = questionQueue[category].slice(
-usedIndex[category],
-usedIndex[category]+3
-);
+/* STRICT SEQUENTIAL PICK */
+let start=indexPointer[category];
+let end=start+3;
 
-usedIndex[category]+=3;
+questionPool = bank[category].slice(start,end);
 
-/* RESET IF END */
+/* MOVE POINTER */
+indexPointer[category]+=3;
+
+/* RESET ONLY WHEN FULLY USED */
 if(questionPool.length===0){
-questionQueue[category]=[];
+bank[category]=[];
 return startGame(level);
 }
 
@@ -313,6 +216,3 @@ document.getElementById(id).classList.add("active");
 }
 
 </script>
-
-</body>
-</html>
