@@ -14,6 +14,7 @@ h1{background:#ff4d6d;padding:10px;margin:0;}
 button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e2;color:white;width:80%;}
 .correct{background:green!important;}
 .wrong{background:red!important;}
+.stats{display:flex;justify-content:space-around;font-weight:bold;margin-bottom:10px;}
 </style>
 </head>
 
@@ -50,14 +51,22 @@ button{padding:12px;margin:10px;border:none;border-radius:10px;background:#4a90e
 <!-- GAME -->
 <div id="game" class="screen">
 <div class="card">
+
+<div class="stats">
+<div>⭐ <span id="score">0</span></div>
+<div>🪙 <span id="coins">0</span></div>
+<div>🏆 <span id="stars">0</span></div>
+</div>
+
 <h2 id="q"></h2>
 <div id="options"></div>
+
 </div>
 </div>
 
 <script>
 
-/* 🔊 SOUND SYSTEM */
+/* SOUND */
 let clickSound=new Audio("click.mp3");
 let correctSound=new Audio("correct.mp3");
 let wrongSound=new Audio("wrong.mp3");
@@ -77,23 +86,15 @@ audioReady=true;
 function play(type){
 if(!audioReady) return;
 
-if(type==="click"){
-clickSound.currentTime=0;
-clickSound.play();
-}
-if(type==="correct"){
-correctSound.currentTime=0;
-correctSound.play();
-}
-if(type==="wrong"){
-wrongSound.currentTime=0;
-wrongSound.play();
-}
+if(type==="click"){clickSound.currentTime=0;clickSound.play();}
+if(type==="correct"){correctSound.currentTime=0;correctSound.play();}
+if(type==="wrong"){wrongSound.currentTime=0;wrongSound.play();}
 }
 
 /* GAME */
 
 let cat="kids",level=1,index=0;
+let score=0,coins=0,stars=0;
 
 function setCat(c){cat=c;}
 
@@ -151,7 +152,11 @@ return [
 function startLevel(l){
 level=l;
 index=0;
+score=0;
+coins=0;
+stars=0;
 questions=getData();
+updateStats();
 show("game");
 load();
 }
@@ -182,10 +187,13 @@ play("click");
 if(opt===q.a){
 b.classList.add("correct");
 play("correct");
+score++;coins+=10;stars++;
 }else{
 b.classList.add("wrong");
 play("wrong");
 }
+
+updateStats();
 
 setTimeout(()=>{
 index++;
@@ -195,6 +203,12 @@ load();
 
 optionsDiv.appendChild(b);
 });
+}
+
+function updateStats(){
+document.getElementById("score").innerText=score;
+document.getElementById("coins").innerText=coins;
+document.getElementById("stars").innerText=stars;
 }
 
 </script>
