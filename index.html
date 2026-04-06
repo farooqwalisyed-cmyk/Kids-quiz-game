@@ -136,14 +136,38 @@ const questions = [
 ];
 
 /* expand to 100 unique */
-while(questions.length < 100){
-  let i = questions.length;
-  questions.push({
-    q:`GK Question ${i+1}?`,
-    o:[`A${i}`,`B${i}`,`C${i}`,`D${i}`],
-    c: Math.floor(Math.random()*4)
-  });
+const questions = [
+  {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata","Chennai"], c:0},
+  {q:"Capital of USA?", o:["Washington DC","New York","LA","Texas"], c:0},
+  {q:"2 + 2 = ?", o:["3","4","5","6"], c:1},
+  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2},
+  {q:"Water formula?", o:["H2O","CO2","O2","NaCl"], c:0},
+  {q:"Sun is a?", o:["Star","Planet","Moon","Comet"], c:0},
+  {q:"Largest ocean?", o:["Pacific","Atlantic","Indian","Arctic"], c:0},
+  {q:"Earth is a?", o:["Planet","Star","Moon","Comet"], c:0},
+  {q:"7 + 3 = ?", o:["9","10","11","12"], c:1},
+  {q:"3 x 3 = ?", o:["6","9","12","15"], c:1}
+];
+
+/* ADD REAL EXPANSION (NO FAKE TEXT) */
+const extraQuestions = [
+  {q:"Largest planet?", o:["Jupiter","Mars","Earth","Venus"], c:0},
+  {q:"H2 gas is?", o:["Hydrogen","Oxygen","Helium","Carbon"], c:0},
+  {q:"India currency?", o:["Rupee","Dollar","Yen","Euro"], c:0},
+  {q:"Speed of light?", o:["Fast","Slow","Medium","Zero"], c:0},
+  {q:"Human heart has?", o:["4 chambers","2","3","5"], c:0}
+];
+
+/* MERGE INTO ONE CLEAN SET */
+let fullQuestions = [...questions, ...extraQuestions];
+
+/* AUTO FILL TO 100 (COPY REAL MIX) */
+while(fullQuestions.length < 100){
+  let base = fullQuestions.length % extraQuestions.length;
+  fullQuestions.push(extraQuestions[base]);
 }
+
+const finalQuestions = fullQuestions;
 
 /* START GAME */
 function startGame(){
