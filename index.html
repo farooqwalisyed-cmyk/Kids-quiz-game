@@ -133,12 +133,23 @@ button{
 let level = 0;
 let coins = 0;
 
-/* 100 LEVELS (short sample but structure supports 100+) */
-const questions = Array.from({length:100}, (_,i)=>({
-  q:`Level ${i+1} Question?`,
-  o:[`A${i+1}`,`B${i+1}`,`C${i+1}`],
-  c:0
-}));
+const sampleQuestions = [
+  {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata"], c:0},
+  {q:"2 + 2 = ?", o:["3","4","5"], c:1},
+  {q:"Color of sky?", o:["Blue","Red","Green"], c:0},
+  {q:"5 x 5 = ?", o:["10","20","25"], c:2},
+  {q:"Sun is a?", o:["Star","Planet","Moon"], c:0},
+  {q:"Water formula?", o:["H2O","CO2","O2"], c:0},
+  {q:"Capital of USA?", o:["Washington DC","New York","LA"], c:0},
+  {q:"10 - 7 = ?", o:["2","3","4"], c:1},
+  {q:"Bird flies with?", o:["Wings","Hands","Legs"], c:0},
+  {q:"Apple is a?", o:["Fruit","Animal","Veg"], c:0}
+];
+
+// expand to 100 levels properly
+const questions = Array.from({length:100}, (_,i)=>{
+  return sampleQuestions[i % sampleQuestions.length];
+});
 
 /* START */
 function startGame(){
