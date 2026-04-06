@@ -26,9 +26,7 @@ body{
   text-align:center;
 }
 
-h1{
-  margin:10px 0;
-}
+h1{margin:10px 0;}
 
 .btn{
   padding:12px;
@@ -51,7 +49,6 @@ h1{
 }
 
 .hidden{display:none;}
-
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
 </style>
@@ -83,7 +80,7 @@ h1{
 </div>
 
 <div id="screen3" class="hidden">
-  <h3 id="question">Question</h3>
+  <h3 id="question"></h3>
   <div id="answers"></div>
 </div>
 
@@ -97,49 +94,94 @@ let score=0;
 let stars=0;
 let coins=0;
 
-// FIXED QUESTION BANK (NO REPEAT)
+// ================= BIG QUESTION BANK =================
 const questions={
+
 gk:{
- easy:[
- {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
- {q:"Sun rises in?",a:["West","East","North","South"],c:1},
- {q:"How many days in week?",a:["5","6","7","8"],c:2}
- ],
- medium:[
- {q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
- {q:"Who is PM of India?",a:["Modi","Kohli","Shah","Rahul"],c:0}
- ],
- hard:[
- {q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0}
- ]
+easy:[
+{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
+{q:"Sun rises in?",a:["West","East","North","South"],c:1},
+{q:"How many days in a week?",a:["5","6","7","8"],c:2},
+{q:"How many continents?",a:["5","6","7","8"],c:2},
+{q:"Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
+{q:"National animal of India?",a:["Lion","Tiger","Elephant","Leopard"],c:1},
+{q:"Color of sky?",a:["Blue","Green","Red","Yellow"],c:0},
+{q:"How many legs spider has?",a:["6","8","10","12"],c:1},
+{q:"Which is a fruit?",a:["Carrot","Potato","Apple","Onion"],c:2},
+{q:"How many hours in a day?",a:["12","18","24","30"],c:2}
+],
+
+medium:[
+{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
+{q:"Who is PM of India?",a:["Modi","Kohli","Shah","Rahul"],c:0},
+{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
+{q:"H2O is?",a:["Oxygen","Hydrogen","Water","Salt"],c:2},
+{q:"Which planet is red?",a:["Earth","Mars","Venus","Jupiter"],c:1},
+{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1},
+{q:"How many states in India?",a:["28","29","30","31"],c:0},
+{q:"Which is gas?",a:["Iron","Air","Water","Stone"],c:1},
+{q:"Which is bird?",a:["Dog","Cat","Crow","Cow"],c:2},
+{q:"Which is vegetable?",a:["Apple","Carrot","Mango","Banana"],c:1}
+],
+
+hard:[
+{q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0},
+{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0},
+{q:"Currency of Japan?",a:["Yen","Dollar","Rupee","Euro"],c:0},
+{q:"Which gas do plants take?",a:["Oxygen","Carbon Dioxide","Nitrogen","Helium"],c:1},
+{q:"Earth revolves around?",a:["Moon","Sun","Mars","Venus"],c:1}
+]
 },
 
 english:{
- easy:[
- {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
- {q:"Opposite of hot?",a:["Cold","Warm","Heat","Fire"],c:0}
- ],
- medium:[
- {q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1}
- ],
- hard:[
- {q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2}
- ]
+easy:[
+{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
+{q:"Opposite of hot?",a:["Cold","Warm","Heat","Fire"],c:0},
+{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
+{q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0},
+{q:"D for?",a:["Dog","Apple","Ball","Cat"],c:0}
+],
+
+medium:[
+{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
+{q:"Opposite of big?",a:["Large","Huge","Small","Tall"],c:2},
+{q:"Synonym of fast?",a:["Quick","Slow","Late","Weak"],c:0},
+{q:"Past of go?",a:["Goes","Gone","Went","Going"],c:2},
+{q:"Antonym of happy?",a:["Sad","Joy","Smile","Glad"],c:0}
+],
+
+hard:[
+{q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2},
+{q:"Opposite of victory?",a:["Win","Lose","Gain","Try"],c:1},
+{q:"Meaning of brave?",a:["Coward","Fearless","Weak","Lazy"],c:1}
+]
 },
 
 math:{
- easy:[
- {q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
- {q:"5 - 2 = ?",a:["2","3","4","5"],c:1}
- ],
- medium:[
- {q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
- ],
- hard:[
- {q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1}
- ]
+easy:[
+{q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
+{q:"5 - 2 = ?",a:["2","3","4","5"],c:1},
+{q:"3 + 1 = ?",a:["2","3","4","5"],c:2},
+{q:"10 - 5 = ?",a:["5","6","7","8"],c:0},
+{q:"1 + 1 = ?",a:["1","2","3","4"],c:1}
+],
+
+medium:[
+{q:"10 × 2 = ?",a:["20","15","25","30"],c:0},
+{q:"12 ÷ 2 = ?",a:["4","5","6","7"],c:2},
+{q:"15 + 5 = ?",a:["10","15","20","25"],c:2},
+{q:"9 × 3 = ?",a:["27","18","21","24"],c:0}
+],
+
+hard:[
+{q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1},
+{q:"25 × 2 = ?",a:["40","45","50","60"],c:2},
+{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}
+]
 }
 };
+
+// ================= GAME LOGIC =================
 
 function selectCategory(c){
 category=c;
@@ -187,10 +229,8 @@ btn.classList.add("correct");
 score++;
 stars+=1;
 coins+=5;
-playSound(true);
 }else{
 btn.classList.add("wrong");
-playSound(false);
 }
 
 document.getElementById("stars").innerText=stars;
@@ -208,15 +248,6 @@ function endGame(){
 alert("Game Over! Score: "+score);
 document.getElementById("screen1").classList.remove("hidden");
 document.getElementById("screen3").classList.add("hidden");
-}
-
-function playSound(correct){
-let ctx=new (window.AudioContext||window.webkitAudioContext)();
-let o=ctx.createOscillator();
-o.frequency.value=correct?800:200;
-o.connect(ctx.destination);
-o.start();
-o.stop(ctx.currentTime+0.2);
 }
 </script>
 
