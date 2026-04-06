@@ -129,24 +129,70 @@ let coins = 0;
 let player = "";
 
 /* 100 REAL QUESTIONS BASE */
-const questions = [
+const topics = [
   {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata","Chennai"], c:0},
   {q:"Capital of USA?", o:["Washington DC","New York","LA","Texas"], c:0},
   {q:"2 + 2 = ?", o:["3","4","5","6"], c:1},
   {q:"Water formula?", o:["H2O","CO2","O2","NaCl"], c:0},
   {q:"Sun is a?", o:["Star","Planet","Moon","Comet"], c:0},
   {q:"5 x 5 = ?", o:["10","20","25","30"], c:2},
-  {q:"Largest planet?", o:["Jupiter","Mars","Earth","Venus"], c:0},
   {q:"India currency?", o:["Rupee","Dollar","Yen","Euro"], c:0},
+  {q:"Largest planet?", o:["Jupiter","Mars","Earth","Venus"], c:0},
   {q:"Human heart chambers?", o:["4","2","3","5"], c:0},
-  {q:"National animal of India?", o:["Tiger","Lion","Elephant","Deer"], c:0}
+  {q:"Speed of light?", o:["3 lakh km/s","10 km/s","100 km/s","1 km/s"], c:0}
 ];
 
-/* EXTEND TO 100 WITHOUT REPEATING SAME ORDER FEEL */
-while(questions.length < 100){
-  let base = questions[questions.length % 10];
-  questions.push({...base});
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    let j = Math.floor(Math.random() * (i+1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
+
+function generate100Questions(){
+
+  let list = [];
+
+  let pool = topics.map(q => ({
+    q: q.q,
+    o: [...q.o],
+    c: q.c
+  }));
+
+  shuffle(pool);
+
+  for(let i=0;i<100;i++){
+
+    let base = pool[i % pool.length];
+
+    list.push({
+      q: base.q,
+      o: [...base.o],
+      c: base.c
+    });
+  }
+
+  return list;
+}
+
+let finalQuestions = generate100Questions();
+  
+  for(let i=0;i<100;i++){
+    let base = topics[i % topics.length];
+
+    list.push({
+      q: base.q + " (Level " + (i+1) + ")",
+      o: [...base.o],
+      c: base.c
+    });
+  }
+
+  return list;
+}
+
+let finalQuestions = generate100Questions();
+
 
 /* START */
 function startGame(){
