@@ -206,6 +206,11 @@ const questions = [
 function startGame(){
   document.getElementById("home").classList.remove("active");
   document.getElementById("quizScreen").classList.add("active");
+
+  level = 0;
+  coins = 0;
+
+  updateUI();
   loadQuestion();
 }
 
