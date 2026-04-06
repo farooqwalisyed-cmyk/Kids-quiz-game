@@ -42,6 +42,8 @@ h1{margin:10px 0;}
 .level-btn{background:#6a11cb;color:white;}
 .answer-btn{background:#eee;}
 
+.hidden{display:none;}
+
 .top{
   display:flex;
   justify-content:space-between;
@@ -58,9 +60,10 @@ h1{margin:10px 0;}
   width:32%;
   background:#333;
   color:white;
+  border:none;
+  padding:10px;
+  border-radius:10px;
 }
-
-.hidden{display:none;}
 
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
@@ -96,9 +99,14 @@ h1{margin:10px 0;}
 <!-- LEVEL -->
 <div id="screen2" class="hidden">
   <h3>Select Level</h3>
+
   <button class="btn level-btn" onclick="startGame('easy')">Easy</button>
   <button class="btn level-btn" onclick="startGame('medium')">Medium</button>
   <button class="btn level-btn" onclick="startGame('hard')">Hard</button>
+
+  <button class="btn" style="background:#333;color:white;width:90%" onclick="backToCategory()">
+    ⬅ Back to Category
+  </button>
 </div>
 
 <!-- QUIZ -->
@@ -108,8 +116,8 @@ h1{margin:10px 0;}
 
   <div class="nav">
     <button onclick="prevQ()">⬅ Prev</button>
+    <button onclick="backToLevels()">🔙 Levels</button>
     <button onclick="home()">🏠 Home</button>
-    <button onclick="nextQ()">Next ➡</button>
   </div>
 </div>
 
@@ -121,7 +129,7 @@ let category="", level="", index=0;
 let stars=0, coins=0;
 let locked=false;
 
-// ================= FIXED QUESTION BANK =================
+// ================= QUESTIONS =================
 const questions={
 gk:{
 easy:[
@@ -131,24 +139,20 @@ easy:[
 ],
 medium:[
 {q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
-{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1}
+{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1}
 ],
 hard:[
-{q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0},
-{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0}
+{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
 ]
 },
 
 english:{
 easy:[
 {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
-{q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0}
+{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0}
 ],
 medium:[
-{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
-{q:"Opposite of big?",a:["Large","Huge","Small","Tall"],c:2}
+{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1}
 ],
 hard:[
 {q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2}
@@ -157,8 +161,7 @@ hard:[
 
 math:{
 easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
-{q:"5 - 2 = ?",a:["2","3","4","5"],c:1}
+{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}
 ],
 medium:[
 {q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
@@ -169,7 +172,7 @@ hard:[
 }
 };
 
-// ================= SAFE SOUND =================
+// ================= SOUND =================
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function beep(freq,time=0.15){
@@ -193,20 +196,25 @@ t==="good"?"🎉😄":
 t==="bad"?"😢":"🙂";
 }
 
-// ================= GAME =================
-
+// ================= NAV =================
 function selectCategory(c){
 category=c;
+index=0;
+stars=0;
+coins=0;
+
+document.getElementById("stars").innerText=0;
+document.getElementById("coins").innerText=0;
+
 document.getElementById("screen1").classList.add("hidden");
 document.getElementById("screen2").classList.remove("hidden");
+
 beep(300);
 }
 
 function startGame(l){
 level=l;
 index=0;
-stars=0;
-coins=0;
 locked=false;
 
 document.getElementById("screen2").classList.add("hidden");
@@ -216,21 +224,37 @@ loadQ();
 beep(400);
 }
 
-// ================= FIXED LOAD =================
+function backToCategory(){
+document.getElementById("screen2").classList.add("hidden");
+document.getElementById("screen1").classList.remove("hidden");
+beep(300);
+}
 
+function backToLevels(){
+document.getElementById("screen3").classList.add("hidden");
+document.getElementById("screen2").classList.remove("hidden");
+beep(300);
+}
+
+function home(){
+document.getElementById("screen3").classList.add("hidden");
+document.getElementById("screen1").classList.remove("hidden");
+beep(300);
+}
+
+// ================= LOAD QUESTION =================
 function loadQ(){
 
-let levelData = questions?.[category]?.[level];
+let list = questions?.[category]?.[level];
 
-if(!levelData || !levelData[index]){
-home();
+if(!list || !list[index]){
+backToCategory();
 return;
 }
 
 locked=false;
 
-let q = levelData[index];
-
+let q = list[index];
 document.getElementById("question").innerText=q.q;
 
 let ansDiv=document.getElementById("answers");
@@ -247,8 +271,7 @@ ansDiv.appendChild(btn);
 setEmoji("neutral");
 }
 
-// ================= FIXED ANSWER =================
-
+// ================= ANSWER =================
 function checkAnswer(sel,correct,btn){
 
 if(locked) return;
@@ -273,14 +296,13 @@ document.getElementById("coins").innerText=coins;
 
 buttons.forEach(b=>b.disabled=true);
 
-// AUTO NEXT SAFE
+// AUTO NEXT
 setTimeout(()=>{
 nextQ();
 },900);
 }
 
-// ================= NAV =================
-
+// ================= NEXT / PREV =================
 function nextQ(){
 let list=questions[category][level];
 
@@ -297,12 +319,6 @@ if(index>0){
 index--;
 loadQ();
 }
-}
-
-function home(){
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-beep(300);
 }
 
 </script>
