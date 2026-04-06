@@ -6,12 +6,12 @@
 <style>
 body{
   margin:0;
-  font-family: Arial;
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
+  font-family:Arial;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
   color:white;
 }
 
-.card, .quizBox{
+.card,.quizBox{
   background:white;
   color:black;
   width:85%;
@@ -20,7 +20,6 @@ body{
   padding:20px;
   border-radius:20px;
   text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 input{
@@ -28,7 +27,6 @@ input{
   padding:12px;
   margin:10px 0;
   border-radius:10px;
-  border:1px solid #ccc;
 }
 
 button{
@@ -36,55 +34,14 @@ button{
   padding:12px;
   margin:8px 0;
   border:none;
-  border-radius:12px;
-  font-size:16px;
+  border-radius:10px;
   background:#2575fc;
   color:white;
   font-weight:bold;
-  transition:0.2s;
 }
 
 button:active{
   transform:scale(0.97);
-}
-
-button:hover{
-  background:#1a5fd1;
-}
-
-/* POPUP FIXED CENTER */
-#popup{
-  display:none;              /* ONLY THIS FIRST */
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-
-  justify-content:center;
-  align-items:center;
-
-  z-index:999999;
-}
-
-.popupBox{
-  background:white;
-  color:black;
-  padding:20px;
-  border-radius:12px;
-  text-align:center;
-  width:260px;
-
-  position:relative;
-  z-index:1000000;   /* ABOVE EVERYTHING */
-}
-
-@keyframes pop{
-  from{transform:scale(0.6); opacity:0;}
-  to{transform:scale(1); opacity:1;}
-}
-
-@keyframes pop{
-  from{transform:scale(0.7); opacity:0;}
-  to{transform:scale(1); opacity:1;}
 }
 </style>
 </head>
@@ -92,14 +49,6 @@ button:hover{
 <body>
 
 <div id="app"></div>
-
-<!-- POPUP -->
-<div id="popup">
-  <div class="popupBox">
-    <h2 id="popupText">Message</h2>
-    <button onclick="closePopup()">OK</button>
-  </div>
-</div>
 
 <script>
 
@@ -109,123 +58,88 @@ let player = "";
 let level = 0;
 let coins = 0;
 
-/* 🎮 50 REAL QUESTIONS */
+/* QUESTIONS */
 let questions = [
-{ q:"Capital of India?", options:["Mumbai","Delhi","Kolkata","Chennai"], answer:1 },
-{ q:"Capital of UK?", options:["London","Paris","Berlin","Rome"], answer:0 },
-{ q:"Largest ocean?", options:["Atlantic","Indian","Pacific","Arctic"], answer:2 },
-{ q:"How many continents?", options:["5","6","7","8"], answer:2 },
-{ q:"National animal of India?", options:["Lion","Tiger","Elephant","Leopard"], answer:1 },
-
-{ q:"12 × 8 = ?", options:["96","88","108","86"], answer:0 },
-{ q:"144 ÷ 12 = ?", options:["10","11","12","13"], answer:2 },
-{ q:"25 × 6 = ?", options:["150","120","140","160"], answer:0 },
-{ q:"225 ÷ 15 = ?", options:["10","12","15","20"], answer:2 },
-{ q:"√144 = ?", options:["10","11","12","13"], answer:2 },
-
-{ q:"Opposite of Brave?", options:["Coward","Strong","Bold","Smart"], answer:0 },
-{ q:"Synonym of Happy?", options:["Sad","Joyful","Angry","Tired"], answer:1 },
-{ q:"Plural of Mouse?", options:["Mouses","Mice","Mouse","Mices"], answer:1 },
-{ q:"He ___ playing football", options:["is","are","am","be"], answer:0 },
-{ q:"Opposite of Fast?", options:["Slow","Quick","Run","Speed"], answer:0 },
-
-{ q:"18 × 7 = ?", options:["126","136","116","146"], answer:0 },
-{ q:"500 - 275 = ?", options:["225","235","215","245"], answer:0 },
-{ q:"20% of 200 = ?", options:["20","30","40","40"], answer:2 },
-{ q:"3/4 of 100 = ?", options:["70","75","80","85"], answer:1 },
-{ q:"9 × 11 = ?", options:["99","89","109","91"], answer:0 }
+{q:"2+2=?",options:["3","4","5","6"],answer:1},
+{q:"Capital of India?",options:["Delhi","Mumbai","Kolkata","Chennai"],answer:0},
+{q:"5×5=?",options:["20","25","30","15"],answer:1},
+{q:"Capital of UK?",options:["London","Paris","Berlin","Rome"],answer:0},
+{q:"10+10=?",options:["10","15","20","25"],answer:2}
 ];
 
-/* START SCREEN */
 function renderStart(){
-  app.innerHTML = `
-    <div class="card">
-      <h1>🎮 Kids Quiz Pro</h1>
-      <input id="name" placeholder="Enter Your Name"/>
-      <button onclick="startGame()">Start</button>
-    </div>
-  `;
+app.innerHTML=`
+<div class="card">
+<h2>🎮 Kids Quiz Pro</h2>
+<input id="name" placeholder="Enter name">
+<button onclick="startGame()">Start</button>
+</div>
+`;
 }
 
 function startGame(){
-  player = document.getElementById("name").value;
+player=document.getElementById("name").value;
 
-  if(!player){
-    showPopup("Enter Name");
-    return;
-  }
-
-  level = 0;
-  coins = 0;
-  loadLevel();
+if(!player){
+alert("Enter name");
+return;
 }
 
-/* QUIZ SCREEN */
+level=0;
+coins=0;
+loadLevel();
+}
+
 function loadLevel(){
-  let q = questions[level];
+let q=questions[level];
 
-  app.innerHTML = `
-    <div class="quizBox">
-      <h3>👤 ${player} | 💰 Coins: ${coins}</h3>
-      <h2>⭐ Level ${level+1}/${questions.length}</h2>
+app.innerHTML=`
+<div class="quizBox">
+<h3>${player} 💰 Coins: ${coins}</h3>
+<h2>Level ${level+1}/${questions.length}</h2>
 
-      <h3>${q.q}</h3>
+<h3>${q.q}</h3>
 
-      ${q.options.map((o,i)=>`
-        <button onclick="answer(${i})">${o}</button>
-      `).join("")}
+${q.options.map((o,i)=>`
+<button onclick="answer(${i})">${o}</button>
+`).join("")}
 
-      <button onclick="prevQuestion()">⬅ Previous</button>
-      <button onclick="renderStart()">🏠 Home</button>
-    </div>
-  `;
+<button onclick="prevQuestion()">⬅ Previous</button>
+<button onclick="renderStart()">🏠 Home</button>
+</div>
+`;
 }
 
-/* ANSWER SYSTEM */
 function answer(i){
-  let q = questions[level];
-
-  if(i === q.answer){
-    coins += 10;
-    showPopup("🎉 Correct +10 coins");
-  } else {
-    showPopup("❌ Wrong!");
-  }
-
-  setTimeout(()=>{
-    level++;
-
-    if(level >= questions.length){
-      showPopup("Game Over! Coins: " + coins);
-      renderStart();
-      return;
-    }
-
-    loadLevel();
-  }, 800);
+if(i === questions[level].answer){
+coins += 10;
+alert("🎉 Correct +10 coins");
+}else{
+alert("❌ Wrong");
 }
 
-/* PREVIOUS QUESTION */
+setTimeout(()=>{
+level++;
+
+if(level >= questions.length){
+alert("Game Over! Coins: " + coins);
+renderStart();
+return;
+}
+
+loadLevel();
+},500);
+}
+
 function prevQuestion(){
-  if(level > 0){
-    level--;
-    loadLevel();
-  } else {
-    showPopup("This is first level");
-  }
+if(level > 0){
+level--;
+loadLevel();
+}else{
+alert("This is first question");
+}
 }
 
-/* POPUP */
-function showPopup(msg){
-  document.getElementById("popupText").innerText = msg;
-  document.getElementById("popup").style.display = "flex";
-}
-
-function closePopup(){
-  document.getElementById("popup").style.display = "none";
-}
-
-/* INIT */
 renderStart();
 
 </script>
