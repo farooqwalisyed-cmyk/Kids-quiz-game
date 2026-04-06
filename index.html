@@ -99,13 +99,12 @@ h1{margin:10px 0;}
 <!-- LEVEL -->
 <div id="screen2" class="hidden">
   <h3>Select Level</h3>
-
   <button class="btn level-btn" onclick="startGame('easy')">Easy</button>
   <button class="btn level-btn" onclick="startGame('medium')">Medium</button>
   <button class="btn level-btn" onclick="startGame('hard')">Hard</button>
 
   <button class="btn" style="background:#333;color:white;width:90%" onclick="backToCategory()">
-    ⬅ Back to Category
+    ⬅ Back
   </button>
 </div>
 
@@ -119,6 +118,18 @@ h1{margin:10px 0;}
     <button onclick="backToLevels()">🔙 Levels</button>
     <button onclick="home()">🏠 Home</button>
   </div>
+
+  <div id="timer" style="margin-top:10px;font-weight:bold;">⏱ 10</div>
+</div>
+
+<!-- RESULT -->
+<div id="screen4" class="hidden">
+  <h2>🎉 Game Completed!</h2>
+  <h3 id="finalScore"></h3>
+  <h3 id="badge"></h3>
+
+  <button class="btn level-btn" onclick="playAgain()">🔁 Play Again</button>
+  <button class="btn category-btn" onclick="home()">🏠 Home</button>
 </div>
 
 </div>
@@ -128,82 +139,54 @@ h1{margin:10px 0;}
 let category="", level="", index=0;
 let stars=0, coins=0;
 let locked=false;
+let shuffledList=[];
+
+let timer;
+let timeLeft=10;
 
 // ================= QUESTIONS =================
-const questions = {
+const questions={
 gk:{
 easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
 {q:"Sun rises in?",a:["West","East","North","South"],c:1},
 {q:"How many days in a week?",a:["5","6","7","8"],c:2},
-{q:"How many legs does a spider have?",a:["6","8","10","12"],c:1},
-{q:"Which is a fruit?",a:["Carrot","Apple","Potato","Onion"],c:1},
-{q:"Which is used to write?",a:["Pencil","Plate","Spoon","Shoes"],c:0},
-{q:"How many colors in rainbow?",a:["5","6","7","8"],c:2},
-{q:"Which animal barks?",a:["Cat","Dog","Cow","Lion"],c:1},
-{q:"Which is hot?",a:["Ice","Fire","Snow","Water"],c:1},
-{q:"Which is planet we live on?",a:["Mars","Earth","Moon","Sun"],c:1}
+{q:"How many legs does a spider have?",a:["6","8","10","12"],c:1}
 ],
-
 medium:[
 {q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
-{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1},
-{q:"Which is a mammal?",a:["Shark","Whale","Crocodile","Fish"],c:1},
-{q:"How many continents?",a:["5","6","7","8"],c:2},
-{q:"Which planet is red?",a:["Earth","Mars","Venus","Jupiter"],c:1},
-{q:"Which gas do we breathe?",a:["Oxygen","Carbon Dioxide","Hydrogen","Nitrogen"],c:0},
-{q:"Which is largest land animal?",a:["Elephant","Tiger","Horse","Lion"],c:0}
+{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1}
 ],
-
 hard:[
 {q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0},
-{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0},
-{q:"Who invented gravity theory?",a:["Newton","Einstein","Tesla","Galileo"],c:0},
-{q:"Earth revolves around?",a:["Moon","Mars","Sun","Venus"],c:2},
-{q:"How many bones in adult body?",a:["206","201","210","196"],c:0}
+{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0}
 ]
 },
 
 english:{
 easy:[
 {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
-{q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0},
-{q:"Opposite of Big?",a:["Large","Small","Huge","Tall"],c:1},
-{q:"Color of sky?",a:["Blue","Green","Red","Pink"],c:0}
+{q:"Opposite of Big?",a:["Small","Large","Huge","Tall"],c:0}
 ],
-
 medium:[
 {q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1},
-{q:"Opposite of Hot?",a:["Warm","Cold","Boil","Fire"],c:1},
-{q:"Synonym of Happy?",a:["Sad","Angry","Joyful","Tired"],c:2},
-{q:"Past of Go?",a:["Gone","Went","Goes","Going"],c:1}
+{q:"Opposite of Hot?",a:["Cold","Warm","Fire","Boil"],c:0}
 ],
-
 hard:[
-{q:"Antonym of Brave?",a:["Coward","Strong","Bold","Fast"],c:0},
-{q:"Correct spelling?",a:["Definately","Definitely","Definetly","Defenitely"],c:1}
+{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}
 ]
 },
 
 math:{
 easy:[
 {q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
-{q:"5 - 2 = ?",a:["2","3","4","5"],c:1},
-{q:"3 × 2 = ?",a:["5","6","7","8"],c:1},
-{q:"10 ÷ 2 = ?",a:["2","5","10","20"],c:1}
+{q:"5 - 2 = ?",a:["2","3","4","5"],c:1}
 ],
-
 medium:[
-{q:"10 × 2 = ?",a:["20","15","25","30"],c:0},
-{q:"20 + 15 = ?",a:["35","30","25","40"],c:0},
-{q:"50 - 20 = ?",a:["20","30","40","10"],c:1}
+{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
 ],
-
 hard:[
-{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1},
-{q:"12 × 12 = ?",a:["144","121","132","124"],c:0}
+{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}
 ]
 }
 };
@@ -212,8 +195,8 @@ hard:[
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function beep(freq,time=0.15){
-let o = audioCtx.createOscillator();
-let g = audioCtx.createGain();
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
 
 o.frequency.value=freq;
 o.type="sine";
@@ -225,9 +208,19 @@ o.start();
 o.stop(audioCtx.currentTime+time);
 }
 
+// ================= SHUFFLE =================
+function shuffle(arr){
+let a=[...arr];
+for(let i=a.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[a[i],a[j]]=[a[j],a[i]];
+}
+return a;
+}
+
 // ================= UI =================
 function setEmoji(t){
-document.getElementById("emoji").innerText =
+document.getElementById("emoji").innerText=
 t==="good"?"🎉😄":
 t==="bad"?"😢":"🙂";
 }
@@ -253,6 +246,8 @@ level=l;
 index=0;
 locked=false;
 
+shuffledList=shuffle(questions[category][level]);
+
 document.getElementById("screen2").classList.add("hidden");
 document.getElementById("screen3").classList.remove("hidden");
 
@@ -260,37 +255,45 @@ loadQ();
 beep(400);
 }
 
-function backToCategory(){
-document.getElementById("screen2").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-beep(300);
+// ================= TIMER =================
+function startTimer(){
+clearInterval(timer);
+timeLeft=10;
+
+timer=setInterval(()=>{
+timeLeft--;
+document.getElementById("timer").innerText="⏱ "+timeLeft;
+
+if(timeLeft<=0){
+clearInterval(timer);
+autoWrong();
+}
+},1000);
 }
 
-function backToLevels(){
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen2").classList.remove("hidden");
-beep(300);
+function autoWrong(){
+if(locked) return;
+locked=true;
+
+setEmoji("bad");
+beep(200);
+
+setTimeout(()=>nextQ(),800);
 }
 
-function home(){
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-beep(300);
-}
-
-// ================= LOAD QUESTION =================
+// ================= LOAD =================
 function loadQ(){
 
-let list = questions?.[category]?.[level];
+let list=shuffledList;
 
 if(!list || !list[index]){
-backToCategory();
+showResult();
 return;
 }
 
 locked=false;
 
-let q = list[index];
+let q=list[index];
 document.getElementById("question").innerText=q.q;
 
 let ansDiv=document.getElementById("answers");
@@ -305,6 +308,8 @@ ansDiv.appendChild(btn);
 });
 
 setEmoji("neutral");
+
+startTimer();
 }
 
 // ================= ANSWER =================
@@ -312,6 +317,8 @@ function checkAnswer(sel,correct,btn){
 
 if(locked) return;
 locked=true;
+
+clearInterval(timer);
 
 let buttons=document.querySelectorAll(".answer-btn");
 
@@ -332,21 +339,18 @@ document.getElementById("coins").innerText=coins;
 
 buttons.forEach(b=>b.disabled=true);
 
-// AUTO NEXT
-setTimeout(()=>{
-nextQ();
-},900);
+setTimeout(()=>nextQ(),900);
 }
 
-// ================= NEXT / PREV =================
+// ================= NEXT =================
 function nextQ(){
-let list=questions[category][level];
+let list=shuffledList;
 
-if(index < list.length-1){
+if(index<list.length-1){
 index++;
 loadQ();
 }else{
-home();
+showResult();
 }
 }
 
@@ -355,6 +359,45 @@ if(index>0){
 index--;
 loadQ();
 }
+}
+
+// ================= RESULT =================
+function showResult(){
+
+document.getElementById("screen3").classList.add("hidden");
+document.getElementById("screen4").classList.remove("hidden");
+
+document.getElementById("finalScore").innerText=
+"⭐ Stars: "+stars+" 💰 Coins: "+coins;
+
+let badge="🌟 GENIUS";
+if(stars>=8) badge="🏆 PRO";
+if(stars>=15) badge="⭐ MASTER";
+
+document.getElementById("badge").innerText=badge;
+
+beep(600);
+}
+
+function playAgain(){
+selectCategory(category);
+document.getElementById("screen4").classList.add("hidden");
+document.getElementById("screen1").classList.remove("hidden");
+}
+
+function backToCategory(){
+document.getElementById("screen2").classList.add("hidden");
+document.getElementById("screen1").classList.remove("hidden");
+}
+
+function backToLevels(){
+document.getElementById("screen3").classList.add("hidden");
+document.getElementById("screen2").classList.remove("hidden");
+}
+
+function home(){
+document.getElementById("screen3").classList.add("hidden");
+document.getElementById("screen1").classList.remove("hidden");
 }
 
 </script>
