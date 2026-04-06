@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz PRO</title>
+<title>Kids Quiz PRO MAX</title>
 
 <style>
 body{
@@ -26,8 +26,6 @@ body{
   text-align:center;
 }
 
-h1{margin:10px 0;}
-
 .btn{
   padding:12px;
   margin:6px;
@@ -36,6 +34,11 @@ h1{margin:10px 0;}
   border-radius:12px;
   font-size:16px;
   cursor:pointer;
+  transition:0.2s;
+}
+
+.btn:active{
+  transform:scale(0.9);
 }
 
 .category-btn{background:#2575fc;color:white;}
@@ -72,6 +75,22 @@ h1{margin:10px 0;}
   font-size:40px;
   margin:10px 0;
 }
+
+/* 🎉 Confetti */
+.confetti{
+position:fixed;
+top:0;
+width:10px;
+height:10px;
+animation:fall 1s linear forwards;
+}
+
+@keyframes fall{
+to{
+transform:translateY(500px) rotate(360deg);
+opacity:0;
+}
+}
 </style>
 </head>
 
@@ -80,56 +99,57 @@ h1{margin:10px 0;}
 <div class="game">
 
 <div class="top">
-<div>⭐ Stars: <span id="stars">0</span></div>
-<div>💰 Coins: <span id="coins">0</span></div>
+<div>⭐ <span id="stars">0</span></div>
+<div>💰 <span id="coins">0</span></div>
 </div>
 
-<h1>Kids Quiz PRO 🎮</h1>
+<h2>Kids Quiz PRO MAX 🎮</h2>
+
+<button onclick="toggleSound()">🔊 Sound</button>
 
 <div id="emoji">🙂</div>
 
 <!-- CATEGORY -->
 <div id="screen1">
-  <h3>Select Category</h3>
-  <button class="btn category-btn" onclick="selectCategory('gk')">General Knowledge</button>
-  <button class="btn category-btn" onclick="selectCategory('english')">English</button>
-  <button class="btn category-btn" onclick="selectCategory('math')">Math</button>
+<h3>Select Category</h3>
+<button class="btn category-btn" onclick="selectCategory('gk')">GK</button>
+<button class="btn category-btn" onclick="selectCategory('english')">English</button>
+<button class="btn category-btn" onclick="selectCategory('math')">Math</button>
 </div>
 
 <!-- LEVEL -->
 <div id="screen2" class="hidden">
-  <h3>Select Level</h3>
-  <button class="btn level-btn" onclick="startGame('easy')">Easy</button>
-  <button class="btn level-btn" onclick="startGame('medium')">Medium</button>
-  <button class="btn level-btn" onclick="startGame('hard')">Hard</button>
+<h3>Select Level</h3>
 
-  <button class="btn" style="background:#333;color:white;width:90%" onclick="backToCategory()">
-    ⬅ Back
-  </button>
+<button id="easyBtn" class="btn level-btn" onclick="startGame('easy')">Easy</button>
+<button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')" disabled>🔒 Medium</button>
+<button id="hardBtn" class="btn level-btn" onclick="startGame('hard')" disabled>🔒 Hard</button>
+
+<button class="btn" onclick="backToCategory()">⬅ Back</button>
 </div>
 
 <!-- QUIZ -->
 <div id="screen3" class="hidden">
-  <h3 id="question"></h3>
-  <div id="answers"></div>
+<h3 id="question"></h3>
+<div id="answers"></div>
 
-  <div class="nav">
-    <button onclick="prevQ()">⬅ Prev</button>
-    <button onclick="backToLevels()">🔙 Levels</button>
-    <button onclick="home()">🏠 Home</button>
-  </div>
+<div class="nav">
+<button onclick="prevQ()">⬅</button>
+<button onclick="backToLevels()">🔙</button>
+<button onclick="home()">🏠</button>
+</div>
 
-  <div id="timer" style="margin-top:10px;font-weight:bold;">⏱ 10</div>
+<div id="timer">⏱ 10</div>
 </div>
 
 <!-- RESULT -->
 <div id="screen4" class="hidden">
-  <h2>🎉 Game Completed!</h2>
-  <h3 id="finalScore"></h3>
-  <h3 id="badge"></h3>
+<h2>🎉 Completed!</h2>
+<h3 id="finalScore"></h3>
+<h3 id="badge"></h3>
 
-  <button class="btn level-btn" onclick="playAgain()">🔁 Play Again</button>
-  <button class="btn category-btn" onclick="home()">🏠 Home</button>
+<button class="btn level-btn" onclick="playAgain()">🔁 Play Again</button>
+<button class="btn category-btn" onclick="home()">🏠 Home</button>
 </div>
 
 </div>
@@ -138,49 +158,42 @@ h1{margin:10px 0;}
 
 let category="", level="", index=0;
 let stars=0, coins=0;
-let locked=false;
 let shuffledList=[];
+let locked=false;
 
 let timer;
 let timeLeft=10;
 
-// ================= QUESTIONS =================
+let soundOn=true;
+
+// QUESTIONS
 const questions={
 gk:{
 easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"How many days in a week?",a:["5","6","7","8"],c:2},
-{q:"How many legs does a spider have?",a:["6","8","10","12"],c:1}
+{q:"Sun rises in?",a:["West","East","North","South"],c:1}
 ],
 medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1}
+{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}
 ],
 hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0},
-{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0}
+{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
 ]
 },
-
 english:{
 easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"Opposite of Big?",a:["Small","Large","Huge","Tall"],c:0}
+{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}
 ],
 medium:[
-{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1},
-{q:"Opposite of Hot?",a:["Cold","Warm","Fire","Boil"],c:0}
+{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1}
 ],
 hard:[
 {q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}
 ]
 },
-
 math:{
 easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
-{q:"5 - 2 = ?",a:["2","3","4","5"],c:1}
+{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}
 ],
 medium:[
 {q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
@@ -191,24 +204,26 @@ hard:[
 }
 };
 
-// ================= SOUND =================
+// SOUND
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function beep(freq,time=0.15){
+if(!soundOn) return;
 let o=audioCtx.createOscillator();
 let g=audioCtx.createGain();
-
 o.frequency.value=freq;
-o.type="sine";
-
 o.connect(g);
 g.connect(audioCtx.destination);
-
 o.start();
 o.stop(audioCtx.currentTime+time);
 }
 
-// ================= SHUFFLE =================
+function toggleSound(){
+soundOn=!soundOn;
+event.target.innerText = soundOn ? "🔊 Sound" : "🔇 Mute";
+}
+
+// SHUFFLE
 function shuffle(arr){
 let a=[...arr];
 for(let i=a.length-1;i>0;i--){
@@ -218,44 +233,35 @@ let j=Math.floor(Math.random()*(i+1));
 return a;
 }
 
-// ================= UI =================
+// UI
 function setEmoji(t){
 document.getElementById("emoji").innerText=
-t==="good"?"🎉😄":
-t==="bad"?"😢":"🙂";
+t==="good"?"🎉":"😢";
 }
 
-// ================= NAV =================
+// NAV
 function selectCategory(c){
 category=c;
-index=0;
-stars=0;
-coins=0;
-
+stars=0; coins=0;
 document.getElementById("stars").innerText=0;
 document.getElementById("coins").innerText=0;
 
 document.getElementById("screen1").classList.add("hidden");
 document.getElementById("screen2").classList.remove("hidden");
-
-beep(300);
 }
 
 function startGame(l){
 level=l;
 index=0;
-locked=false;
-
 shuffledList=shuffle(questions[category][level]);
 
 document.getElementById("screen2").classList.add("hidden");
 document.getElementById("screen3").classList.remove("hidden");
 
 loadQ();
-beep(400);
 }
 
-// ================= TIMER =================
+// TIMER
 function startTimer(){
 clearInterval(timer);
 timeLeft=10;
@@ -274,26 +280,21 @@ autoWrong();
 function autoWrong(){
 if(locked) return;
 locked=true;
-
 setEmoji("bad");
 beep(200);
-
 setTimeout(()=>nextQ(),800);
 }
 
-// ================= LOAD =================
+// LOAD
 function loadQ(){
-
-let list=shuffledList;
-
-if(!list || !list[index]){
+if(!shuffledList[index]){
 showResult();
 return;
 }
 
 locked=false;
 
-let q=list[index];
+let q=shuffledList[index];
 document.getElementById("question").innerText=q.q;
 
 let ansDiv=document.getElementById("answers");
@@ -307,27 +308,22 @@ btn.onclick=()=>checkAnswer(i,q.c,btn);
 ansDiv.appendChild(btn);
 });
 
-setEmoji("neutral");
-
 startTimer();
 }
 
-// ================= ANSWER =================
+// ANSWER
 function checkAnswer(sel,correct,btn){
-
 if(locked) return;
 locked=true;
 
 clearInterval(timer);
 
-let buttons=document.querySelectorAll(".answer-btn");
-
 if(sel===correct){
 btn.classList.add("correct");
-stars++;
-coins+=5;
+stars++; coins+=5;
 setEmoji("good");
 beep(800);
+showConfetti();
 }else{
 btn.classList.add("wrong");
 setEmoji("bad");
@@ -337,21 +333,25 @@ beep(200);
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
-buttons.forEach(b=>b.disabled=true);
-
-setTimeout(()=>nextQ(),900);
+setTimeout(()=>nextQ(),800);
 }
 
-// ================= NEXT =================
-function nextQ(){
-let list=shuffledList;
+// CONFETTI
+function showConfetti(){
+for(let i=0;i<20;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),1000);
+}
+}
 
-if(index<list.length-1){
+// NEXT
+function nextQ(){
 index++;
 loadQ();
-}else{
-showResult();
-}
 }
 
 function prevQ(){
@@ -361,26 +361,25 @@ loadQ();
 }
 }
 
-// ================= RESULT =================
+// RESULT
 function showResult(){
-
 document.getElementById("screen3").classList.add("hidden");
 document.getElementById("screen4").classList.remove("hidden");
 
 document.getElementById("finalScore").innerText=
-"⭐ Stars: "+stars+" 💰 Coins: "+coins;
+"⭐ "+stars+" 💰 "+coins;
 
 let badge="🌟 GENIUS";
-if(stars>=8) badge="🏆 PRO";
-if(stars>=15) badge="⭐ MASTER";
+if(stars>=3) document.getElementById("mediumBtn").disabled=false;
+if(stars>=6) document.getElementById("hardBtn").disabled=false;
+
+if(stars>=6) badge="⭐ MASTER";
+else if(stars>=3) badge="🏆 PRO";
 
 document.getElementById("badge").innerText=badge;
-
-beep(600);
 }
 
 function playAgain(){
-selectCategory(category);
 document.getElementById("screen4").classList.add("hidden");
 document.getElementById("screen1").classList.remove("hidden");
 }
