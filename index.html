@@ -300,9 +300,9 @@ if(!currentQ){
 
 levelIndex++;
 
-if(levelIndex>=levels.length){
-alert("🎉 Game Completed!");
-levelIndex=0;
+if(levelIndex >= levels.length){
+gameOver();
+return;   // 🔥 STOP GAME HERE
 }
 
 showLevelStart();
@@ -374,6 +374,19 @@ if(soundOn) document.getElementById("wrongSound").play();
 function playLevelSound(){
 if(soundOn) document.getElementById("levelSound").play();
 }
+  function gameOver(){
+
+document.getElementById("question").innerHTML =
+"🎉 GAME COMPLETED!";
+
+document.getElementById("options").innerHTML =
+"<h3>You finished all levels 🏆</h3>";
+
+document.getElementById("levelText").innerText =
+"COMPLETED";
+
+document.getElementById("bar").style.width = "100%";
+  }
 
 </script>
 
