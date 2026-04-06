@@ -91,176 +91,61 @@ let score = 0;
 let questions = [
 
 /* 🟢 GK (1–18) */
-{
-  q: "Capital of India?",
-  options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
-  answer: 1
-},
-{
-  q: "Which planet is known as Red Planet?",
-  options: ["Earth", "Mars", "Venus", "Jupiter"],
-  answer: 1
-},
-{
-  q: "How many continents are there?",
-  options: ["5", "6", "7", "8"],
-  answer: 2
-},
-{
-  q: "Largest ocean in the world?",
-  options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-  answer: 3
-},
-{
-  q: "National animal of India?",
-  options: ["Lion", "Tiger", "Elephant", "Leopard"],
-  answer: 1
-},
-{
-  q: "Sun rises in which direction?",
-  options: ["West", "East", "North", "South"],
-  answer: 1
-},
-{
-  q: "How many days in a leap year?",
-  options: ["365", "366", "364", "360"],
-  answer: 1
-},
-{
-  q: "Which is national bird of India?",
-  options: ["Peacock", "Parrot", "Sparrow", "Crow"],
-  answer: 0
-},
-{
-  q: "Which gas do plants use?",
-  options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
-  answer: 2
-},
-{
-  q: "Water freezes at?",
-  options: ["0°C", "10°C", "100°C", "50°C"],
-  answer: 0
-},
+{ q:"Capital of India?", options:["Mumbai","Delhi","Kolkata","Chennai"], answer:1 },
+{ q:"Capital of UK?", options:["London","Paris","Berlin","Rome"], answer:0 },
+{ q:"Largest ocean?", options:["Atlantic","Indian","Pacific","Arctic"], answer:2 },
+{ q:"How many continents?", options:["5","6","7","8"], answer:2 },
+{ q:"National animal of India?", options:["Lion","Tiger","Elephant","Leopard"], answer:1 },
+{ q:"Sun rises in?", options:["West","East","North","South"], answer:1 },
+{ q:"Water freezes at?", options:["0°C","10°C","100°C","-10°C"], answer:0 },
+{ q:"National bird of India?", options:["Peacock","Parrot","Crow","Sparrow"], answer:0 },
+{ q:"Which planet is Red Planet?", options:["Earth","Mars","Venus","Jupiter"], answer:1 },
+{ q:"How many days in a leap year?", options:["365","366","364","360"], answer:1 },
+{ q:"Which gas do plants use?", options:["Oxygen","Carbon Dioxide","Nitrogen","Hydrogen"], answer:1 },
+{ q:"Largest country by area?", options:["India","USA","Russia","China"], answer:2 },
+{ q:"Currency of India?", options:["Dollar","Rupee","Euro","Yen"], answer:1 },
+{ q:"Which is our national flower?", options:["Rose","Lotus","Lily","Tulip"], answer:1 },
+{ q:"Which organ pumps blood?", options:["Lungs","Heart","Brain","Liver"], answer:1 },
+{ q:"How many sides in triangle?", options:["3","4","5","6"], answer:0 },
+{ q:"Which is primary color?", options:["Green","Red","Purple","Pink"], answer:1 },
+{ q:"Which is nearest star?", options:["Moon","Sun","Mars","Venus"], answer:1 },
 
-/* 🔵 MATH (CLASS 5/6/7 LEVEL) */
-{
-  q: "12 × 8 = ?",
-  options: ["96", "88", "108", "86"],
-  answer: 0
-},
-{
-  q: "144 ÷ 12 = ?",
-  options: ["10", "11", "12", "13"],
-  answer: 2
-},
-{
-  q: "25 × 6 = ?",
-  options: ["150", "120", "160", "140"],
-  answer: 0
-},
-{
-  q: "225 ÷ 15 = ?",
-  options: ["10", "12", "15", "20"],
-  answer: 2
-},
-{
-  q: "√144 = ?",
-  options: ["10", "11", "12", "13"],
-  answer: 2
-},
-{
-  q: "35 × 4 = ?",
-  options: ["120", "140", "150", "160"],
-  answer: 1
-},
-{
-  q: "48 ÷ 6 = ?",
-  options: ["6", "7", "8", "9"],
-  answer: 2
-},
-{
-  q: "15² = ?",
-  options: ["225", "250", "200", "275"],
-  answer: 0
-},
-{
-  q: "18 × 7 = ?",
-  options: ["126", "136", "116", "146"],
-  answer: 0
-},
-{
-  q: "500 - 275 = ?",
-  options: ["225", "235", "215", "245"],
-  answer: 0
-},
-{
-  q: "What is 20% of 200?",
-  options: ["20", "30", "40", "50"],
-  answer: 2
-},
-{
-  q: "3/4 of 100 = ?",
-  options: ["70", "75", "80", "85"],
-  answer: 1
-},
-{
-  q: "9 × 11 = ?",
-  options: ["99", "89", "109", "91"],
-  answer: 0
-},
+/* 🔵 MATH (18–35) */
+{ q:"12 × 8 = ?", options:["96","88","108","86"], answer:0 },
+{ q:"144 ÷ 12 = ?", options:["10","11","12","13"], answer:2 },
+{ q:"25 × 6 = ?", options:["150","120","140","160"], answer:0 },
+{ q:"225 ÷ 15 = ?", options:["10","12","15","20"], answer:2 },
+{ q:"√144 = ?", options:["10","11","12","13"], answer:2 },
+{ q:"35 × 4 = ?", options:["120","140","150","160"], answer:1 },
+{ q:"48 ÷ 6 = ?", options:["6","7","8","9"], answer:2 },
+{ q:"15² = ?", options:["225","250","200","275"], answer:0 },
+{ q:"18 × 7 = ?", options:["126","136","116","146"], answer:0 },
+{ q:"500 - 275 = ?", options:["225","235","215","245"], answer:0 },
+{ q:"20% of 200 = ?", options:["20","30","40","40"], answer:2 },
+{ q:"3/4 of 100 = ?", options:["70","75","80","85"], answer:1 },
+{ q:"9 × 11 = ?", options:["99","89","109","91"], answer:0 },
+{ q:"64 ÷ 8 = ?", options:["6","7","8","9"], answer:2 },
+{ q:"17 + 29 = ?", options:["46","45","44","47"], answer:0 },
+{ q:"1000 ÷ 25 = ?", options:["40","45","50","35"], answer:0 },
+{ q:"13 × 7 = ?", options:["91","81","71","101"], answer:0 },
+{ q:"√81 = ?", options:["7","8","9","10"], answer:2 },
 
-/* 🟡 ENGLISH */
-{
-  q: "Opposite of Brave?",
-  options: ["Strong", "Coward", "Bold", "Smart"],
-  answer: 1
-},
-{
-  q: "Synonym of Happy?",
-  options: ["Sad", "Joyful", "Angry", "Tired"],
-  answer: 1
-},
-{
-  q: "Plural of Mouse?",
-  options: ["Mouses", "Mice", "Mouse", "Mices"],
-  answer: 1
-},
-{
-  q: "A noun is?",
-  options: ["Action", "Name of person/place", "Verb", "Adjective"],
-  answer: 1
-},
-{
-  q: "He ___ playing football.",
-  options: ["is", "are", "am", "be"],
-  answer: 0
-},
-{
-  q: "Opposite of Easy?",
-  options: ["Simple", "Hard", "Light", "Soft"],
-  answer: 1
-},
-{
-  q: "Verb means?",
-  options: ["Action word", "Name", "Place", "Thing"],
-  answer: 0
-},
-{
-  q: "Past tense of Go?",
-  options: ["Goed", "Gone", "Went", "Going"],
-  answer: 2
-},
-{
-  q: "Article in English?",
-  options: ["a, an, the", "is, are", "he, she", "run, jump"],
-  answer: 0
-},
-{
-  q: "Opposite of Fast?",
-  options: ["Quick", "Slow", "Run", "Speed"],
-  answer: 1
-}
-];
+/* 🟡 ENGLISH (35–50) */
+{ q:"Opposite of Brave?", options:["Coward","Strong","Bold","Smart"], answer:0 },
+{ q:"Synonym of Happy?", options:["Sad","Joyful","Angry","Tired"], answer:1 },
+{ q:"Plural of Mouse?", options:["Mouses","Mice","Mouse","Mices"], answer:1 },
+{ q:"A noun is?", options:["Action","Name","Verb","Adjective"], answer:1 },
+{ q:"He ___ playing football", options:["is","are","am","be"], answer:0 },
+{ q:"Opposite of Easy?", options:["Hard","Simple","Light","Soft"], answer:0 },
+{ q:"Past tense of Go?", options:["Gone","Went","Goed","Going"], answer:1 },
+{ q:"Verb means?", options:["Action word","Name","Place","Thing"], answer:0 },
+{ q:"Article in English?", options:["a, an, the","is, are","he, she","run"], answer:0 },
+{ q:"Opposite of Fast?", options:["Slow","Quick","Run","Speed"], answer:0 },
+{ q:"Synonym of Big?", options:["Large","Small","Tiny","Weak"], answer:0 },
+{ q:"Opposite of Hot?", options:["Cold","Warm","Boiling","Dry"], answer:0 },
+{ q:"She ___ a doctor", options:["is","are","am","be"], answer:0 },
+{ q:"What is pronoun?", options:["Name word","Action word","Replacement of noun","Place"], answer:2 },
+{ q:"Capital letter is used for?", options:["Start sentence","End","Middle","None"], answer:0 }
 ];
 
 /* NAME SCREEN */
