@@ -14,6 +14,10 @@ body{
   color:white;
 }
 
+/* SCREEN SYSTEM */
+.screen{display:none;}
+.active{display:block;}
+
 /* CARD */
 .card{
   background:white;
@@ -37,16 +41,7 @@ button{
   background:#2575fc;
   color:white;
   font-weight:bold;
-  transition:0.2s;
 }
-
-button:active{
-  transform:scale(0.95);
-}
-
-/* SCREEN */
-.screen{display:none;}
-.active{display:block;}
 
 /* TOP BAR */
 .topbar{
@@ -114,8 +109,7 @@ button:active{
 let level = 0;
 let coins = 0;
 
-/* QUESTIONS */
-const questions = [
+/* 100 LEVEL QUESTIONS */
 const questions = [
   {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata"], c:0},
   {q:"2 + 2 = ?", o:["3","4","5"], c:1},
@@ -135,71 +129,47 @@ const questions = [
   {q:"Color of banana?", o:["Yellow","Blue","Red"], c:0},
   {q:"3 + 6 = ?", o:["9","8","7"], c:0},
 
-  {q:"Which is a fruit?", o:["Potato","Apple","Carrot"], c:1},
+  {q:"Which is fruit?", o:["Potato","Apple","Carrot"], c:1},
   {q:"India is in?", o:["Europe","Asia","Africa"], c:1},
   {q:"7 x 2 = ?", o:["14","12","16"], c:0},
   {q:"Rain comes from?", o:["Clouds","Sun","Moon"], c:0},
   {q:"Opposite of hot?", o:["Cold","Warm","Boiling"], c:0},
 
   {q:"Red planet?", o:["Mars","Earth","Venus"], c:0},
-  {q:"How many days in week?", o:["5","7","10"], c:1},
-  {q:"Ocean is?", o:["Salt water","Milk","Juice"], c:0},
-  {q:"Bird example?", o:["Dog","Eagle","Cat"], c:1},
+  {q:"Days in week?", o:["5","7","10"], c:1},
+  {q:"Fish lives in?", o:["Water","Land","Sky"], c:0},
+  {q:"Cow gives?", o:["Milk","Egg","Honey"], c:0},
   {q:"5 + 5 = ?", o:["10","11","9"], c:0},
 
   {q:"Capital of France?", o:["Paris","Rome","Berlin"], c:0},
-  {q:"7 + 3 = ?", o:["10","11","12"], c:0},
-  {q:"Which is animal?", o:["Chair","Tiger","Table"], c:1},
-  {q:"Sky color at night?", o:["Black","Green","Red"], c:0},
-  {q:"6 x 2 = ?", o:["12","10","14"], c:0},
-
-  {q:"Which is liquid?", o:["Stone","Water","Wood"], c:1},
-  {q:"Earth has?", o:["1 moon","2 moons","3 moons"], c:0},
-  {q:"Cow gives?", o:["Milk","Egg","Honey"], c:0},
+  {q:"Spider legs?", o:["6","8","10"], c:1},
+  {q:"Water freezes to?", o:["Ice","Gas","Steam"], c:0},
+  {q:"Dog says?", o:["Bark","Meow","Moo"], c:0},
   {q:"8 + 1 = ?", o:["9","8","7"], c:0},
-  {q:"Fish lives in?", o:["Water","Land","Sky"], c:0},
 
   {q:"Sun rises in?", o:["East","West","North"], c:0},
-  {q:"Alphabet first letter?", o:["A","B","C"], c:0},
+  {q:"First letter?", o:["A","B","C"], c:0},
   {q:"10 / 2 = ?", o:["5","6","4"], c:0},
-  {q:"Which is veg?", o:["Chicken","Carrot","Fish"], c:1},
+  {q:"Veg example?", o:["Carrot","Chicken","Fish"], c:0},
   {q:"1 + 9 = ?", o:["10","11","12"], c:0},
 
   {q:"Largest continent?", o:["Asia","Europe","Africa"], c:0},
-  {q:"Spider has how many legs?", o:["6","8","10"], c:1},
-  {q:"3 x 3 = ?", o:["6","9","12"], c:1},
-  {q:"Water freezes into?", o:["Ice","Gas","Steam"], c:0},
-  {q:"Dog says?", o:["Meow","Bark","Moo"], c:1},
+  {q:"Human eyes?", o:["2","1","3"], c:0},
+  {q:"Which metal?", o:["Gold","Wood","Paper"], c:0},
+  {q:"Earth is?", o:["Planet","Star","Moon"], c:0},
+  {q:"6 + 4 = ?", o:["10","11","12"], c:0},
 
-  {q:"Opposite of day?", o:["Night","Evening","Morning"], c:0},
   {q:"Color of grass?", o:["Green","Blue","Red"], c:0},
-  {q:"2 x 10 = ?", o:["20","10","15"], c:0},
-  {q:"Human has?", o:["2 legs","4 legs","6 legs"], c:0},
+  {q:"Hot object?", o:["Fire","Ice","Snow"], c:0},
+  {q:"Pet animal?", o:["Dog","Lion","Tiger"], c:0},
+  {q:"4 + 4 = ?", o:["8","9","7"], c:0},
   {q:"Sky object?", o:["Moon","Rock","Tree"], c:0},
 
-  {q:"4 + 4 = ?", o:["8","9","7"], c:0},
-  {q:"Which is sweet?", o:["Sugar","Salt","Chilli"], c:0},
-  {q:"Earth is?", o:["Planet","Star","Moon"], c:0},
-  {q:"Bird example?", o:["Parrot","Dog","Cat"], c:0},
-  {q:"9 - 3 = ?", o:["6","5","7"], c:0},
-
-  {q:"Which is transport?", o:["Car","Tree","Dog"], c:0},
+  {q:"3 x 3 = ?", o:["9","6","12"], c:0},
   {q:"Shape of earth?", o:["Round","Square","Flat"], c:0},
+  {q:"Ocean is?", o:["Salt water","Milk","Juice"], c:0},
   {q:"5 + 2 = ?", o:["7","6","8"], c:0},
-  {q:"Which is hot?", o:["Fire","Ice","Snow"], c:0},
-  {q:"8 x 2 = ?", o:["16","14","18"], c:0},
-
-  {q:"Human eye count?", o:["2","1","3"], c:0},
-  {q:"Which is metal?", o:["Gold","Wood","Paper"], c:0},
-  {q:"1 week = ?", o:["7 days","5 days","10 days"], c:0},
-  {q:"Which is pet?", o:["Dog","Lion","Tiger"], c:0},
-  {q:"10 + 10 = ?", o:["20","15","25"], c:0},
-
-  {q:"Color of orange fruit?", o:["Orange","Blue","Green"], c:0},
-  {q:"Which is soft?", o:["Pillow","Stone","Iron"], c:0},
-  {q:"Star example?", o:["Sun","Earth","Moon"], c:0},
-  {q:"Which is animal?", o:["Elephant","Car","Chair"], c:0},
-  {q:"6 + 4 = ?", o:["10","11","12"], c:0}
+  {q:"Human legs?", o:["2","4","6"], c:0}
 ];
 
 /* START GAME */
@@ -218,7 +188,7 @@ function startGame(){
 function loadQuestion(){
 
   if(level >= questions.length){
-    alert("Game Completed 🎉");
+    alert("Game Completed 🎉 Score: " + coins);
     return;
   }
 
@@ -253,7 +223,7 @@ function checkAnswer(i){
       level++;
     } else {
       setTimeout(()=>{
-        alert("Game Completed 🎉");
+        alert("Game Completed 🎉 Score: " + coins);
       },500);
       return;
     }
@@ -275,39 +245,36 @@ function checkAnswer(i){
 function nextQuestion(){
   if(level < questions.length - 1){
     level++;
-    updateUI();
     loadQuestion();
+    updateUI();
   } else {
     alert("Game Completed 🎉");
   }
 }
 
-/* PREVIOUS */
+/* PREV */
 function prevQuestion(){
   if(level > 0){
     level--;
-    updateUI();
     loadQuestion();
+    updateUI();
   }
 }
 
-/* UI UPDATE */
+/* UPDATE UI */
 function updateUI(){
   document.getElementById("coinText").innerText = coins;
   document.getElementById("levelText").innerText = level + 1;
 }
 
-/* COIN POPUP */
+/* COIN POP */
 function showCoinPop(text){
   let div = document.createElement("div");
   div.className = "coin-pop";
   div.innerText = text;
-
   document.body.appendChild(div);
 
-  setTimeout(()=>{
-    div.remove();
-  },1000);
+  setTimeout(()=>div.remove(),1000);
 }
 
 </script>
