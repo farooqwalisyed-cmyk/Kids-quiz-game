@@ -25,16 +25,6 @@ body{
   box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
-/* INPUT */
-input{
-  width:90%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:16px;
-}
-
 /* BUTTON */
 button{
   width:90%;
@@ -46,226 +36,172 @@ button{
   background:#2575fc;
   color:white;
   font-weight:bold;
-  transition: all 0.2s ease;
+  transition:0.2s;
 }
 
 button:active{
-  transform: scale(0.95);
+  transform:scale(0.95);
 }
 
-/* OPTIONS */
-.option{
-  width:100%;
-}
+/* SCREENS */
+.screen{display:none;}
+.active{display:block;}
 
 /* TOP BAR */
 .topbar{
   display:flex;
   justify-content:space-between;
   padding:10px;
-  font-size:14px;
 }
 
-/* HIDE SCREENS */
-.screen{
-  display:none;
-}
-.active{
-  display:block;
-}
-  
+/* ANIMATIONS */
+.correct{background:#4caf50 !important;}
+.wrong{background:#f44336 !important;}
 
-.card, #quizScreen{
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform: translateY(20px);}
-  to{opacity:1; transform: translateY(0);}
-}
-
+/* COIN POP */
 .coin-pop{
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: gold;
-  color: black;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: bold;
-  animation: pop 1s ease forwards;
-  z-index: 9999;
+  position:fixed;
+  top:20%;
+  left:50%;
+  transform:translateX(-50%);
+  background:gold;
+  color:black;
+  padding:10px 20px;
+  border-radius:20px;
+  font-weight:bold;
+  animation:pop 1s ease forwards;
+  z-index:9999;
 }
 
 @keyframes pop{
-  0%{opacity:0; transform: translate(-50%, 0);}
-  30%{opacity:1; transform: translate(-50%, -20px);}
-  100%{opacity:0; transform: translate(-50%, -60px);}
-}
-
-.correct{
-  animation: correctAnim 0.4s;
-}
-
-.wrong{
-  animation: wrongAnim 0.4s;
-}
-
-@keyframes correctAnim{
-  0%{background: white;}
-  50%{background: #4caf50;}
-  100%{background: white;}
-}
-
-@keyframes wrongAnim{
-  0%{background: white;}
-  50%{background: #f44336;}
-  100%{background: white;}
+  0%{transform:translate(-50%,0) scale(0);opacity:0;}
+  50%{transform:translate(-50%,-20px) scale(1.2);opacity:1;}
+  100%{transform:translate(-50%,-40px) scale(1);opacity:0;}
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP INFO -->
-<div class="topbar">
-  <div id="userInfo">👤 Player</div>
-  <div id="coinInfo">💰 Coins: 0</div>
+<!-- HOME -->
+<div id="home" class="screen active card">
+  <h1>🎮 Kids Quiz Pro</h1>
+  <button onclick="startGame()">Start Game</button>
 </div>
 
-<!-- NAME SCREEN -->
-<div id="nameScreen" class="card screen active">
-  <h2>Enter Your Name</h2>
-  <input id="nameInput" placeholder="Your Name">
-  <button onclick="startGame()">Start</button>
-</div>
+<!-- GAME -->
+<div id="game" class="screen card">
 
-<!-- QUIZ SCREEN -->
-<div id="quizScreen" class="card screen">
-  <h2 id="levelText">Level 1</h2>
-  <h3 id="question">Question</h3>
+  <div class="topbar">
+    <div>Level: <span id="levelText">1</span></div>
+    <div>Coins: <span id="coinText">0</span></div>
+  </div>
+
+  <h2 id="question">Question</h2>
 
   <div id="options"></div>
 
-  <button onclick="prevQuestion()">⬅ Previous</button>
+  <button onclick="prevQuestion()">⬅ Prev</button>
   <button onclick="nextQuestion()">Next ➡</button>
-  <button onclick="goHome()">🏠 Home</button>
 </div>
 
 <script>
-let userName = "";
 let level = 0;
 let coins = 0;
 
-/* 200 LEVEL QUESTIONS (sample + expandable system) */
 const questions = [
-  {q:"Capital of UK?", a:["London","Paris","Berlin","Rome"], c:0},
-  {q:"2 + 2 = ?", a:["3","4","5","6"], c:1},
-  {q:"Spell Apple", a:["Aple","Apple","Appl","Apll"], c:1},
-  {q:"5 x 3 = ?", a:["15","10","20","25"], c:0},
-  {q:"Capital of India?", a:["Delhi","Mumbai","Kolkata","Chennai"], c:0}
+  {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata"], c:0},
+  {q:"2 + 2 = ?", o:["3","4","5"], c:1},
+  {q:"Apple is a?", o:["Fruit","Animal","Car"], c:0},
+  {q:"Color of sky?", o:["Blue","Red","Green"], c:0},
+  {q:"5 + 3 = ?", o:["6","7","8"], c:2}
 ];
 
-/* LOAD QUESTION */
-function loadQuestion(){
-  let q = questions[level % questions.length];
+function startGame(){
+  document.getElementById("home").classList.remove("active");
+  document.getElementById("game").classList.add("active");
+  loadQuestion();
+}
 
-  document.getElementById("levelText").innerText = "Level " + (level+1);
+function loadQuestion(){
+  let q = questions[level];
+
+  document.getElementById("levelText").innerText = level+1;
   document.getElementById("question").innerText = q.q;
 
-  let optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
+  let box = document.getElementById("options");
+  box.innerHTML = "";
 
-  q.a.forEach((opt,i)=>{
+  q.o.forEach((opt,i)=>{
     let btn = document.createElement("button");
     btn.innerText = opt;
-    btn.className = "option";
     btn.onclick = ()=>checkAnswer(i);
-    optionsDiv.appendChild(btn);
+    box.appendChild(btn);
   });
 }
 
-/* CHECK ANSWER */
 function checkAnswer(i){
-  let q = questions[level % questions.length];
-  let screen = document.getElementById("quizScreen");
+
+  if(level >= questions.length){
+    alert("Game Completed 🎉");
+    return;
+  }
+
+  let q = questions[level];
+  let screen = document.getElementById("game");
 
   if(i === q.c){
     coins += 10;
-    level++;
-
-    // green flash
+    showCoin("+10 Coins 🎉");
     screen.classList.add("correct");
 
-    // coin popup
-    showCoinPop("+10 Coins 🎉");
-  } 
-  else {
-    // red flash
+    if(level < questions.length - 1){
+      level++;
+    }
+  } else {
     screen.classList.add("wrong");
   }
 
-  // remove animation after short time
   setTimeout(()=>{
     screen.classList.remove("correct");
     screen.classList.remove("wrong");
-  }, 400);
+  },400);
 
   updateUI();
   loadQuestion();
 }
 
-/* NEXT */
 function nextQuestion(){
-  level++;
-  updateUI();
-  loadQuestion();
-}
-  function showCoinPop(text){
-  let div = document.createElement("div");
-  div.className = "coin-pop";
-  div.innerText = text;
-
-  document.body.appendChild(div);
-
-  setTimeout(()=>{
-    div.remove();
-  }, 1000);
+  if(level < questions.length - 1){
+    level++;
+    loadQuestion();
+    updateUI();
+  } else {
+    alert("Game Completed 🎉");
   }
+}
 
-/* PREVIOUS */
 function prevQuestion(){
   if(level > 0){
     level--;
-    updateUI();
     loadQuestion();
+    updateUI();
   }
 }
 
-/* HOME */
-function goHome(){
-  document.getElementById("nameScreen").classList.add("active");
-  document.getElementById("quizScreen").classList.remove("active");
-}
-
-/* START GAME */
-function startGame(){
-  userName = document.getElementById("nameInput").value || "Player";
-
-  document.getElementById("userInfo").innerText = "👤 " + userName;
-
-  document.getElementById("nameScreen").classList.remove("active");
-  document.getElementById("quizScreen").classList.add("active");
-
-  loadQuestion();
-  updateUI();
-}
-
-/* UPDATE TOP BAR */
 function updateUI(){
-  document.getElementById("coinInfo").innerText = "💰 Coins: " + coins;
+  document.getElementById("coinText").innerText = coins;
 }
+
+function showCoin(text){
+  let div = document.createElement("div");
+  div.className = "coin-pop";
+  div.innerText = text;
+  document.body.appendChild(div);
+
+  setTimeout(()=>div.remove(),1000);
+}
+
 </script>
 
 </body>
