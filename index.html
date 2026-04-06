@@ -189,11 +189,28 @@ function loadQuestion(){
 /* CHECK ANSWER */
 function checkAnswer(i){
   let q = questions[level % questions.length];
+  let screen = document.getElementById("quizScreen");
 
   if(i === q.c){
     coins += 10;
     level++;
+
+    // green flash
+    screen.classList.add("correct");
+
+    // coin popup
+    showCoinPop("+10 Coins 🎉");
+  } 
+  else {
+    // red flash
+    screen.classList.add("wrong");
   }
+
+  // remove animation after short time
+  setTimeout(()=>{
+    screen.classList.remove("correct");
+    screen.classList.remove("wrong");
+  }, 400);
 
   updateUI();
   loadQuestion();
@@ -205,6 +222,17 @@ function nextQuestion(){
   updateUI();
   loadQuestion();
 }
+  function showCoinPop(text){
+  let div = document.createElement("div");
+  div.className = "coin-pop";
+  div.innerText = text;
+
+  document.body.appendChild(div);
+
+  setTimeout(()=>{
+    div.remove();
+  }, 1000);
+  }
 
 /* PREVIOUS */
 function prevQuestion(){
