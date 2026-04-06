@@ -24,7 +24,6 @@ body{
   padding:20px;
   box-shadow:0 10px 30px rgba(0,0,0,0.3);
   text-align:center;
-  position:relative;
 }
 
 h1{margin:10px 0;}
@@ -66,14 +65,11 @@ h1{margin:10px 0;}
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
 
-/* coin pop */
-.pop{
-  animation:pop 0.3s ease;
-}
+.pop{animation:pop 0.3s ease;}
 
 @keyframes pop{
   0%{transform:scale(1);}
-  50%{transform:scale(1.4);}
+  50%{transform:scale(1.3);}
   100%{transform:scale(1);}
 }
 </style>
@@ -83,7 +79,6 @@ h1{margin:10px 0;}
 
 <div class="game">
 
-<!-- TOP -->
 <div class="top">
 <div>⭐ Stars: <span id="stars">0</span></div>
 <div>💰 Coins: <span id="coins">0</span></div>
@@ -91,16 +86,8 @@ h1{margin:10px 0;}
 
 <h1>Kids Quiz PRO</h1>
 
-<!-- NAME SCREEN -->
-<div id="nameScreen">
-  <h3>Enter Your Name 👇</h3>
-  <input id="playerName" placeholder="Your name" style="padding:10px;width:80%;border-radius:10px;border:1px solid #ccc;">
-  <button class="btn category-btn" onclick="saveName()">Start Game</button>
-</div>
-
 <!-- CATEGORY -->
-<div id="screen1" class="hidden">
-  <h3>Hello <span id="showName"></span> 👋</h3>
+<div id="screen1">
   <h3>Select Category</h3>
   <button class="btn category-btn" onclick="selectCategory('gk')">General Knowledge</button>
   <button class="btn category-btn" onclick="selectCategory('english')">English</button>
@@ -130,58 +117,71 @@ h1{margin:10px 0;}
 </div>
 
 <script>
+
 let category="", level="", index=0;
-let stars=0, coins=0, name="";
+let stars=0, coins=0;
+let autoMove=true;
 
-// ---------------- NAME ----------------
-function saveName(){
-name=document.getElementById("playerName").value || "Player";
-document.getElementById("nameScreen").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-document.getElementById("showName").innerText=name;
-clickSound();
-}
-
-// ---------------- QUESTIONS (SAME AS BEFORE SMALL SAMPLE) ----------------
+// ================= BIG QUESTION BANK =================
 const questions={
+
 gk:{
 easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
 {q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"How many days in week?",a:["5","6","7","8"],c:2}
+{q:"How many days in a week?",a:["5","6","7","8"],c:2},
+{q:"Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
+{q:"National animal of India?",a:["Lion","Tiger","Elephant","Leopard"],c:1}
 ],
 medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}
+{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
+{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
+{q:"H2O is?",a:["Oxygen","Hydrogen","Water","Salt"],c:2},
+{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1}
 ],
 hard:[
-{q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0}
+{q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0},
+{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0},
+{q:"Earth revolves around?",a:["Moon","Sun","Mars","Venus"],c:1}
 ]
 },
+
 english:{
 easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}
+{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
+{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
+{q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0}
 ],
 medium:[
-{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1}
+{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
+{q:"Opposite of big?",a:["Large","Huge","Small","Tall"],c:2},
+{q:"Synonym of fast?",a:["Quick","Slow","Late","Weak"],c:0}
 ],
 hard:[
-{q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2}
+{q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2},
+{q:"Opposite of victory?",a:["Win","Lose","Gain","Try"],c:1}
 ]
 },
+
 math:{
 easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}
+{q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
+{q:"5 - 2 = ?",a:["2","3","4","5"],c:1},
+{q:"1 + 1 = ?",a:["1","2","3","4"],c:1}
 ],
 medium:[
-{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
+{q:"10 × 2 = ?",a:["20","15","25","30"],c:0},
+{q:"12 ÷ 2 = ?",a:["4","5","6","7"],c:2}
 ],
 hard:[
-{q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1}
+{q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1},
+{q:"25 × 2 = ?",a:["40","45","50","60"],c:2}
 ]
 }
 };
 
-// ---------------- NAVIGATION ----------------
+// ================= GAME LOGIC =================
+
 function selectCategory(c){
 category=c;
 document.getElementById("screen1").classList.add("hidden");
@@ -214,7 +214,8 @@ ansDiv.appendChild(btn);
 });
 }
 
-// ---------------- ANSWER ----------------
+// ================= AUTO NEXT FIX =================
+
 function checkAnswer(sel,correct,btn){
 let buttons=document.querySelectorAll(".answer-btn");
 
@@ -233,14 +234,24 @@ document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
 buttons.forEach(b=>b.disabled=true);
+
+// 🚀 AUTO NEXT AFTER 1 SECOND
+setTimeout(()=>{
+if(autoMove){
+nextQ();
+}
+},1000);
 }
 
-// ---------------- NEXT / PREV ----------------
+// ================= NAV =================
+
 function nextQ(){
 if(index < questions[category][level].length-1){
 index++;
 loadQ();
 clickSound();
+}else{
+home();
 }
 }
 
@@ -252,30 +263,25 @@ clickSound();
 }
 }
 
-// ---------------- HOME ----------------
 function home(){
 document.getElementById("screen3").classList.add("hidden");
 document.getElementById("screen1").classList.remove("hidden");
 clickSound();
 }
 
-// ---------------- COIN POP ----------------
+// ================= COIN POP =================
+
 function coinPop(){
 let c=document.getElementById("coins");
 c.classList.add("pop");
 setTimeout(()=>c.classList.remove("pop"),300);
 }
 
-// ---------------- SOUND ----------------
-function clickSound(){
-beep(300);
-}
-function correctSound(){
-beep(800);
-}
-function wrongSound(){
-beep(150);
-}
+// ================= SOUND =================
+
+function clickSound(){beep(300);}
+function correctSound(){beep(800);}
+function wrongSound(){beep(150);}
 
 function beep(freq){
 let ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -285,6 +291,7 @@ o.connect(ctx.destination);
 o.start();
 o.stop(ctx.currentTime+0.15);
 }
+
 </script>
 
 </body>
