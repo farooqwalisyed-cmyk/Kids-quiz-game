@@ -43,24 +43,26 @@ button{
   justify-content:space-around;
   background:rgba(0,0,0,0.4);
   padding:10px;
+  font-size:14px;
 }
 
-.bar{
-  height:10px;
-  background:#2ecc71;
-  width:0%;
-}
 .progress{
+  height:10px;
   background:#ddd;
   border-radius:10px;
   overflow:hidden;
+}
+.bar{
+  height:10px;
+  width:0%;
+  background:#2ecc71;
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAME -->
+<!-- NAME SCREEN -->
 <div id="nameScreen" class="screen" style="display:block;">
   <div class="card">
     <h2>👋 Enter Your Name</h2>
@@ -88,10 +90,11 @@ button{
   <div class="topbar">
     ⭐ <span id="stars">0</span>
     🪙 <span id="coins">0</span>
-    📘 <span id="levelText">EASY</span>
+    📘 <span id="levelText">LEVEL: EASY</span>
   </div>
 
   <div class="card">
+
     <h3 id="question"></h3>
 
     <div class="progress">
@@ -101,6 +104,7 @@ button{
     <div id="options"></div>
 
     <button onclick="goHome()">🏠 Home</button>
+
   </div>
 </div>
 
@@ -112,9 +116,10 @@ let coins=0,stars=0;
 let currentQ=null;
 
 const levels=["easy","medium","hard"];
+
 let used={};
 
-// DATA (clean + structured)
+// 🎯 DATA
 const data={
 gk:{
 easy:[
@@ -158,6 +163,7 @@ hard:[
 }
 };
 
+// 👤 NAME
 function goMenu(){
 player=document.getElementById("nameInput").value.trim();
 if(!player){alert("Enter name");return;}
@@ -166,6 +172,7 @@ show("menuScreen");
 document.getElementById("playerName").innerText=player;
 }
 
+// 🎮 START GAME
 function startGame(c){
 cat=c;
 levelIndex=0;
@@ -177,20 +184,24 @@ show("gameScreen");
 loadQ();
 }
 
+// 🏠 HOME
 function goHome(){
 show("menuScreen");
 }
 
+// 📺 SCREEN CONTROL
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
+// 📊 CURRENT LEVEL
 function level(){
 return levels[levelIndex];
 }
 
-function getQ(){
+// ❌ NO REPEAT ENGINE
+function getQuestion(){
 
 let lvl=level();
 let list=data[cat][lvl];
@@ -207,11 +218,14 @@ used[lvl].push(list.indexOf(q));
 return q;
 }
 
+// 🎯 LOAD QUESTION
 function loadQ(){
 
-currentQ=getQ();
+currentQ=getQuestion();
 
+// 🔥 LEVEL COMPLETE
 if(!currentQ){
+
 levelIndex++;
 
 if(levelIndex>=levels.length){
@@ -223,10 +237,14 @@ loadQ();
 return;
 }
 
+// QUESTION
 document.getElementById("question").innerText=currentQ.q;
-document.getElementById("levelText").innerText=
-cat.toUpperCase()+" | "+level().toUpperCase();
 
+// LEVEL DISPLAY
+document.getElementById("levelText").innerText=
+"LEVEL: " + level().toUpperCase();
+
+// OPTIONS
 let opt=document.getElementById("options");
 opt.innerHTML="";
 
@@ -238,11 +256,14 @@ b.onclick=()=>check(o,b);
 opt.appendChild(b);
 });
 
+// PROGRESS
 document.getElementById("bar").style.width=
-(used[level()].length/data[cat][level()].length)*100+"%";
+(used[level()].length / data[cat][level()].length) * 100 + "%";
 }
 
+// ✅ ANSWER CHECK
 function check(sel,btn){
+
 if(sel===currentQ.c){
 btn.classList.add("correct");
 coins+=10;
