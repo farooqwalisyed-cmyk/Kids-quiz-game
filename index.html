@@ -88,16 +88,163 @@ let level = 0;
 let score = 0;
 
 /* 🎯 200 LEVELS AUTO GENERATED */
-let questions = Array.from({length:200}, (_,i)=>({
-  q: `Level ${i+1}: What is ${i+1} + 1 ?`,
-  options:[
-    `${i+1}`,
-    `${i+2}`,
-    `${i+3}`,
-    `${i+4}`
-  ],
-  answer:1
-}));
+let questions = [
+  // 🟢 GK (1–20)
+  {
+    q: "Capital of India?",
+    options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
+    answer: 1
+  },
+  {
+    q: "Capital of UK?",
+    options: ["London", "Paris", "Berlin", "Rome"],
+    answer: 0
+  },
+  {
+    q: "How many continents are there?",
+    options: ["5", "6", "7", "8"],
+    answer: 2
+  },
+  {
+    q: "Which planet is called Red Planet?",
+    options: ["Earth", "Mars", "Jupiter", "Venus"],
+    answer: 1
+  },
+  {
+    q: "National animal of India?",
+    options: ["Lion", "Tiger", "Elephant", "Leopard"],
+    answer: 1
+  },
+  {
+    q: "Which is largest ocean?",
+    options: ["Atlantic", "Indian", "Pacific", "Arctic"],
+    answer: 2
+  },
+  {
+    q: "How many days in a year?",
+    options: ["365", "360", "366", "350"],
+    answer: 0
+  },
+  {
+    q: "Which is the national bird of India?",
+    options: ["Peacock", "Parrot", "Sparrow", "Crow"],
+    answer: 0
+  },
+  {
+    q: "Sun rises in?",
+    options: ["West", "East", "North", "South"],
+    answer: 1
+  },
+  {
+    q: "How many states in India (approx)?",
+    options: ["28", "29", "30", "27"],
+    answer: 0
+  },
+
+  // 🔵 Math (21–35)
+  {
+    q: "5 + 3 = ?",
+    options: ["5", "8", "9", "7"],
+    answer: 1
+  },
+  {
+    q: "10 - 6 = ?",
+    options: ["3", "4", "5", "6"],
+    answer: 1
+  },
+  {
+    q: "6 × 2 = ?",
+    options: ["10", "12", "14", "8"],
+    answer: 1
+  },
+  {
+    q: "15 ÷ 3 = ?",
+    options: ["3", "5", "6", "4"],
+    answer: 1
+  },
+  {
+    q: "9 + 6 = ?",
+    options: ["15", "14", "13", "16"],
+    answer: 0
+  },
+  {
+    q: "20 - 5 = ?",
+    options: ["10", "15", "16", "14"],
+    answer: 1
+  },
+  {
+    q: "4 × 5 = ?",
+    options: ["20", "25", "15", "10"],
+    answer: 0
+  },
+  {
+    q: "18 ÷ 2 = ?",
+    options: ["9", "8", "7", "6"],
+    answer: 0
+  },
+  {
+    q: "7 + 8 = ?",
+    options: ["14", "15", "16", "13"],
+    answer: 1
+  },
+  {
+    q: "12 - 4 = ?",
+    options: ["6", "8", "7", "9"],
+    answer: 1
+  },
+
+  // 🟡 English (36–50)
+  {
+    q: "Opposite of Hot?",
+    options: ["Cold", "Warm", "Dry", "Fast"],
+    answer: 0
+  },
+  {
+    q: "Opposite of Big?",
+    options: ["Large", "Small", "Tall", "Wide"],
+    answer: 1
+  },
+  {
+    q: "Synonym of Happy?",
+    options: ["Sad", "Angry", "Joyful", "Tired"],
+    answer: 2
+  },
+  {
+    q: "What is a noun?",
+    options: ["Action", "Name of person/place", "Color", "Verb"],
+    answer: 1
+  },
+  {
+    q: "Opposite of Fast?",
+    options: ["Slow", "Quick", "Speed", "Run"],
+    answer: 0
+  },
+  {
+    q: "Plural of Child?",
+    options: ["Childs", "Children", "Childes", "Childer"],
+    answer: 1
+  },
+  {
+    q: "A, E, I, O, U are?",
+    options: ["Numbers", "Vowels", "Consonants", "Symbols"],
+    answer: 1
+  },
+  {
+    q: "Opposite of Up?",
+    options: ["Down", "Left", "Right", "Top"],
+    answer: 0
+  },
+  {
+    q: "What is a verb?",
+    options: ["Action word", "Name", "Place", "Thing"],
+    answer: 0
+  },
+  {
+    q: "He ___ playing football",
+    options: ["is", "are", "am", "be"],
+    answer: 0
+  }
+];
 
 /* NAME SCREEN */
 function renderStart(){
