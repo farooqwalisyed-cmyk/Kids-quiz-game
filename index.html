@@ -36,6 +36,11 @@ h1{margin:10px 0;}
   border-radius:12px;
   font-size:16px;
   cursor:pointer;
+  transition:0.2s;
+}
+
+.btn:active{
+  transform:scale(0.95);
 }
 
 .category-btn{background:#2575fc;color:white;}
@@ -72,6 +77,11 @@ h1{margin:10px 0;}
   50%{transform:scale(1.3);}
   100%{transform:scale(1);}
 }
+
+#emoji{
+  font-size:40px;
+  margin:10px 0;
+}
 </style>
 </head>
 
@@ -84,7 +94,11 @@ h1{margin:10px 0;}
 <div>💰 Coins: <span id="coins">0</span></div>
 </div>
 
-<h1>Kids Quiz PRO</h1>
+<h1>Kids Quiz PRO 🎮</h1>
+
+<div id="progress">Question: 1</div>
+
+<div id="emoji">🙂</div>
 
 <!-- CATEGORY -->
 <div id="screen1">
@@ -120,11 +134,10 @@ h1{margin:10px 0;}
 
 let category="", level="", index=0;
 let stars=0, coins=0;
-let autoMove=true;
+let streak=0;
 
-// ================= BIG QUESTION BANK =================
+// ================= QUESTIONS =================
 const questions={
-
 gk:{
 easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
@@ -132,75 +145,76 @@ easy:[
 {q:"How many days in a week?",a:["5","6","7","8"],c:2},
 {q:"Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
 {q:"National animal of India?",a:["Lion","Tiger","Elephant","Leopard"],c:1}
-],
-medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
-{q:"H2O is?",a:["Oxygen","Hydrogen","Water","Salt"],c:2},
-{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1}
-],
-hard:[
-{q:"World smallest country?",a:["Vatican","India","USA","UK"],c:0},
-{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0},
-{q:"Earth revolves around?",a:["Moon","Sun","Mars","Venus"],c:1}
 ]
 },
-
 english:{
 easy:[
 {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
 {q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
 {q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0}
-],
-medium:[
-{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
-{q:"Opposite of big?",a:["Large","Huge","Small","Tall"],c:2},
-{q:"Synonym of fast?",a:["Quick","Slow","Late","Weak"],c:0}
-],
-hard:[
-{q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2},
-{q:"Opposite of victory?",a:["Win","Lose","Gain","Try"],c:1}
 ]
 },
-
 math:{
 easy:[
 {q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
 {q:"5 - 2 = ?",a:["2","3","4","5"],c:1},
 {q:"1 + 1 = ?",a:["1","2","3","4"],c:1}
-],
-medium:[
-{q:"10 × 2 = ?",a:["20","15","25","30"],c:0},
-{q:"12 ÷ 2 = ?",a:["4","5","6","7"],c:2}
-],
-hard:[
-{q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1},
-{q:"25 × 2 = ?",a:["40","45","50","60"],c:2}
 ]
 }
 };
 
-// ================= GAME LOGIC =================
+// ================= SOUND (FIXED RELIABLE METHOD) =================
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function beep(freq, time=0.15){
+let o = audioCtx.createOscillator();
+let g = audioCtx.createGain();
+
+o.frequency.value = freq;
+o.type = "sine";
+
+o.connect(g);
+g.connect(audioCtx.destination);
+
+o.start();
+o.stop(audioCtx.currentTime + time);
+}
+
+// ================= UI =================
+
+function setEmoji(type){
+document.getElementById("emoji").innerText =
+type==="good" ? "🎉😄" :
+type==="bad" ? "😢" : "🙂";
+}
+
+// ================= GAME =================
 
 function selectCategory(c){
 category=c;
 document.getElementById("screen1").classList.add("hidden");
 document.getElementById("screen2").classList.remove("hidden");
-clickSound();
+beep(300);
 }
 
 function startGame(l){
 level=l;
 index=0;
+streak=0;
 document.getElementById("screen2").classList.add("hidden");
 document.getElementById("screen3").classList.remove("hidden");
 loadQ();
-clickSound();
+beep(400);
 }
 
 function loadQ(){
-let q=questions[category][level][index];
+let q = questions[category][level][index];
+
 document.getElementById("question").innerText=q.q;
+document.getElementById("progress").innerText =
+"Question: " + (index+1);
+
+setEmoji("neutral");
 
 let ansDiv=document.getElementById("answers");
 ansDiv.innerHTML="";
@@ -214,7 +228,7 @@ ansDiv.appendChild(btn);
 });
 }
 
-// ================= AUTO NEXT FIX =================
+// ================= ANSWER =================
 
 function checkAnswer(sel,correct,btn){
 let buttons=document.querySelectorAll(".answer-btn");
@@ -223,11 +237,21 @@ if(sel===correct){
 btn.classList.add("correct");
 stars++;
 coins+=5;
-coinPop();
-correctSound();
+streak++;
+
+setEmoji("good");
+beep(800);
+
+// 🔥 streak bonus
+if(streak % 3 === 0){
+coins+=10;
+beep(1000,0.2);
+}
 }else{
 btn.classList.add("wrong");
-wrongSound();
+streak=0;
+setEmoji("bad");
+beep(200);
 }
 
 document.getElementById("stars").innerText=stars;
@@ -235,12 +259,8 @@ document.getElementById("coins").innerText=coins;
 
 buttons.forEach(b=>b.disabled=true);
 
-// 🚀 AUTO NEXT AFTER 1 SECOND
-setTimeout(()=>{
-if(autoMove){
-nextQ();
-}
-},1000);
+// AUTO NEXT
+setTimeout(()=>nextQ(),1000);
 }
 
 // ================= NAV =================
@@ -249,7 +269,6 @@ function nextQ(){
 if(index < questions[category][level].length-1){
 index++;
 loadQ();
-clickSound();
 }else{
 home();
 }
@@ -259,37 +278,13 @@ function prevQ(){
 if(index>0){
 index--;
 loadQ();
-clickSound();
 }
 }
 
 function home(){
 document.getElementById("screen3").classList.add("hidden");
 document.getElementById("screen1").classList.remove("hidden");
-clickSound();
-}
-
-// ================= COIN POP =================
-
-function coinPop(){
-let c=document.getElementById("coins");
-c.classList.add("pop");
-setTimeout(()=>c.classList.remove("pop"),300);
-}
-
-// ================= SOUND =================
-
-function clickSound(){beep(300);}
-function correctSound(){beep(800);}
-function wrongSound(){beep(150);}
-
-function beep(freq){
-let ctx=new (window.AudioContext||window.webkitAudioContext)();
-let o=ctx.createOscillator();
-o.frequency.value=freq;
-o.connect(ctx.destination);
-o.start();
-o.stop(ctx.currentTime+0.15);
+beep(300);
 }
 
 </script>
