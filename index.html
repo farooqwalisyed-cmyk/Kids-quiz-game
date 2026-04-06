@@ -5,6 +5,8 @@
 <title>Kids Quiz Pro</title>
 
 <style>
+
+/* BACKGROUND */
 body{
   margin:0;
   font-family: Arial, sans-serif;
@@ -22,7 +24,6 @@ body{
   padding:20px;
   border-radius:20px;
   text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 /* BUTTON */
@@ -43,7 +44,7 @@ button:active{
   transform:scale(0.95);
 }
 
-/* SCREENS */
+/* SCREEN */
 .screen{display:none;}
 .active{display:block;}
 
@@ -51,10 +52,11 @@ button:active{
 .topbar{
   display:flex;
   justify-content:space-between;
-  padding:10px;
+  font-size:14px;
+  margin-bottom:10px;
 }
 
-/* ANIMATIONS */
+/* ANIMATION */
 .correct{background:#4caf50 !important;}
 .wrong{background:#f44336 !important;}
 
@@ -78,6 +80,7 @@ button:active{
   50%{transform:translate(-50%,-20px) scale(1.2);opacity:1;}
   100%{transform:translate(-50%,-40px) scale(1);opacity:0;}
 }
+
 </style>
 </head>
 
@@ -90,7 +93,7 @@ button:active{
 </div>
 
 <!-- GAME -->
-<div id="game" class="screen card">
+<div id="quizScreen" class="screen card">
 
   <div class="topbar">
     <div>Level: <span id="levelText">1</span></div>
@@ -103,12 +106,15 @@ button:active{
 
   <button onclick="prevQuestion()">⬅ Prev</button>
   <button onclick="nextQuestion()">Next ➡</button>
+
 </div>
 
 <script>
+
 let level = 0;
 let coins = 0;
 
+/* QUESTIONS */
 const questions = [
   {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata"], c:0},
   {q:"2 + 2 = ?", o:["3","4","5"], c:1},
@@ -117,16 +123,24 @@ const questions = [
   {q:"5 + 3 = ?", o:["6","7","8"], c:2}
 ];
 
+/* START GAME */
 function startGame(){
   document.getElementById("home").classList.remove("active");
-  document.getElementById("game").classList.add("active");
+  document.getElementById("quizScreen").classList.add("active");
   loadQuestion();
 }
 
+/* LOAD QUESTION */
 function loadQuestion(){
+
+  if(level >= questions.length){
+    alert("Game Completed 🎉");
+    return;
+  }
+
   let q = questions[level];
 
-  document.getElementById("levelText").innerText = level+1;
+  document.getElementById("levelText").innerText = level + 1;
   document.getElementById("question").innerText = q.q;
 
   let box = document.getElementById("options");
@@ -140,22 +154,23 @@ function loadQuestion(){
   });
 }
 
- function checkAnswer(i){
+/* CHECK ANSWER */
+function checkAnswer(i){
 
   let q = questions[level];
   let screen = document.getElementById("quizScreen");
 
   if(i === q.c){
     coins += 10;
-
-    screen.classList.add("correct");
     showCoinPop("+10 Coins 🎉");
+    screen.classList.add("correct");
 
-    // move next question ONLY if available
     if(level < questions.length - 1){
       level++;
     } else {
-      alert("Game Completed 🎉");
+      setTimeout(()=>{
+        alert("Game Completed 🎉");
+      },500);
       return;
     }
 
@@ -166,41 +181,49 @@ function loadQuestion(){
   setTimeout(()=>{
     screen.classList.remove("correct");
     screen.classList.remove("wrong");
-  }, 400);
+  },400);
 
   updateUI();
   loadQuestion();
-  }
+}
 
+/* NEXT */
 function nextQuestion(){
   if(level < questions.length - 1){
     level++;
-    loadQuestion();
     updateUI();
+    loadQuestion();
   } else {
     alert("Game Completed 🎉");
   }
 }
 
+/* PREVIOUS */
 function prevQuestion(){
   if(level > 0){
     level--;
-    loadQuestion();
     updateUI();
+    loadQuestion();
   }
 }
 
+/* UI UPDATE */
 function updateUI(){
   document.getElementById("coinText").innerText = coins;
+  document.getElementById("levelText").innerText = level + 1;
 }
 
-function showCoin(text){
+/* COIN POPUP */
+function showCoinPop(text){
   let div = document.createElement("div");
   div.className = "coin-pop";
   div.innerText = text;
+
   document.body.appendChild(div);
 
-  setTimeout(()=>div.remove(),1000);
+  setTimeout(()=>{
+    div.remove();
+  },1000);
 }
 
 </script>
