@@ -15,7 +15,6 @@ body{
   height:100vh;
 }
 
-/* CARD */
 .screen{
   width:92%;
   max-width:520px;
@@ -26,7 +25,6 @@ body{
   box-shadow:0 20px 60px rgba(0,0,0,0.4);
 }
 
-/* BUTTONS */
 button{
   width:100%;
   padding:14px;
@@ -39,17 +37,13 @@ button{
   font-weight:bold;
 }
 
-/* INPUT */
 input{
   width:90%;
   padding:12px;
   font-size:18px;
   border-radius:10px;
-  border:1px solid #ccc;
-  margin:10px 0;
 }
 
-/* PROGRESS */
 .progress{
   width:100%;
   height:12px;
@@ -65,7 +59,6 @@ input{
   transition:0.3s;
 }
 
-/* COIN POP */
 .coin-popup{
   position:fixed;
   top:20%;
@@ -88,15 +81,12 @@ input{
 
 <body>
 
-<!-- NAME SCREEN -->
 <div id="nameScreen" class="screen">
   <h2>🎮 Kids Quiz Pro</h2>
-  <p>Enter Your Name</p>
-  <input id="username" placeholder="Your Name">
-  <button onclick="startGame()">Start Game</button>
+  <input id="username" placeholder="Enter Name">
+  <button onclick="startGame()">Start</button>
 </div>
 
-<!-- GAME SCREEN -->
 <div id="gameScreen" class="screen" style="display:none;">
 
   <h3>Player: <span id="playerName"></span></h3>
@@ -121,70 +111,44 @@ let level = 0;
 let coins = 0;
 let player = "";
 
-/* 100 UNIQUE QUESTIONS (NO REPEATING) */
-const questions = [
+/* REAL QUESTIONS */
+const baseQuestions = [
   {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata","Chennai"], c:0},
   {q:"Capital of USA?", o:["Washington DC","New York","LA","Texas"], c:0},
   {q:"2 + 2 = ?", o:["3","4","5","6"], c:1},
-  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2},
   {q:"Water formula?", o:["H2O","CO2","O2","NaCl"], c:0},
   {q:"Sun is a?", o:["Star","Planet","Moon","Comet"], c:0},
-  {q:"3 x 3 = ?", o:["6","9","12","15"], c:1},
-  {q:"Color of sky?", o:["Blue","Red","Green","Black"], c:0},
-  {q:"Earth is a?", o:["Planet","Star","Moon","Comet"], c:0},
-  {q:"7 + 3 = ?", o:["9","10","11","12"], c:1}
+  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2}
 ];
 
-/* expand to 100 unique */
-const questions = [
-  {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata","Chennai"], c:0},
-  {q:"Capital of USA?", o:["Washington DC","New York","LA","Texas"], c:0},
-  {q:"2 + 2 = ?", o:["3","4","5","6"], c:1},
-  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2},
-  {q:"Water formula?", o:["H2O","CO2","O2","NaCl"], c:0},
-  {q:"Sun is a?", o:["Star","Planet","Moon","Comet"], c:0},
-  {q:"Largest ocean?", o:["Pacific","Atlantic","Indian","Arctic"], c:0},
-  {q:"Earth is a?", o:["Planet","Star","Moon","Comet"], c:0},
-  {q:"7 + 3 = ?", o:["9","10","11","12"], c:1},
-  {q:"3 x 3 = ?", o:["6","9","12","15"], c:1}
-];
-
-/* ADD REAL EXPANSION (NO FAKE TEXT) */
 const extraQuestions = [
   {q:"Largest planet?", o:["Jupiter","Mars","Earth","Venus"], c:0},
-  {q:"H2 gas is?", o:["Hydrogen","Oxygen","Helium","Carbon"], c:0},
   {q:"India currency?", o:["Rupee","Dollar","Yen","Euro"], c:0},
   {q:"Speed of light?", o:["Fast","Slow","Medium","Zero"], c:0},
-  {q:"Human heart has?", o:["4 chambers","2","3","5"], c:0}
+  {q:"Human heart chambers?", o:["4","2","3","5"], c:0}
 ];
 
-/* MERGE INTO ONE CLEAN SET */
-let fullQuestions = [...questions, ...extraQuestions];
+/* BUILD 100 QUESTIONS CLEANLY */
+let finalQuestions = [...baseQuestions, ...extraQuestions];
 
-/* AUTO FILL TO 100 (COPY REAL MIX) */
-while(fullQuestions.length < 100){
-  let base = fullQuestions.length % extraQuestions.length;
-  fullQuestions.push(extraQuestions[base]);
+while(finalQuestions.length < 100){
+  let i = finalQuestions.length % extraQuestions.length;
+  finalQuestions.push(extraQuestions[i]);
 }
 
-const finalQuestions = fullQuestions;
-
-/* START GAME */
+/* START */
 function startGame(){
   player = document.getElementById("username").value || "Player";
-
   document.getElementById("nameScreen").style.display="none";
   document.getElementById("gameScreen").style.display="block";
-
   document.getElementById("playerName").innerText = player;
-
   loadQuestion();
 }
 
-/* LOAD QUESTION */
+/* LOAD */
 function loadQuestion(){
 
-  if(level >= questions.length){
+  if(level >= finalQuestions.length){
     alert("🎉 Game Completed " + player + " Coins: " + coins);
     return;
   }
@@ -209,8 +173,7 @@ function loadQuestion(){
 
 /* ANSWER */
 function checkAnswer(i){
-
-  let q = questions[level];
+  let q = finalQuestions[level];
 
   if(i === q.c){
     coins += 10;
@@ -219,20 +182,18 @@ function checkAnswer(i){
 
   level++;
   loadQuestion();
-  updateUI();
 }
 
 /* UI */
 function updateUI(){
   document.getElementById("coinText").innerText = coins;
-
-  let percent = (level / questions.length) * 100;
+  let percent = (level / finalQuestions.length) * 100;
   document.getElementById("progressBar").style.width = percent + "%";
 }
 
 /* NAV */
 function nextQuestion(){
-  if(level < questions.length-1){
+  if(level < finalQuestions.length-1){
     level++;
     loadQuestion();
   }
@@ -258,7 +219,6 @@ function showCoin(){
   setTimeout(()=>div.remove(),1000);
 }
 
-/* INIT */
 </script>
 
 </body>
