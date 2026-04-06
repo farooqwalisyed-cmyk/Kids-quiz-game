@@ -140,24 +140,25 @@ function loadQuestion(){
   });
 }
 
-function checkAnswer(i){
-
-  if(level >= questions.length){
-    alert("Game Completed 🎉");
-    return;
-  }
+ function checkAnswer(i){
 
   let q = questions[level];
-  let screen = document.getElementById("game");
+  let screen = document.getElementById("quizScreen");
 
   if(i === q.c){
     coins += 10;
-    showCoin("+10 Coins 🎉");
-    screen.classList.add("correct");
 
+    screen.classList.add("correct");
+    showCoinPop("+10 Coins 🎉");
+
+    // move next question ONLY if available
     if(level < questions.length - 1){
       level++;
+    } else {
+      alert("Game Completed 🎉");
+      return;
     }
+
   } else {
     screen.classList.add("wrong");
   }
@@ -165,11 +166,11 @@ function checkAnswer(i){
   setTimeout(()=>{
     screen.classList.remove("correct");
     screen.classList.remove("wrong");
-  },400);
+  }, 400);
 
   updateUI();
   loadQuestion();
-}
+  }
 
 function nextQuestion(){
   if(level < questions.length - 1){
