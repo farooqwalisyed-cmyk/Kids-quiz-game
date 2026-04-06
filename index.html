@@ -130,44 +130,80 @@ let stars=0, coins=0;
 let locked=false;
 
 // ================= QUESTIONS =================
-const questions={
+const questions = {
 gk:{
 easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
 {q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"How many days in a week?",a:["5","6","7","8"],c:2}
+{q:"How many days in a week?",a:["5","6","7","8"],c:2},
+{q:"How many legs does a spider have?",a:["6","8","10","12"],c:1},
+{q:"Which is a fruit?",a:["Carrot","Apple","Potato","Onion"],c:1},
+{q:"Which is used to write?",a:["Pencil","Plate","Spoon","Shoes"],c:0},
+{q:"How many colors in rainbow?",a:["5","6","7","8"],c:2},
+{q:"Which animal barks?",a:["Cat","Dog","Cow","Lion"],c:1},
+{q:"Which is hot?",a:["Ice","Fire","Snow","Water"],c:1},
+{q:"Which is planet we live on?",a:["Mars","Earth","Moon","Sun"],c:1}
 ],
+
 medium:[
 {q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1}
+{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
+{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1},
+{q:"Which is a mammal?",a:["Shark","Whale","Crocodile","Fish"],c:1},
+{q:"How many continents?",a:["5","6","7","8"],c:2},
+{q:"Which planet is red?",a:["Earth","Mars","Venus","Jupiter"],c:1},
+{q:"Which gas do we breathe?",a:["Oxygen","Carbon Dioxide","Hydrogen","Nitrogen"],c:0},
+{q:"Which is largest land animal?",a:["Elephant","Tiger","Horse","Lion"],c:0}
 ],
+
 hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
+{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0},
+{q:"Speed of light?",a:["300,000 km/s","150,000 km/s","100,000 km/s","50,000 km/s"],c:0},
+{q:"Who invented gravity theory?",a:["Newton","Einstein","Tesla","Galileo"],c:0},
+{q:"Earth revolves around?",a:["Moon","Mars","Sun","Venus"],c:2},
+{q:"How many bones in adult body?",a:["206","201","210","196"],c:0}
 ]
 },
 
 english:{
 easy:[
 {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0}
+{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
+{q:"C for?",a:["Cat","Dog","Elephant","Fish"],c:0},
+{q:"Opposite of Big?",a:["Large","Small","Huge","Tall"],c:1},
+{q:"Color of sky?",a:["Blue","Green","Red","Pink"],c:0}
 ],
+
 medium:[
-{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1}
+{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1},
+{q:"Opposite of Hot?",a:["Warm","Cold","Boil","Fire"],c:1},
+{q:"Synonym of Happy?",a:["Sad","Angry","Joyful","Tired"],c:2},
+{q:"Past of Go?",a:["Gone","Went","Goes","Going"],c:1}
 ],
+
 hard:[
-{q:"Synonym of happy?",a:["Sad","Angry","Joyful","Tired"],c:2}
+{q:"Antonym of Brave?",a:["Coward","Strong","Bold","Fast"],c:0},
+{q:"Correct spelling?",a:["Definately","Definitely","Definetly","Defenitely"],c:1}
 ]
 },
 
 math:{
 easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}
+{q:"2 + 2 = ?",a:["3","4","5","6"],c:1},
+{q:"5 - 2 = ?",a:["2","3","4","5"],c:1},
+{q:"3 × 2 = ?",a:["5","6","7","8"],c:1},
+{q:"10 ÷ 2 = ?",a:["2","5","10","20"],c:1}
 ],
+
 medium:[
-{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
+{q:"10 × 2 = ?",a:["20","15","25","30"],c:0},
+{q:"20 + 15 = ?",a:["35","30","25","40"],c:0},
+{q:"50 - 20 = ?",a:["20","30","40","10"],c:1}
 ],
+
 hard:[
-{q:"50 ÷ 5 = ?",a:["5","10","15","20"],c:1}
+{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1},
+{q:"12 × 12 = ?",a:["144","121","132","124"],c:0}
 ]
 }
 };
