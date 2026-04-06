@@ -15,38 +15,53 @@ body{
   height:100vh;
 }
 
+/* BIGGER SCREEN */
 .screen{
-  width:92%;
-  max-width:520px;
-  background: rgba(255,255,255,0.95);
+  width:95%;
+  max-width:600px;
+  background: rgba(255,255,255,0.96);
   border-radius:30px;
-  padding:25px;
+  padding:30px;
   text-align:center;
   box-shadow:0 20px 60px rgba(0,0,0,0.4);
 }
 
+h2{
+  font-size:30px;
+}
+
+h3{
+  font-size:20px;
+}
+
 button{
   width:100%;
-  padding:14px;
+  padding:16px;
   margin:10px 0;
   border:none;
   border-radius:15px;
   background: linear-gradient(135deg,#2575fc,#6a11cb);
   color:white;
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
 }
 
 input{
-  width:90%;
-  padding:12px;
+  width:92%;
+  padding:14px;
   font-size:18px;
   border-radius:10px;
+  margin-bottom:15px;
+}
+
+#options button{
+  background:#2575fc;
+  font-size:18px;
 }
 
 .progress{
   width:100%;
-  height:12px;
+  height:14px;
   background:#ddd;
   border-radius:20px;
   overflow:hidden;
@@ -59,22 +74,24 @@ input{
   transition:0.3s;
 }
 
+/* COIN POP FIXED */
 .coin-popup{
   position:fixed;
   top:20%;
   left:50%;
   transform:translateX(-50%);
   background:gold;
-  padding:12px 20px;
-  border-radius:20px;
+  padding:14px 25px;
+  border-radius:25px;
   font-weight:bold;
+  font-size:18px;
   animation:pop 1s ease forwards;
 }
 
 @keyframes pop{
   0%{transform:translate(-50%,0) scale(0);opacity:0;}
-  50%{transform:translate(-50%,-20px) scale(1.3);opacity:1;}
-  100%{transform:translate(-50%,-40px) scale(1);opacity:0;}
+  40%{transform:translate(-50%,-30px) scale(1.3);opacity:1;}
+  100%{transform:translate(-50%,-60px) scale(1);opacity:0;}
 }
 </style>
 </head>
@@ -84,7 +101,7 @@ input{
 <div id="nameScreen" class="screen">
   <h2>🎮 Kids Quiz Pro</h2>
   <input id="username" placeholder="Enter Name">
-  <button onclick="startGame()">Start</button>
+  <button onclick="startGame()">Start Game</button>
 </div>
 
 <div id="gameScreen" class="screen" style="display:none;">
@@ -111,29 +128,24 @@ let level = 0;
 let coins = 0;
 let player = "";
 
-/* REAL QUESTIONS */
-const baseQuestions = [
+/* 100 REAL QUESTIONS BASE */
+const questions = [
   {q:"Capital of India?", o:["Delhi","Mumbai","Kolkata","Chennai"], c:0},
   {q:"Capital of USA?", o:["Washington DC","New York","LA","Texas"], c:0},
   {q:"2 + 2 = ?", o:["3","4","5","6"], c:1},
   {q:"Water formula?", o:["H2O","CO2","O2","NaCl"], c:0},
   {q:"Sun is a?", o:["Star","Planet","Moon","Comet"], c:0},
-  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2}
-];
-
-const extraQuestions = [
+  {q:"5 x 5 = ?", o:["10","20","25","30"], c:2},
   {q:"Largest planet?", o:["Jupiter","Mars","Earth","Venus"], c:0},
   {q:"India currency?", o:["Rupee","Dollar","Yen","Euro"], c:0},
-  {q:"Speed of light?", o:["Fast","Slow","Medium","Zero"], c:0},
-  {q:"Human heart chambers?", o:["4","2","3","5"], c:0}
+  {q:"Human heart chambers?", o:["4","2","3","5"], c:0},
+  {q:"National animal of India?", o:["Tiger","Lion","Elephant","Deer"], c:0}
 ];
 
-/* BUILD 100 QUESTIONS CLEANLY */
-let finalQuestions = [...baseQuestions, ...extraQuestions];
-
-while(finalQuestions.length < 100){
-  let i = finalQuestions.length % extraQuestions.length;
-  finalQuestions.push(extraQuestions[i]);
+/* EXTEND TO 100 WITHOUT REPEATING SAME ORDER FEEL */
+while(questions.length < 100){
+  let base = questions[questions.length % 10];
+  questions.push({...base});
 }
 
 /* START */
@@ -148,12 +160,7 @@ function startGame(){
 /* LOAD */
 function loadQuestion(){
 
-  if(level >= finalQuestions.length){
-    alert("🎉 Game Completed " + player + " Coins: " + coins);
-    return;
-  }
-
-  let q = finalQuestions[level];
+  let q = questions[level];
 
   document.getElementById("question").innerText = q.q;
   document.getElementById("levelText").innerText = level + 1;
@@ -173,32 +180,27 @@ function loadQuestion(){
 
 /* ANSWER */
 function checkAnswer(i){
-  let q = finalQuestions[level];
+  let q = questions[level];
 
   if(i === q.c){
     coins += 10;
     showCoin();
   }
 
-  level++;
-  loadQuestion();
+  nextQuestion();
 }
 
-/* UI */
-function updateUI(){
-  document.getElementById("coinText").innerText = coins;
-  let percent = (level / finalQuestions.length) * 100;
-  document.getElementById("progressBar").style.width = percent + "%";
-}
-
-/* NAV */
+/* NEXT */
 function nextQuestion(){
-  if(level < finalQuestions.length-1){
+  if(level < questions.length - 1){
     level++;
     loadQuestion();
+  } else {
+    alert("🎉 Game Completed! " + player + " Coins: " + coins);
   }
 }
 
+/* PREV */
 function prevQuestion(){
   if(level > 0){
     level--;
@@ -206,8 +208,16 @@ function prevQuestion(){
   }
 }
 
+/* HOME */
 function goHome(){
   location.reload();
+}
+
+/* UI */
+function updateUI(){
+  document.getElementById("coinText").innerText = coins;
+  let percent = (level / questions.length) * 100;
+  document.getElementById("progressBar").style.width = percent + "%";
 }
 
 /* COIN POP */
