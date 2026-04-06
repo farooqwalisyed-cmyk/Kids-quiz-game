@@ -3,9 +3,90 @@
 <head>
 <title>Kids Quiz Pro</title>
 <style>
-body { font-family: Arial; text-align:center; background:#f2f2f2; }
-.screen { display:none; padding:20px; }
-button { padding:10px; margin:5px; font-size:16px; }
+body{
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
+  color:white;
+}
+
+/* MAIN CENTER CARD */
+.card{
+  background:white;
+  color:black;
+  width:85%;
+  max-width:400px;
+  margin:80px auto;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  text-align:center;
+}
+
+/* TITLE */
+h1,h2,h3{
+  margin:10px 0;
+}
+
+/* INPUT */
+input{
+  width:90%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+
+/* BUTTONS */
+button{
+  width:90%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  background:#2575fc;
+  color:white;
+  font-weight:bold;
+}
+
+button:hover{
+  background:#1a5fd1;
+}
+
+/* GRID BUTTONS (CATEGORY) */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+/* QUIZ CARD */
+.quizBox{
+  background:white;
+  color:black;
+  width:85%;
+  max-width:450px;
+  margin:60px auto;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* OPTION BUTTONS */
+.option{
+  width:100%;
+}
+
+/* SMALL HOME BUTTON */
+.smallBtn{
+  width:auto;
+  padding:8px 15px;
+  font-size:14px;
+  background:#555;
+}
 </style>
 </head>
 
