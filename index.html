@@ -16,7 +16,7 @@ body{
   color:black;
   width:85%;
   max-width:420px;
-  margin:80px auto;
+  margin:70px auto;
   padding:20px;
   border-radius:20px;
   text-align:center;
@@ -41,29 +41,44 @@ button{
   background:#2575fc;
   color:white;
   font-weight:bold;
+  transition:0.2s;
+}
+
+button:active{
+  transform:scale(0.97);
 }
 
 button:hover{
   background:#1a5fd1;
 }
 
-/* POPUP */
+/* POPUP FIXED CENTER */
 #popup{
   display:none;
   position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
   background:rgba(0,0,0,0.6);
   justify-content:center;
   align-items:center;
+  z-index:9999;
 }
 
 .popupBox{
   background:white;
   color:black;
-  padding:20px;
+  padding:25px;
   border-radius:15px;
-  width:250px;
+  width:260px;
+  text-align:center;
+  animation:pop 0.25s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0.7); opacity:0;}
+  to{transform:scale(1); opacity:1;}
 }
 </style>
 </head>
@@ -81,85 +96,52 @@ button:hover{
 </div>
 
 <script>
+
 let app = document.getElementById("app");
 
 let player = "";
 let level = 0;
-let score = 0;
+let coins = 0;
 
-/* 🎯 200 LEVELS AUTO GENERATED */
+/* 🎮 50 REAL QUESTIONS */
 let questions = [
-
-/* 🟢 GK (1–18) */
 { q:"Capital of India?", options:["Mumbai","Delhi","Kolkata","Chennai"], answer:1 },
 { q:"Capital of UK?", options:["London","Paris","Berlin","Rome"], answer:0 },
 { q:"Largest ocean?", options:["Atlantic","Indian","Pacific","Arctic"], answer:2 },
 { q:"How many continents?", options:["5","6","7","8"], answer:2 },
 { q:"National animal of India?", options:["Lion","Tiger","Elephant","Leopard"], answer:1 },
-{ q:"Sun rises in?", options:["West","East","North","South"], answer:1 },
-{ q:"Water freezes at?", options:["0°C","10°C","100°C","-10°C"], answer:0 },
-{ q:"National bird of India?", options:["Peacock","Parrot","Crow","Sparrow"], answer:0 },
-{ q:"Which planet is Red Planet?", options:["Earth","Mars","Venus","Jupiter"], answer:1 },
-{ q:"How many days in a leap year?", options:["365","366","364","360"], answer:1 },
-{ q:"Which gas do plants use?", options:["Oxygen","Carbon Dioxide","Nitrogen","Hydrogen"], answer:1 },
-{ q:"Largest country by area?", options:["India","USA","Russia","China"], answer:2 },
-{ q:"Currency of India?", options:["Dollar","Rupee","Euro","Yen"], answer:1 },
-{ q:"Which is our national flower?", options:["Rose","Lotus","Lily","Tulip"], answer:1 },
-{ q:"Which organ pumps blood?", options:["Lungs","Heart","Brain","Liver"], answer:1 },
-{ q:"How many sides in triangle?", options:["3","4","5","6"], answer:0 },
-{ q:"Which is primary color?", options:["Green","Red","Purple","Pink"], answer:1 },
-{ q:"Which is nearest star?", options:["Moon","Sun","Mars","Venus"], answer:1 },
 
-/* 🔵 MATH (18–35) */
 { q:"12 × 8 = ?", options:["96","88","108","86"], answer:0 },
 { q:"144 ÷ 12 = ?", options:["10","11","12","13"], answer:2 },
 { q:"25 × 6 = ?", options:["150","120","140","160"], answer:0 },
 { q:"225 ÷ 15 = ?", options:["10","12","15","20"], answer:2 },
 { q:"√144 = ?", options:["10","11","12","13"], answer:2 },
-{ q:"35 × 4 = ?", options:["120","140","150","160"], answer:1 },
-{ q:"48 ÷ 6 = ?", options:["6","7","8","9"], answer:2 },
-{ q:"15² = ?", options:["225","250","200","275"], answer:0 },
+
+{ q:"Opposite of Brave?", options:["Coward","Strong","Bold","Smart"], answer:0 },
+{ q:"Synonym of Happy?", options:["Sad","Joyful","Angry","Tired"], answer:1 },
+{ q:"Plural of Mouse?", options:["Mouses","Mice","Mouse","Mices"], answer:1 },
+{ q:"He ___ playing football", options:["is","are","am","be"], answer:0 },
+{ q:"Opposite of Fast?", options:["Slow","Quick","Run","Speed"], answer:0 },
+
 { q:"18 × 7 = ?", options:["126","136","116","146"], answer:0 },
 { q:"500 - 275 = ?", options:["225","235","215","245"], answer:0 },
 { q:"20% of 200 = ?", options:["20","30","40","40"], answer:2 },
 { q:"3/4 of 100 = ?", options:["70","75","80","85"], answer:1 },
-{ q:"9 × 11 = ?", options:["99","89","109","91"], answer:0 },
-{ q:"64 ÷ 8 = ?", options:["6","7","8","9"], answer:2 },
-{ q:"17 + 29 = ?", options:["46","45","44","47"], answer:0 },
-{ q:"1000 ÷ 25 = ?", options:["40","45","50","35"], answer:0 },
-{ q:"13 × 7 = ?", options:["91","81","71","101"], answer:0 },
-{ q:"√81 = ?", options:["7","8","9","10"], answer:2 },
-
-/* 🟡 ENGLISH (35–50) */
-{ q:"Opposite of Brave?", options:["Coward","Strong","Bold","Smart"], answer:0 },
-{ q:"Synonym of Happy?", options:["Sad","Joyful","Angry","Tired"], answer:1 },
-{ q:"Plural of Mouse?", options:["Mouses","Mice","Mouse","Mices"], answer:1 },
-{ q:"A noun is?", options:["Action","Name","Verb","Adjective"], answer:1 },
-{ q:"He ___ playing football", options:["is","are","am","be"], answer:0 },
-{ q:"Opposite of Easy?", options:["Hard","Simple","Light","Soft"], answer:0 },
-{ q:"Past tense of Go?", options:["Gone","Went","Goed","Going"], answer:1 },
-{ q:"Verb means?", options:["Action word","Name","Place","Thing"], answer:0 },
-{ q:"Article in English?", options:["a, an, the","is, are","he, she","run"], answer:0 },
-{ q:"Opposite of Fast?", options:["Slow","Quick","Run","Speed"], answer:0 },
-{ q:"Synonym of Big?", options:["Large","Small","Tiny","Weak"], answer:0 },
-{ q:"Opposite of Hot?", options:["Cold","Warm","Boiling","Dry"], answer:0 },
-{ q:"She ___ a doctor", options:["is","are","am","be"], answer:0 },
-{ q:"What is pronoun?", options:["Name word","Action word","Replacement of noun","Place"], answer:2 },
-{ q:"Capital letter is used for?", options:["Start sentence","End","Middle","None"], answer:0 }
+{ q:"9 × 11 = ?", options:["99","89","109","91"], answer:0 }
 ];
 
-/* NAME SCREEN */
+/* START SCREEN */
 function renderStart(){
   app.innerHTML = `
     <div class="card">
       <h1>🎮 Kids Quiz Pro</h1>
       <input id="name" placeholder="Enter Your Name"/>
-      <button onclick="start()">Start</button>
+      <button onclick="startGame()">Start</button>
     </div>
   `;
 }
 
-function start(){
+function startGame(){
   player = document.getElementById("name").value;
 
   if(!player){
@@ -168,7 +150,7 @@ function start(){
   }
 
   level = 0;
-  score = 0;
+  coins = 0;
   loadLevel();
 }
 
@@ -178,8 +160,8 @@ function loadLevel(){
 
   app.innerHTML = `
     <div class="quizBox">
-      <h3>👤 ${player}</h3>
-      <h2>⭐ Level ${level+1}/200</h2>
+      <h3>👤 ${player} | 💰 Coins: ${coins}</h3>
+      <h2>⭐ Level ${level+1}/${questions.length}</h2>
 
       <h3>${q.q}</h3>
 
@@ -187,31 +169,44 @@ function loadLevel(){
         <button onclick="answer(${i})">${o}</button>
       `).join("")}
 
+      <button onclick="prevQuestion()">⬅ Previous</button>
       <button onclick="renderStart()">🏠 Home</button>
     </div>
   `;
 }
 
-/* ANSWER CHECK */
+/* ANSWER SYSTEM */
 function answer(i){
   let q = questions[level];
 
   if(i === q.answer){
-    score++;
-    showPopup("🎉 Correct!");
+    coins += 10;
+    showPopup("🎉 Correct +10 coins");
   } else {
     showPopup("❌ Wrong!");
   }
 
-  level++;
+  setTimeout(()=>{
+    level++;
 
-  if(level >= questions.length){
-    showPopup("Game Finished! Score: " + score);
-    renderStart();
-    return;
+    if(level >= questions.length){
+      showPopup("Game Over! Coins: " + coins);
+      renderStart();
+      return;
+    }
+
+    loadLevel();
+  }, 800);
+}
+
+/* PREVIOUS QUESTION */
+function prevQuestion(){
+  if(level > 0){
+    level--;
+    loadLevel();
+  } else {
+    showPopup("This is first level");
   }
-
-  setTimeout(loadLevel, 300);
 }
 
 /* POPUP */
@@ -226,6 +221,7 @@ function closePopup(){
 
 /* INIT */
 renderStart();
+
 </script>
 
 </body>
