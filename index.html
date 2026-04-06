@@ -54,20 +54,15 @@ button:hover{
 
 /* POPUP FIXED CENTER */
 #popup{
-  display:none;
+  display:none;              /* ONLY THIS FIRST */
   position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-
+  inset:0;
   background:rgba(0,0,0,0.6);
 
-  /* FORCE CENTERING */
-  display:grid;
-  place-items:center;
+  justify-content:center;
+  align-items:center;
 
-  z-index:99999;
+  z-index:999999;
 }
 
 .popupBox{
@@ -77,11 +72,10 @@ button:hover{
   border-radius:12px;
   text-align:center;
   width:260px;
-  margin:0;
+
+  position:relative;
+  z-index:1000000;   /* ABOVE EVERYTHING */
 }
-  .popupBox{
-  animation:pop 0.2s ease;
-  }
 
 @keyframes pop{
   from{transform:scale(0.6); opacity:0;}
