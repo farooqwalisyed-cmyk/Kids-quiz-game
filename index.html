@@ -7,31 +7,31 @@
 
 <style>
 body{
-  margin:0;
-  font-family: Arial;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:white;
-  text-align:center;
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+text-align:center;
 }
 
 .screen{display:none;padding:20px;}
 
 .card{
-  background:white;
-  color:black;
-  margin:20px auto;
-  padding:20px;
-  border-radius:20px;
-  max-width:500px;
+background:white;
+color:black;
+margin:20px auto;
+padding:20px;
+border-radius:20px;
+max-width:500px;
 }
 
 button{
-  padding:12px;
-  margin:10px;
-  width:80%;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
+padding:12px;
+margin:10px;
+width:80%;
+border:none;
+border-radius:12px;
+font-size:16px;
 }
 
 .option{background:#eee;}
@@ -39,73 +39,74 @@ button{
 .wrong{background:#e74c3c !important;color:white;}
 
 .topbar{
-  display:flex;
-  justify-content:space-around;
-  background:rgba(0,0,0,0.4);
-  padding:10px;
-  font-size:14px;
+display:flex;
+justify-content:space-around;
+padding:10px;
+background:rgba(0,0,0,0.4);
 }
 
 .progress{
-  height:10px;
-  background:#ddd;
-  border-radius:10px;
-  overflow:hidden;
+height:10px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
 }
+
 .bar{
-  height:10px;
-  width:0%;
-  background:#2ecc71;
+height:10px;
+width:0%;
+background:#2ecc71;
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAME SCREEN -->
+<!-- NAME -->
 <div id="nameScreen" class="screen" style="display:block;">
-  <div class="card">
-    <h2>👋 Enter Your Name</h2>
-    <input id="nameInput" placeholder="Your name"
-    style="padding:10px;width:80%;border-radius:10px;">
-    <br>
-    <button onclick="goMenu()">Start</button>
-  </div>
+<div class="card">
+<h2>👋 Enter Name</h2>
+<input id="nameInput" placeholder="Your name"
+style="padding:10px;width:80%;border-radius:10px;">
+<br>
+<button onclick="goMenu()">Start</button>
+</div>
 </div>
 
 <!-- MENU -->
 <div id="menuScreen" class="screen">
-  <div class="card">
-    <h2>Welcome <span id="playerName"></span></h2>
-    <h3>Select Category</h3>
-    <button onclick="startGame('gk')">🌍 GK</button>
-    <button onclick="startGame('math')">➕ Math</button>
-    <button onclick="startGame('english')">🔤 English</button>
-  </div>
+<div class="card">
+<h2>Welcome <span id="playerName"></span></h2>
+
+<h3>Select Category</h3>
+<button onclick="startGame('gk')">🌍 GK</button>
+<button onclick="startGame('math')">➕ Math</button>
+<button onclick="startGame('english')">🔤 English</button>
+</div>
 </div>
 
 <!-- GAME -->
 <div id="gameScreen" class="screen">
 
-  <div class="topbar">
-    ⭐ <span id="stars">0</span>
-    🪙 <span id="coins">0</span>
-    📘 <span id="levelText">LEVEL: EASY</span>
-  </div>
+<div class="topbar">
+⭐ <span id="stars">0</span>
+🪙 <span id="coins">0</span>
+📘 <span id="levelText">LEVEL</span>
+</div>
 
-  <div class="card">
+<div class="card">
 
-    <h3 id="question"></h3>
+<h3 id="question"></h3>
 
-    <div class="progress">
-      <div id="bar" class="bar"></div>
-    </div>
+<div class="progress">
+<div id="bar" class="bar"></div>
+</div>
 
-    <div id="options"></div>
+<div id="options"></div>
 
-    <button onclick="goHome()">🏠 Home</button>
+<button onclick="goHome()">🏠 Home</button>
 
-  </div>
+</div>
 </div>
 
 <script>
@@ -116,10 +117,9 @@ let coins=0,stars=0;
 let currentQ=null;
 
 const levels=["easy","medium","hard"];
-
 let used={};
 
-// 🎯 DATA
+// 📦 QUESTIONS
 const data={
 gk:{
 easy:[
@@ -132,7 +132,7 @@ medium:[
 {q:"Water freezes at?",a:["0°C","10°C","100°C","50°C"],c:"0°C"}
 ],
 hard:[
-{q:"Plants absorb which gas?",a:["Oxygen","Nitrogen","CO2","Hydrogen"],c:"CO2"}
+{q:"Plants absorb?",a:["Oxygen","Nitrogen","CO2","Hydrogen"],c:"CO2"}
 ]
 },
 
@@ -172,7 +172,7 @@ show("menuScreen");
 document.getElementById("playerName").innerText=player;
 }
 
-// 🎮 START GAME
+// 🎮 START
 function startGame(c){
 cat=c;
 levelIndex=0;
@@ -181,7 +181,7 @@ stars=0;
 used={};
 
 show("gameScreen");
-loadQ();
+showLevelStart();   // 🔥 IMPORTANT FIX
 }
 
 // 🏠 HOME
@@ -189,18 +189,18 @@ function goHome(){
 show("menuScreen");
 }
 
-// 📺 SCREEN CONTROL
+// 📺 SCREEN
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
-// 📊 CURRENT LEVEL
+// 📊 LEVEL
 function level(){
 return levels[levelIndex];
 }
 
-// ❌ NO REPEAT ENGINE
+// ❌ NO REPEAT
 function getQuestion(){
 
 let lvl=level();
@@ -218,12 +218,29 @@ used[lvl].push(list.indexOf(q));
 return q;
 }
 
+// 🔥 LEVEL START SCREEN
+function showLevelStart(){
+
+let lvl=level();
+
+document.getElementById("question").innerHTML=
+"🔥 " + lvl.toUpperCase() + " LEVEL START";
+
+document.getElementById("options").innerHTML="";
+
+document.getElementById("levelText").innerText=
+"LEVEL: " + lvl.toUpperCase();
+
+document.getElementById("bar").style.width="0%";
+
+setTimeout(loadQ,1500);
+}
+
 // 🎯 LOAD QUESTION
 function loadQ(){
 
 currentQ=getQuestion();
 
-// 🔥 LEVEL COMPLETE
 if(!currentQ){
 
 levelIndex++;
@@ -233,18 +250,15 @@ alert("🎉 Game Completed!");
 levelIndex=0;
 }
 
-loadQ();
+showLevelStart();
 return;
 }
 
-// QUESTION
 document.getElementById("question").innerText=currentQ.q;
 
-// LEVEL DISPLAY
 document.getElementById("levelText").innerText=
 "LEVEL: " + level().toUpperCase();
 
-// OPTIONS
 let opt=document.getElementById("options");
 opt.innerHTML="";
 
@@ -256,12 +270,11 @@ b.onclick=()=>check(o,b);
 opt.appendChild(b);
 });
 
-// PROGRESS
 document.getElementById("bar").style.width=
 (used[level()].length / data[cat][level()].length) * 100 + "%";
 }
 
-// ✅ ANSWER CHECK
+// ✅ CHECK ANSWER
 function check(sel,btn){
 
 if(sel===currentQ.c){
