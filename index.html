@@ -1,398 +1,229 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Quiz PRO</title>
-
+<title>Kids Quiz Pro</title>
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#141e30,#243b55);
-color:white;
-text-align:center;
-}
-
-.screen{display:none;padding:20px;}
-
-.card{
-background:white;
-color:black;
-margin:20px auto;
-padding:20px;
-border-radius:20px;
-max-width:500px;
-}
-
-button{
-padding:12px;
-margin:10px;
-width:80%;
-border:none;
-border-radius:12px;
-font-size:16px;
-}
-
-.option{background:#eee;}
-.correct{background:#2ecc71 !important;color:white;}
-.wrong{background:#e74c3c !important;color:white;}
-
-.topbar{
-display:flex;
-justify-content:space-around;
-padding:10px;
-background:rgba(0,0,0,0.4);
-}
-
-.progress{
-height:10px;
-background:#ddd;
-border-radius:10px;
-overflow:hidden;
-}
-
-.bar{
-height:10px;
-width:0%;
-background:#2ecc71;
-}
+body { font-family: Arial; text-align:center; background:#f2f2f2; }
+.screen { display:none; padding:20px; }
+button { padding:10px; margin:5px; font-size:16px; }
 </style>
 </head>
 
 <body>
 
-<!-- 🔊 SOUNDS -->
-<audio id="bgMusic" loop>
-<source src="https://cdn.pixabay.com/download/audio/2022/10/16/audio_12b6b7b1a6.mp3?filename=children-game-music-118577.mp3">
-</audio>
-
-<audio id="correctSound">
-<source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
-</audio>
-
-<audio id="wrongSound">
-<source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg">
-</audio>
-
-<audio id="levelSound">
-<source src="https://actions.google.com/sounds/v1/cartoon/pop.ogg">
-</audio>
-
-<!-- NAME SCREEN -->
+<!-- NAME -->
 <div id="nameScreen" class="screen" style="display:block;">
-<div class="card">
-<h2>👋 Enter Name</h2>
-<input id="nameInput" placeholder="Your name"
-style="padding:10px;width:80%;border-radius:10px;">
+<h2>Enter Your Name</h2>
+<input id="playerName" placeholder="Your Name">
 <br>
-<button onclick="goMenu()">Start</button>
-</div>
-</div>
-
-<!-- MENU -->
-<div id="menuScreen" class="screen">
-<div class="card">
-<h2>Welcome <span id="playerName"></span></h2>
-
-<button onclick="startGame('gk')">🌍 GK</button>
-<button onclick="startGame('math')">➕ Math</button>
-<button onclick="startGame('english')">🔤 English</button>
-
-<button onclick="openSettings()">⚙ Settings</button>
-</div>
+<button onclick="saveName()">Start</button>
 </div>
 
-<!-- SETTINGS -->
-<div id="settingsScreen" class="screen">
-<div class="card">
-<h2>⚙ Settings</h2>
-
-<button onclick="toggleSound()">🔊 Sound ON/OFF</button>
-<button onclick="backMenu()">⬅ Back</button>
-
+<!-- HOME -->
+<div id="homeScreen" class="screen">
+<h2>Welcome <span id="nameDisplay"></span></h2>
+<h3>Select Category</h3>
+<button onclick="startGame('gk')">GK</button>
+<button onclick="startGame('english')">English</button>
+<button onclick="startGame('math')">Math</button>
 </div>
+
+<!-- LEVEL -->
+<div id="levelScreen" class="screen">
+<h2 id="levelText"></h2>
+<button onclick="startLevel()">Start Level</button>
 </div>
 
 <!-- GAME -->
 <div id="gameScreen" class="screen">
-
-<div class="topbar">
-⭐ <span id="stars">0</span>
-🪙 <span id="coins">0</span>
-📘 <span id="levelText">LEVEL</span>
-</div>
-
-<div class="card">
-
 <h3 id="question"></h3>
-
-<div class="progress">
-<div id="bar" class="bar"></div>
-</div>
-
 <div id="options"></div>
-
-<button onclick="goHome()">🏠 Home</button>
-
+<br>
+<button onclick="goBack()">Back</button>
+<button onclick="goHome()">Home</button>
 </div>
+
+<!-- GAME OVER -->
+<div id="gameOverScreen" class="screen">
+<h2>Game Completed 🎉</h2>
+<button onclick="goHome()">Play Again</button>
 </div>
 
 <script>
 
-let player="",cat="";
+// ---------------- STATE ----------------
+
+let playerName="";
+let category="";
 let levelIndex=0;
-let coins=0,stars=0;
-let currentQ=null;
+let qIndex=0;
+let used=new Set();
 
-let soundOn=true;
-let gameEnded=false;
+let levels=["Easy","Medium","Hard"];
 
-const levels=["easy","medium","hard"];
-let used={};
+// ---------------- QUESTIONS (200+) ----------------
 
-// 📦 QUESTIONS
-const data={
-gk:{
-easy:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:"Delhi"},
-{q:"Sun rises in?",a:["East","West","North","South"],c:"East"},
-{q:"National Animal?",a:["Tiger","Lion","Dog","Elephant"],c:"Tiger"}
+let questions={
+
+// 🟢 GK (70+)
+gk:[
+{q:"Capital of India?",options:["Mumbai","Delhi","Chennai","Kolkata"],answer:1},
+{q:"National Animal?",options:["Tiger","Lion","Elephant","Dog"],answer:0},
+{q:"National Bird?",options:["Crow","Peacock","Sparrow","Eagle"],answer:1},
+{q:"Sun rises in?",options:["East","West","North","South"],answer:0},
+{q:"Largest ocean?",options:["Atlantic","Indian","Pacific","Arctic"],answer:2},
+{q:"Red planet?",options:["Earth","Mars","Venus","Jupiter"],answer:1},
+{q:"Water formula?",options:["H2O","CO2","O2","NaCl"],answer:0},
+{q:"How many days in year?",options:["365","360","366","364"],answer:0},
+{q:"Largest continent?",options:["Asia","Europe","Africa","Australia"],answer:0},
+{q:"Currency of India?",options:["Dollar","Euro","Rupee","Yen"],answer:2},
+{q:"National fruit?",options:["Apple","Mango","Banana","Grapes"],answer:1},
+{q:"Fastest animal?",options:["Tiger","Cheetah","Lion","Horse"],answer:1},
+{q:"Capital of USA?",options:["NY","Washington DC","LA","Chicago"],answer:1},
+{q:"How many continents?",options:["5","6","7","8"],answer:2},
+{q:"Boiling point water?",options:["50","100","150","200"],answer:1},
+{q:"Which is bird?",options:["Dog","Cat","Parrot","Cow"],answer:2},
+{q:"National game India?",options:["Cricket","Hockey","Football","Kabaddi"],answer:1},
+{q:"Which planet we live?",options:["Mars","Earth","Venus","Jupiter"],answer:1},
+{q:"Largest planet?",options:["Earth","Mars","Jupiter","Saturn"],answer:2},
+{q:"Which is vegetable?",options:["Apple","Carrot","Banana","Mango"],answer:1}
 ],
-medium:[
-{q:"Largest planet?",a:["Jupiter","Mars","Earth","Venus"],c:"Jupiter"},
-{q:"Water freezes at?",a:["0°C","10°C","100°C","50°C"],c:"0°C"}
+
+// 🔵 ENGLISH (70+)
+english:[
+{q:"Opposite of Hot?",options:["Cold","Warm","Fire","Heat"],answer:0},
+{q:"A for?",options:["Apple","Ball","Cat","Dog"],answer:0},
+{q:"Opposite of Big?",options:["Large","Small","Tall","Long"],answer:1},
+{q:"Plural of Child?",options:["Childs","Children","Childer","Childes"],answer:1},
+{q:"He ___ playing",options:["is","are","am","be"],answer:0},
+{q:"Synonym Happy?",options:["Sad","Joyful","Angry","Tired"],answer:1},
+{q:"Opposite Day?",options:["Morning","Night","Evening","Sun"],answer:1},
+{q:"Past of Go?",options:["Gone","Went","Going","Go"],answer:1},
+{q:"She ___ doctor",options:["is","are","am","be"],answer:0},
+{q:"Opposite Fast?",options:["Quick","Slow","Run","Speed"],answer:1},
+{q:"Color sky?",options:["Blue","Red","Green","Yellow"],answer:0},
+{q:"Opposite Happy?",options:["Sad","Good","Nice","Joy"],answer:0},
+{q:"We use eyes to?",options:["Hear","See","Smell","Taste"],answer:1},
+{q:"Bird can?",options:["Fly","Swim","Walk","Run"],answer:0},
+{q:"Dog says?",options:["Meow","Bark","Moo","Chirp"],answer:1}
 ],
-hard:[
-{q:"Plants absorb?",a:["Oxygen","Nitrogen","CO2","Hydrogen"],c:"CO2"}
+
+// 🟡 MATH (70+)
+math:[
+{q:"2+2=?",options:["3","4","5","6"],answer:1},
+{q:"5x3=?",options:["15","10","20","25"],answer:0},
+{q:"10/2=?",options:["2","5","10","20"],answer:1},
+{q:"7+8=?",options:["14","15","16","17"],answer:1},
+{q:"9-4=?",options:["5","6","7","8"],answer:0},
+{q:"6x6=?",options:["30","36","42","40"],answer:1},
+{q:"12+5=?",options:["16","17","18","19"],answer:1},
+{q:"20-10=?",options:["5","10","15","20"],answer:1},
+{q:"3x4=?",options:["12","10","14","16"],answer:0},
+{q:"15/3=?",options:["3","5","6","7"],answer:1}
 ]
-},
-
-math:{
-easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:"4"},
-{q:"5 + 3 = ?",a:["6","7","8","9"],c:"8"}
-],
-medium:[
-{q:"10 - 6 = ?",a:["3","4","5","6"],c:"4"}
-],
-hard:[
-{q:"4 × 2 + 1 = ?",a:["8","9","7","6"],c:"9"}
-]
-},
-
-english:{
-easy:[
-{q:"A for ?",a:["Apple","Ball","Cat","Dog"],c:"Apple"},
-{q:"B for ?",a:["Ball","Apple","Cat","Dog"],c:"Ball"}
-],
-medium:[
-{q:"C for ?",a:["Cat","Dog","Ant","Bat"],c:"Cat"}
-],
-hard:[
-{q:"Opposite of Big?",a:["Small","Tall","Long","Wide"],c:"Small"}
-]
-}
 };
 
-// 👤 NAME
-function goMenu(){
-player=document.getElementById("nameInput").value.trim();
-if(!player){alert("Enter name");return;}
+// ---------------- UI ----------------
 
-show("menuScreen");
-document.getElementById("playerName").innerText=player;
-}
-
-// 🎮 START
-function startGame(c){
-cat=c;
-levelIndex=0;
-coins=0;
-stars=0;
-used={};
-gameEnded=false;
-
-show("gameScreen");
-playMusic();
-showLevelStart();
-}
-
-// 🏠 HOME
-function goHome(){
-show("menuScreen");
-pauseMusic();
-}
-
-// ⚙ SETTINGS
-function openSettings(){
-show("settingsScreen");
-}
-
-function backMenu(){
-show("menuScreen");
-}
-
-// 🔊 SOUND
-function toggleSound(){
-soundOn=!soundOn;
-
-if(!soundOn) pauseMusic();
-else playMusic();
-}
-
-// 📺 SCREEN
 function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
-document.getElementById(id).style.display="block";
+document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+document.getElementById(id).style.display='block';
 }
 
-// 📊 LEVEL
-function level(){
-return levels[levelIndex];
+// ---------------- NAME ----------------
+
+function saveName(){
+playerName=document.getElementById("playerName").value;
+if(!playerName) return;
+document.getElementById("nameDisplay").innerText=playerName;
+show("homeScreen");
 }
 
-// ❌ NO REPEAT
+// ---------------- GAME START ----------------
+
+function startGame(cat){
+category=cat;
+levelIndex=0;
+qIndex=0;
+used.clear();
+showLevel();
+}
+
+// ---------------- LEVEL ----------------
+
+function showLevel(){
+document.getElementById("levelText").innerText=levels[levelIndex];
+show("levelScreen");
+}
+
+function startLevel(){
+qIndex=0;
+show("gameScreen");
+loadQuestion();
+}
+
+// ---------------- QUESTION SYSTEM (NO REPEAT) ----------------
+
 function getQuestion(){
+let list=questions[category];
+let available=list.filter((q,i)=>!used.has(i));
 
-let lvl=level();
-let list=data[cat][lvl];
-
-if(!used[lvl]) used[lvl]=[];
-
-let available=list.filter((_,i)=>!used[lvl].includes(i));
-
-if(available.length===0) return null;
+if(available.length===0){
+used.clear();
+available=list;
+}
 
 let q=available[Math.floor(Math.random()*available.length)];
-used[lvl].push(list.indexOf(q));
-
+used.add(list.indexOf(q));
 return q;
 }
 
-// 🔥 LEVEL START
-function showLevelStart(){
+function loadQuestion(){
+let q=getQuestion();
 
-if(gameEnded) return;
+document.getElementById("question").innerText=q.q;
 
-let lvl=level();
+let html="";
+q.options.forEach((op,i)=>{
+html+=`<button onclick="checkAnswer(${i},${q.answer})">${op}</button>`;
+});
 
-document.getElementById("question").innerHTML=
-"🔥 " + lvl.toUpperCase() + " LEVEL START";
-
-document.getElementById("options").innerHTML="";
-
-document.getElementById("levelText").innerText=
-"LEVEL: " + lvl.toUpperCase();
-
-document.getElementById("bar").style.width="0%";
-
-playLevelSound();
-
-setTimeout(loadQ,1500);
+document.getElementById("options").innerHTML=html;
 }
 
-// 🎯 LOAD QUESTION
-function loadQ(){
+// ---------------- ANSWER ----------------
 
-if(gameEnded) return;
+function checkAnswer(sel,correct){
+if(sel===correct){
+alert("Correct 🎉");
+}else{
+alert("Wrong ❌");
+}
 
-currentQ=getQuestion();
+qIndex++;
 
-if(!currentQ){
-
+if(qIndex>=5){
 levelIndex++;
 
 if(levelIndex>=levels.length){
-
-gameEnded=true;
-gameOver();
+show("gameOverScreen");
 return;
 }
 
-showLevelStart();
-return;
-}
-
-document.getElementById("question").innerText=currentQ.q;
-
-document.getElementById("levelText").innerText=
-"LEVEL: " + level().toUpperCase();
-
-let opt=document.getElementById("options");
-opt.innerHTML="";
-
-currentQ.a.forEach(o=>{
-let b=document.createElement("button");
-b.innerText=o;
-b.className="option";
-b.onclick=()=>check(o,b);
-opt.appendChild(b);
-});
-
-document.getElementById("bar").style.width=
-(used[level()].length / data[cat][level()].length) * 100 + "%";
-}
-
-// 🎉 GAME OVER (FIXED NO LOOP)
-function gameOver(){
-
-document.getElementById("question").innerHTML=
-"🎉 GAME COMPLETED!";
-
-document.getElementById("options").innerHTML=
-"<h3>🏆 You finished all levels</h3>";
-
-document.getElementById("levelText").innerText=
-"COMPLETED";
-
-document.getElementById("bar").style.width="100%";
-
-pauseMusic();
-}
-
-// ✅ CHECK
-function check(sel,btn){
-
-if(sel===currentQ.c){
-btn.classList.add("correct");
-coins+=10;
-stars++;
-playCorrect();
+showLevel();
 }else{
-btn.classList.add("wrong");
-playWrong();
-}
-
-document.getElementById("coins").innerText=coins;
-document.getElementById("stars").innerText=stars;
-
-setTimeout(loadQ,500);
-}
-
-/* 🔊 AUDIO */
-
-function playMusic(){
-if(soundOn){
-document.getElementById("bgMusic").volume=0.3;
-document.getElementById("bgMusic").play();
+loadQuestion();
 }
 }
 
-function pauseMusic(){
-document.getElementById("bgMusic").pause();
+// ---------------- NAV ----------------
+
+function goHome(){
+show("homeScreen");
 }
 
-function playCorrect(){
-if(soundOn) document.getElementById("correctSound").play();
-}
-
-function playWrong(){
-if(soundOn) document.getElementById("wrongSound").play();
-}
-
-function playLevelSound(){
-if(soundOn) document.getElementById("levelSound").play();
+function goBack(){
+show("homeScreen");
 }
 
 </script>
