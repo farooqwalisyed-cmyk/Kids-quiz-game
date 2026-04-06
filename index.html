@@ -79,7 +79,7 @@ background:#2ecc71;
 <source src="https://actions.google.com/sounds/v1/cartoon/pop.ogg">
 </audio>
 
-<!-- NAME -->
+<!-- NAME SCREEN -->
 <div id="nameScreen" class="screen" style="display:block;">
 <div class="card">
 <h2>👋 Enter Name</h2>
@@ -145,7 +145,8 @@ let levelIndex=0;
 let coins=0,stars=0;
 let currentQ=null;
 
-let soundOn = true;
+let soundOn=true;
+let gameEnded=false;
 
 const levels=["easy","medium","hard"];
 let used={};
@@ -210,6 +211,7 @@ levelIndex=0;
 coins=0;
 stars=0;
 used={};
+gameEnded=false;
 
 show("gameScreen");
 playMusic();
@@ -231,15 +233,12 @@ function backMenu(){
 show("menuScreen");
 }
 
-// 🔊 SOUND TOGGLE
+// 🔊 SOUND
 function toggleSound(){
-soundOn = !soundOn;
+soundOn=!soundOn;
 
-if(!soundOn){
-pauseMusic();
-}else{
-playMusic();
-}
+if(!soundOn) pauseMusic();
+else playMusic();
 }
 
 // 📺 SCREEN
@@ -274,6 +273,8 @@ return q;
 // 🔥 LEVEL START
 function showLevelStart(){
 
+if(gameEnded) return;
+
 let lvl=level();
 
 document.getElementById("question").innerHTML=
@@ -291,8 +292,10 @@ playLevelSound();
 setTimeout(loadQ,1500);
 }
 
-// 🎯 LOAD
+// 🎯 LOAD QUESTION
 function loadQ(){
+
+if(gameEnded) return;
 
 currentQ=getQuestion();
 
@@ -300,9 +303,11 @@ if(!currentQ){
 
 levelIndex++;
 
-if(levelIndex >= levels.length){
+if(levelIndex>=levels.length){
+
+gameEnded=true;
 gameOver();
-return;   // 🔥 STOP GAME HERE
+return;
 }
 
 showLevelStart();
@@ -329,6 +334,23 @@ document.getElementById("bar").style.width=
 (used[level()].length / data[cat][level()].length) * 100 + "%";
 }
 
+// 🎉 GAME OVER (FIXED NO LOOP)
+function gameOver(){
+
+document.getElementById("question").innerHTML=
+"🎉 GAME COMPLETED!";
+
+document.getElementById("options").innerHTML=
+"<h3>🏆 You finished all levels</h3>";
+
+document.getElementById("levelText").innerText=
+"COMPLETED";
+
+document.getElementById("bar").style.width="100%";
+
+pauseMusic();
+}
+
 // ✅ CHECK
 function check(sel,btn){
 
@@ -336,9 +358,7 @@ if(sel===currentQ.c){
 btn.classList.add("correct");
 coins+=10;
 stars++;
-
 playCorrect();
-
 }else{
 btn.classList.add("wrong");
 playWrong();
@@ -350,7 +370,7 @@ document.getElementById("stars").innerText=stars;
 setTimeout(loadQ,500);
 }
 
-/* 🎵 MUSIC FUNCTIONS */
+/* 🔊 AUDIO */
 
 function playMusic(){
 if(soundOn){
@@ -374,19 +394,6 @@ if(soundOn) document.getElementById("wrongSound").play();
 function playLevelSound(){
 if(soundOn) document.getElementById("levelSound").play();
 }
-  function gameOver(){
-
-document.getElementById("question").innerHTML =
-"🎉 GAME COMPLETED!";
-
-document.getElementById("options").innerHTML =
-"<h3>You finished all levels 🏆</h3>";
-
-document.getElementById("levelText").innerText =
-"COMPLETED";
-
-document.getElementById("bar").style.width = "100%";
-  }
 
 </script>
 
