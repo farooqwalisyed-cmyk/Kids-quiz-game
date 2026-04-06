@@ -58,13 +58,14 @@ button:hover{
   position:fixed;
   top:0;
   left:0;
-  width:100%;
-  height:100%;
+  right:0;
+  bottom:0;
+
   background:rgba(0,0,0,0.6);
 
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  /* FORCE CENTERING */
+  display:grid;
+  place-items:center;
 
   z-index:99999;
 }
@@ -80,7 +81,7 @@ button:hover{
 }
   .popupBox{
   animation:pop 0.2s ease;
-}
+  }
 
 @keyframes pop{
   from{transform:scale(0.6); opacity:0;}
