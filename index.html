@@ -102,8 +102,7 @@ button{
 <h3 id="q"></h3>
 <div id="opts"></div>
 
-<button class="btn" onclick="prev()">⬅ Prev</button>
-<button class="btn" onclick="next()">➡ Next</button>
+<button class="btn" onclick="restart()">🔄 Restart</button>
 <button class="btn" onclick="home()">🏠 Home</button>
 
 </div>
@@ -146,8 +145,8 @@ function playSound(type){
 
  o.start();
 
- g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.35);
- o.stop(audioCtx.currentTime + 0.35);
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+ o.stop(audioCtx.currentTime + 0.4);
 }
 
 /* ---------------- DATA ---------------- */
@@ -192,12 +191,9 @@ const data={
 /* ---------------- START ---------------- */
 
 function startGame(){
-
- unlockAudio(); // 🔊 FIRST TOUCH FIX
-
+ unlockAudio();
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
-
  setTimeout(()=>playSound("welcome"),200);
 }
 
@@ -221,7 +217,7 @@ function load(){
 
  if(!q){
   alert("🎉 Level Completed!");
-  home();
+  restart();
   return;
  }
 
@@ -237,7 +233,7 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- CHECK ---------------- */
+/* ---------------- CHECK + AUTO NEXT FIX ---------------- */
 
 function check(ans,btn){
 
@@ -250,22 +246,18 @@ function check(ans,btn){
   playSound("wrong");
   btn.classList.add("wrong");
  }
+
+ setTimeout(()=>{
+  i++;              // ✅ FIXED AUTO NEXT
+  load();
+ },700);
 }
 
-/* ---------------- NAVIGATION ---------------- */
+/* ---------------- RESTART FIX ---------------- */
 
-function next(){
- if(i < data[cat][diff].length - 1){
-  i++;
-  load();
- }
-}
-
-function prev(){
- if(i > 0){
-  i--;
-  load();
- }
+function restart(){
+ i=0;
+ load();
 }
 
 /* ---------------- HOME ---------------- */
