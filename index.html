@@ -24,7 +24,7 @@ body{
 
 button{
  padding:12px;
- margin:8px;
+ margin:6px;
  border:none;
  border-radius:12px;
  font-size:16px;
@@ -40,12 +40,7 @@ button{
 .hidden{display:none;}
 
 .top{
- font-size:18px;
- margin-bottom:10px;
-}
-
-.option{
- width:100%;
+ margin:10px 0;
 }
 </style>
 </head>
@@ -80,10 +75,6 @@ button{
 <!-- GAME -->
 <div id="game" class="hidden">
 
- <div class="top">
-  ❤️ <span id="life">3</span> | 💰 <span id="coin">0</span> | ⭐ <span id="star">0</span>
- </div>
-
  <h3 id="q"></h3>
  <div id="opts"></div>
 
@@ -97,54 +88,21 @@ let cat = "";
 let diff = "";
 let i = 0;
 
-let life = 3;
-let coin = 0;
-let star = 0;
-
 const data = {
  math:{
-  easy:[
-   {q:"2 + 2 = ?", a:1, o:["3","4","5"]},
-   {q:"5 + 1 = ?", a:2, o:["5","6","7"]}
-  ],
-  medium:[
-   {q:"10 + 5 = ?", a:2, o:["12","13","15"]},
-   {q:"9 + 6 = ?", a:2, o:["13","14","15"]}
-  ],
-  hard:[
-   {q:"12 × 2 = ?", a:1, o:["20","24","26"]},
-   {q:"15 × 3 = ?", a:2, o:["30","40","45"]}
-  ]
+  easy:[{q:"2+2?",a:1,o:["3","4","5"]}],
+  medium:[{q:"5+5?",a:2,o:["8","9","10"]}],
+  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
  },
-
  english:{
-  easy:[
-   {q:"A for ?", a:0, o:["Apple","Ball","Cat"]},
-   {q:"B for ?", a:1, o:["Apple","Ball","Dog"]}
-  ],
-  medium:[
-   {q:"Plural of Book?", a:0, o:["Books","Book","Bookes"]},
-   {q:"Opposite of Big?", a:2, o:["Large","Huge","Small"]}
-  ],
-  hard:[
-   {q:"Synonym of Happy?", a:1, o:["Sad","Joyful","Angry"]},
-   {q:"Opposite of Hot?", a:0, o:["Cold","Warm","Heat"]}
-  ]
+  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
+  medium:[{q:"Plural Book?",a:0,o:["Books","Book","Boks"]}],
+  hard:[{q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}]
  },
-
  gk:{
-  easy:[
-   {q:"Days in a week?", a:2, o:["5","6","7"]},
-   {q:"Months in a year?", a:1, o:["10","12","11"]}
-  ],
-  medium:[
-   {q:"Capital of India?", a:0, o:["Delhi","Mumbai","Kolkata"]},
-   {q:"National animal?", a:2, o:["Lion","Elephant","Tiger"]}
-  ],
-  hard:[
-   {q:"Largest ocean?", a:1, o:["Atlantic","Pacific","Indian"]},
-   {q:"Planet we live on?", a:0, o:["Earth","Mars","Venus"]}
-  ]
+  easy:[{q:"Days week?",a:2,o:["5","6","7"]}],
+  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
+  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
  }
 };
 
@@ -163,19 +121,26 @@ function setDiff(d){
 
 function startGame(){
 
- if(!cat || !diff){
-  alert("Select category and difficulty");
+ // ✅ HARD SAFETY FIX
+ if(!cat){
+  alert("Please select CATEGORY");
+  return;
+ }
+
+ if(!diff){
+  alert("Please select DIFFICULTY");
+  return;
+ }
+
+ if(!data[cat] || !data[cat][diff]){
+  alert("Level data missing");
   return;
  }
 
  document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- i=0;
- life=3;
- coin=0;
- star=0;
-
+ i = 0;
  load();
 }
 
@@ -184,21 +149,19 @@ function load(){
  let q = data[cat][diff][i];
 
  if(!q){
-  alert("Completed!");
+  alert("Level Completed!");
   location.reload();
   return;
  }
 
  document.getElementById("q").innerText = q.q;
 
- let html="";
- q.o.forEach((op,idx)=>{
-  html += `<button class="btn option" onclick="check(${idx})">${op}</button>`;
+ let html = "";
+ q.o.forEach((opt,idx)=>{
+  html += `<button class="btn" onclick="check(${idx})">${opt}</button>`;
  });
 
  document.getElementById("opts").innerHTML = html;
-
- update();
 }
 
 function check(ans){
@@ -206,25 +169,13 @@ function check(ans){
  let q = data[cat][diff][i];
 
  if(ans === q.a){
-  coin += 10;
-  star++;
+  alert("Correct ✔");
  } else {
-  life--;
- }
-
- if(life <= 0){
-  alert("Game Over");
-  location.reload();
+  alert("Wrong ❌");
  }
 
  i++;
  load();
-}
-
-function update(){
- document.getElementById("life").innerText = life;
- document.getElementById("coin").innerText = coin;
- document.getElementById("star").innerText = star;
 }
 
 </script>
