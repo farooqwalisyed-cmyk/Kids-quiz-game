@@ -164,15 +164,21 @@ hard: false
 
 // QUESTIONS
 const questions={
-gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
+gk:{
+easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
 medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
-hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]},
-english:{easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
+hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]
+},
+english:{
+easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
 medium:[{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1}],
-hard:[{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}]},
-math:{easy:[{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}],
+hard:[{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}]
+},
+math:{
+easy:[{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}],
 medium:[{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}],
-hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]}
+hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]
+}
 };
 
 // SOUND
@@ -198,7 +204,7 @@ event.target.innerText = soundOn ? "🔊 Sound" : "🔇 Mute";
 function shuffle(arr){
 let a=[...arr];
 for(let i=a.length-1;i>0;i--){
-let j=Math.random()* (i+1) | 0;
+let j=Math.floor(Math.random()*(i+1));
 [a[i],a[j]]=[a[j],a[i]];
 }
 return a;
@@ -210,7 +216,7 @@ document.getElementById("emoji").innerText=
 t==="good"?"🎉":"😢";
 }
 
-// 🔥 UPDATE BUTTONS BASED ON UNLOCK
+// 🔥 UPDATE BUTTONS
 function updateLevelButtons(){
 
 let mediumBtn=document.getElementById("mediumBtn");
@@ -361,7 +367,7 @@ loadQ();
 }
 }
 
-// RESULT + UNLOCK FIX
+// RESULT (✅ FIXED UNLOCK)
 function showResult(){
 
 document.getElementById("screen3").classList.add("hidden");
@@ -370,9 +376,13 @@ document.getElementById("screen4").classList.remove("hidden");
 document.getElementById("finalScore").innerText=
 "⭐ "+stars+" 💰 "+coins;
 
-// 🔓 PERMANENT UNLOCK
-if(stars>=1) unlockedLevels.medium=true;
-if(stars>=2) unlockedLevels.hard=true;
+// ✅ UNLOCK BASED ON COMPLETION
+if(level==="easy"){
+unlockedLevels.medium=true;
+}
+if(level==="medium"){
+unlockedLevels.hard=true;
+}
 
 updateLevelButtons();
 
