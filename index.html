@@ -32,7 +32,6 @@ button{
 }
 
 .btn{background:white;color:black;}
-
 .option{width:100%;}
 
 .hidden{display:none;}
@@ -64,24 +63,25 @@ button{
 <!-- HOME -->
 <div id="home">
   <h2>🎮 Kids Quiz PRO</h2>
-  <button class="btn" onclick="goSetup()">Start Game</button>
+  <button class="btn" onclick="openSetup()">Start Game</button>
 </div>
 
 <!-- SETUP -->
 <div id="setup" class="hidden">
 
-  <h3>Select Category</h3>
-  <button class="btn" onclick="cat='math'">Math</button>
-  <button class="btn" onclick="cat='english'">English</button>
-  <button class="btn" onclick="cat='gk'">GK</button>
+  <h3>Category</h3>
+  <button class="btn" onclick="selectCat('math')">Math</button>
+  <button class="btn" onclick="selectCat('english')">English</button>
+  <button class="btn" onclick="selectCat('gk')">GK</button>
 
-  <h3>Select Difficulty</h3>
-  <button class="btn" onclick="diff='easy'">Easy</button>
-  <button class="btn" onclick="diff='medium'">Medium</button>
-  <button class="btn" onclick="diff='hard'">Hard</button>
+  <h3>Difficulty</h3>
+  <button class="btn" onclick="selectDiff('easy')">Easy</button>
+  <button class="btn" onclick="selectDiff('medium')">Medium</button>
+  <button class="btn" onclick="selectDiff('hard')">Hard</button>
 
   <br>
-  <button class="btn" onclick="start()">Play Quiz</button>
+  <button class="btn" onclick="startGame()">Play Quiz</button>
+
 </div>
 
 <!-- GAME -->
@@ -91,7 +91,6 @@ button{
   <div>❤️ <span id="life">3</span></div>
   <div>💰 <span id="coin">0</span></div>
   <div>⭐ <span id="star">0</span></div>
-  <div>🔊 <button class="btn" onclick="toggle()">ON</button></div>
  </div>
 
  <div class="bar"><div class="fill" id="bar"></div></div>
@@ -105,18 +104,36 @@ button{
 
 <script>
 
-let cat="", diff="";
-let q=[], i=0;
-let life=3, coin=0, star=0;
-let sound=true;
+let cat = "";
+let diff = "";
 
-// SOUND TOGGLE
-function toggle(){
- sound=!sound;
+let qlist = [];
+let i = 0;
+
+let life = 3;
+let coin = 0;
+let star = 0;
+
+// NAV
+function openSetup(){
+ document.getElementById("home").style.display="none";
+ document.getElementById("setup").style.display="block";
 }
 
-// SIMPLE DATA
-const data={
+// SAVE CATEGORY
+function selectCat(c){
+ cat = c;
+ alert("Selected: " + c);
+}
+
+// SAVE DIFFICULTY
+function selectDiff(d){
+ diff = d;
+ alert("Selected: " + d);
+}
+
+// DATA
+const data = {
  math:{
   easy:[{q:"2+2?",o:["3","4","5","6"],a:1}],
   medium:[{q:"10+5?",o:["13","14","15","16"],a:2}],
@@ -134,58 +151,55 @@ const data={
  }
 };
 
-// NAVIGATION
-function goSetup(){
- document.getElementById("home").style.display="none";
- document.getElementById("setup").style.display="block";
-}
+// START GAME (FIXED)
+function startGame(){
 
-// START
-function start(){
-
- if(!cat||!diff){
-  alert("Select options");
+ if(cat==="" || diff===""){
+  alert("Please select Category AND Difficulty");
   return;
  }
 
  document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- q=[...data[cat][diff]];
+ qlist = [...data[cat][diff]];
  i=0;
- life=3; coin=0; star=0;
+ life=3;
+ coin=0;
+ star=0;
 
  load();
 }
 
-// LOAD
+// LOAD QUESTION
 function load(){
 
- if(i>=q.length){
+ if(i>=qlist.length){
   alert("Completed!");
   location.reload();
   return;
  }
 
- let x=q[i];
- document.getElementById("q").innerText=x.q;
+ let x = qlist[i];
+ document.getElementById("q").innerText = x.q;
 
  let html="";
- x.o.forEach((o,idx)=>{
-  html+=`<button class="btn option" onclick="check(${idx})">${o}</button>`;
+ x.o.forEach((op,idx)=>{
+  html+=`<button class="btn option" onclick="check(${idx})">${op}</button>`;
  });
 
- document.getElementById("opt").innerHTML=html;
+ document.getElementById("opt").innerHTML = html;
 
- document.getElementById("bar").style.width=(i/q.length)*100+"%";
+ document.getElementById("bar").style.width =
+ (i/qlist.length)*100 + "%";
 
  update();
 }
 
-// CHECK
+// CHECK ANSWER
 function check(n){
 
- if(n===q[i].a){
+ if(n === qlist[i].a){
   coin+=10;
   star++;
  } else {
@@ -203,9 +217,9 @@ function check(n){
 
 // UPDATE UI
 function update(){
- document.getElementById("life").innerText=life;
- document.getElementById("coin").innerText=coin;
- document.getElementById("star").innerText=star;
+ document.getElementById("life").innerText = life;
+ document.getElementById("coin").innerText = coin;
+ document.getElementById("star").innerText = star;
 }
 
 </script>
