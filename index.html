@@ -18,16 +18,14 @@ body{
 .card{
  width:95%;
  max-width:520px;
- background: rgba(0,0,0,0.35);
+ background: rgba(0,0,0,0.4);
  padding:25px;
  border-radius:25px;
  text-align:center;
  color:white;
 }
 
-h2{
- color:#ffe600;
-}
+h2{color:#ffe600;}
 
 h3{color:#00e5ff;}
 
@@ -48,43 +46,29 @@ button{
 .c3{background:#51cf66;}
 .c4{background:#ffd43b; color:black;}
 
-/* ✅ CORRECT CELEBRATION */
-.correct{
- animation:pop 0.4s ease;
- background:#2ecc71 !important;
-}
-
-/* ❌ WRONG SHAKE */
-.wrong{
- animation:shake 0.4s ease;
- background:#e74c3c !important;
-}
-
-/* 🎉 BIG CELEBRATION EFFECT */
-.celebrate{
- animation:boom 0.6s ease;
-}
+.correct{animation:pop 0.4s ease; background:#2ecc71 !important;}
+.wrong{animation:shake 0.4s ease; background:#e74c3c !important;}
+.celebrate{animation:boom 0.6s ease;}
 
 @keyframes pop{
- 0%{transform:scale(1);}
- 50%{transform:scale(1.3);}
- 100%{transform:scale(1);}
+0%{transform:scale(1);}
+50%{transform:scale(1.3);}
+100%{transform:scale(1);}
 }
 
 @keyframes shake{
- 0%{transform:translateX(0);}
- 25%{transform:translateX(-6px);}
- 50%{transform:translateX(6px);}
- 100%{transform:translateX(0);}
+0%{transform:translateX(0);}
+25%{transform:translateX(-6px);}
+50%{transform:translateX(6px);}
+100%{transform:translateX(0);}
 }
 
 @keyframes boom{
- 0%{transform:scale(1);}
- 30%{transform:scale(1.4) rotate(3deg);}
- 60%{transform:scale(1.2) rotate(-3deg);}
- 100%{transform:scale(1);}
+0%{transform:scale(1);}
+30%{transform:scale(1.4) rotate(3deg);}
+60%{transform:scale(1.2) rotate(-3deg);}
+100%{transform:scale(1);}
 }
-
 </style>
 </head>
 
@@ -102,22 +86,22 @@ button{
 
 <div id="setup" style="display:none">
 
- <h3>Select Category</h3>
- <button class="c1" onclick="setCat('math')">Math</button>
- <button class="c2" onclick="setCat('english')">English</button>
- <button class="c3" onclick="setCat('gk')">GK</button>
+<h3>Select Category</h3>
+<button class="c1" onclick="setCat('math')">Math</button>
+<button class="c2" onclick="setCat('english')">English</button>
+<button class="c3" onclick="setCat('gk')">GK</button>
 
- <h3>Select Difficulty</h3>
- <button class="c1" onclick="setDiff('easy')">Easy</button>
- <button class="c2" onclick="setDiff('medium')">Medium</button>
- <button class="c3" onclick="setDiff('hard')">Hard</button>
+<h3>Select Difficulty</h3>
+<button class="c1" onclick="setDiff('easy')">Easy</button>
+<button class="c2" onclick="setDiff('medium')">Medium</button>
+<button class="c3" onclick="setDiff('hard')">Hard</button>
 
 </div>
 
 <div id="game" style="display:none">
 
- <h3 id="q"></h3>
- <div id="opts"></div>
+<h3 id="q"></h3>
+<div id="opts"></div>
 
 </div>
 
@@ -130,22 +114,24 @@ let diff=null;
 let i=0;
 let sound=true;
 let audioCtx=null;
+let audioUnlocked=false;
 
-/* ---------------- AUDIO FIX ---------------- */
+/* ---------------- AUDIO ENGINE FIX ---------------- */
 
-function initAudio(){
- if(!audioCtx){
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
- }
- audioCtx.resume();
+function unlockAudio(){
+ if(audioUnlocked) return;
+
+ audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+ audioCtx.resume().then(()=>{
+  audioUnlocked=true;
+ });
 }
 
-/* ---------------- SOUNDS ---------------- */
+/* ---------------- SOUND ---------------- */
 
 function playSound(type){
- if(!sound) return;
-
- initAudio();
+ if(!sound || !audioUnlocked) return;
 
  const o = audioCtx.createOscillator();
  const g = audioCtx.createGain();
@@ -153,9 +139,9 @@ function playSound(type){
  o.connect(g);
  g.connect(audioCtx.destination);
 
- if(type==="welcome") o.frequency.value=600;
+ if(type==="welcome") o.frequency.value=650;
  if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=180;
+ if(type==="wrong") o.frequency.value=160;
 
  o.start();
 
@@ -205,11 +191,15 @@ const data={
 /* ---------------- START ---------------- */
 
 function startGame(){
+
+ unlockAudio(); // 🔥 MUST BE FIRST USER ACTION
+
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
 
- initAudio();
- playSound("welcome");   // ✅ FIXED
+ setTimeout(()=>{
+  playSound("welcome"); // ✔ NOW ALWAYS WORKS
+ },300);
 }
 
 function setCat(c){ cat=c; tryStart(); }
@@ -248,7 +238,7 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- ANSWER CHECK ---------------- */
+/* ---------------- CHECK ---------------- */
 
 function check(ans,btn){
 
