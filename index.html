@@ -8,63 +8,81 @@
 body{
  margin:0;
  font-family:Arial;
- background:linear-gradient(135deg,#6a11cb,#2575fc);
+ background: radial-gradient(circle at top,#6a11cb,#2575fc);
  color:white;
- text-align:center;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
 }
 
-.box{
+.screen{
+ width:90%;
  max-width:420px;
- margin:auto;
- padding-top:40px;
+ text-align:center;
 }
 
 button{
  padding:12px;
- margin:6px;
+ margin:8px;
  border:none;
- border-radius:10px;
+ border-radius:12px;
  font-size:16px;
  cursor:pointer;
 }
 
-.btn{background:white;color:black;}
+.btn{
+ background:white;
+ color:black;
+ width:80%;
+}
 
 .hidden{display:none;}
+
+.top{
+ font-size:18px;
+ margin-bottom:10px;
+}
+
+.option{
+ width:100%;
+}
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="screen">
 
 <h2>🎮 Kids Quiz PRO</h2>
 
 <!-- HOME -->
 <div id="home">
- <button class="btn" onclick="showSetup()">Start Game</button>
+ <button class="btn" onclick="openSetup()">Start Game</button>
 </div>
 
 <!-- SETUP -->
 <div id="setup" class="hidden">
 
- <h3>Category</h3>
+ <div class="top">Select Category</div>
  <button class="btn" onclick="setCat('math')">Math</button>
  <button class="btn" onclick="setCat('english')">English</button>
  <button class="btn" onclick="setCat('gk')">GK</button>
 
- <h3>Difficulty</h3>
+ <div class="top">Select Difficulty</div>
  <button class="btn" onclick="setDiff('easy')">Easy</button>
  <button class="btn" onclick="setDiff('medium')">Medium</button>
  <button class="btn" onclick="setDiff('hard')">Hard</button>
 
- <br>
  <button class="btn" onclick="startGame()">Play Quiz</button>
-
 </div>
 
 <!-- GAME -->
 <div id="game" class="hidden">
+
+ <div class="top">
+  ❤️ <span id="life">3</span> | 💰 <span id="coin">0</span> | ⭐ <span id="star">0</span>
+ </div>
 
  <h3 id="q"></h3>
  <div id="opts"></div>
@@ -75,96 +93,138 @@ button{
 
 <script>
 
-let cat = null;
-let diff = null;
+let cat = "";
+let diff = "";
 let i = 0;
+
+let life = 3;
+let coin = 0;
+let star = 0;
 
 const data = {
  math:{
-  easy:[{q:"2+2?",a:1,o:["3","4","5"]}],
-  medium:[{q:"5+5?",a:2,o:["8","9","10"]}],
-  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
+  easy:[
+   {q:"2 + 2 = ?", a:1, o:["3","4","5"]},
+   {q:"5 + 1 = ?", a:2, o:["5","6","7"]}
+  ],
+  medium:[
+   {q:"10 + 5 = ?", a:2, o:["12","13","15"]},
+   {q:"9 + 6 = ?", a:2, o:["13","14","15"]}
+  ],
+  hard:[
+   {q:"12 × 2 = ?", a:1, o:["20","24","26"]},
+   {q:"15 × 3 = ?", a:2, o:["30","40","45"]}
+  ]
  },
+
  english:{
-  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
-  medium:[{q:"Plural of Book?",a:0,o:["Books","Book","Boks"]}],
-  hard:[{q:"Opposite of Happy?",a:1,o:["Joy","Sad","Angry"]}]
+  easy:[
+   {q:"A for ?", a:0, o:["Apple","Ball","Cat"]},
+   {q:"B for ?", a:1, o:["Apple","Ball","Dog"]}
+  ],
+  medium:[
+   {q:"Plural of Book?", a:0, o:["Books","Book","Bookes"]},
+   {q:"Opposite of Big?", a:2, o:["Large","Huge","Small"]}
+  ],
+  hard:[
+   {q:"Synonym of Happy?", a:1, o:["Sad","Joyful","Angry"]},
+   {q:"Opposite of Hot?", a:0, o:["Cold","Warm","Heat"]}
+  ]
  },
+
  gk:{
-  easy:[{q:"Days in week?",a:2,o:["5","6","7"]}],
-  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
-  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
+  easy:[
+   {q:"Days in a week?", a:2, o:["5","6","7"]},
+   {q:"Months in a year?", a:1, o:["10","12","11"]}
+  ],
+  medium:[
+   {q:"Capital of India?", a:0, o:["Delhi","Mumbai","Kolkata"]},
+   {q:"National animal?", a:2, o:["Lion","Elephant","Tiger"]}
+  ],
+  hard:[
+   {q:"Largest ocean?", a:1, o:["Atlantic","Pacific","Indian"]},
+   {q:"Planet we live on?", a:0, o:["Earth","Mars","Venus"]}
+  ]
  }
 };
 
-function showSetup(){
+function openSetup(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
 }
 
 function setCat(c){
  cat = c;
- alert("Category: " + c);
 }
 
 function setDiff(d){
  diff = d;
- alert("Difficulty: " + d);
 }
 
 function startGame(){
 
- // SAFE CHECK (IMPORTANT FIX)
  if(!cat || !diff){
-  alert("Select Category and Difficulty first!");
-  return;
- }
-
- if(!data[cat] || !data[cat][diff]){
-  alert("Data missing!");
+  alert("Select category and difficulty");
   return;
  }
 
  document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- i = 0;
+ i=0;
+ life=3;
+ coin=0;
+ star=0;
+
  load();
 }
 
 function load(){
 
- let qData = data[cat][diff][i];
+ let q = data[cat][diff][i];
 
- if(!qData){
-  alert("Quiz finished!");
+ if(!q){
+  alert("Completed!");
   location.reload();
   return;
  }
 
- document.getElementById("q").innerText = qData.q;
+ document.getElementById("q").innerText = q.q;
 
- let html = "";
-
- qData.o.forEach((opt, idx)=>{
-  html += `<button class="btn" onclick="check(${idx})">${opt}</button>`;
+ let html="";
+ q.o.forEach((op,idx)=>{
+  html += `<button class="btn option" onclick="check(${idx})">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML = html;
+
+ update();
 }
 
 function check(ans){
 
- let qData = data[cat][diff][i];
+ let q = data[cat][diff][i];
 
- if(ans === qData.a){
-  alert("Correct ✔");
+ if(ans === q.a){
+  coin += 10;
+  star++;
  } else {
-  alert("Wrong ❌");
+  life--;
+ }
+
+ if(life <= 0){
+  alert("Game Over");
+  location.reload();
  }
 
  i++;
  load();
+}
+
+function update(){
+ document.getElementById("life").innerText = life;
+ document.getElementById("coin").innerText = coin;
+ document.getElementById("star").innerText = star;
 }
 
 </script>
