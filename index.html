@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Kids Quiz PRO</title>
@@ -9,17 +9,17 @@ body{
  margin:0;
  font-family:Arial;
  background: linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
- color:white;
  display:flex;
  justify-content:center;
  align-items:center;
  height:100vh;
+ color:white;
 }
 
 .card{
- width:90%;
+ width:92%;
  max-width:420px;
- background: rgba(0,0,0,0.25);
+ background: rgba(0,0,0,0.3);
  padding:20px;
  border-radius:20px;
  text-align:center;
@@ -36,12 +36,14 @@ button{
 }
 
 .btn{
+ width:100%;
  background:white;
  color:black;
- width:100%;
 }
 
 .hidden{display:none;}
+
+h2,h3{margin:10px 0;}
 </style>
 </head>
 
@@ -51,35 +53,32 @@ button{
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<!-- SOUND -->
-<button class="btn" onclick="toggleSound()">🔊 Sound: <span id="s">ON</span></button>
+<button class="btn" onclick="toggleSound()">🔊 Sound: <span id="soundTxt">ON</span></button>
 
-<!-- HOME -->
 <div id="home">
- <button class="btn" onclick="goSetup()">Start Game</button>
+  <button class="btn" onclick="goSetup()">Start Game</button>
 </div>
 
-<!-- SETUP -->
 <div id="setup" class="hidden">
 
- <h3>Select Category</h3>
- <button class="btn" onclick="setCat('math')">Math</button>
- <button class="btn" onclick="setCat('english')">English</button>
- <button class="btn" onclick="setCat('gk')">GK</button>
+  <h3>Select Category</h3>
+  <button class="btn" onclick="setCat('math')">Math</button>
+  <button class="btn" onclick="setCat('english')">English</button>
+  <button class="btn" onclick="setCat('gk')">GK</button>
 
- <h3>Select Difficulty</h3>
- <button class="btn" onclick="setDiff('easy')">Easy</button>
- <button class="btn" onclick="setDiff('medium')">Medium</button>
- <button class="btn" onclick="setDiff('hard')">Hard</button>
+  <h3>Select Difficulty</h3>
+  <button class="btn" onclick="setDiff('easy')">Easy</button>
+  <button class="btn" onclick="setDiff('medium')">Medium</button>
+  <button class="btn" onclick="setDiff('hard')">Hard</button>
 
- <button class="btn" onclick="startGame()">Play Quiz</button>
+  <button class="btn" onclick="startGame()">Play Quiz</button>
+
 </div>
 
-<!-- GAME -->
 <div id="game" class="hidden">
 
- <h3 id="q"></h3>
- <div id="opts"></div>
+  <h3 id="question">Loading...</h3>
+  <div id="options"></div>
 
 </div>
 
@@ -87,33 +86,59 @@ button{
 
 <script>
 
-let cat="";
-let diff="";
-let i=0;
-let sound=true;
+let cat = null;
+let diff = null;
+let index = 0;
+let sound = true;
 
-const data={
+/* ---------------- SAFE QUESTION BANK (FIXED) ---------------- */
+
+const data = {
  math:{
-  easy:[{q:"2+2?",a:1,o:["3","4","5"]},{q:"5+1?",a:2,o:["5","6","7"]}],
-  medium:[{q:"10+5?",a:2,o:["12","13","15"]}],
-  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
+  easy:[
+   {q:"2 + 2 = ?", o:["3","4","5"], a:1},
+   {q:"5 + 3 = ?", o:["6","7","8"], a:2},
+   {q:"10 - 4 = ?", o:["5","6","7"], a:1},
+   {q:"3 + 6 = ?", o:["7","8","9"], a:2},
+   {q:"2 x 2 = ?", o:["2","4","6"], a:1}
+  ],
+  medium:[
+   {q:"12 + 8 = ?", o:["18","20","22"], a:1},
+   {q:"15 - 7 = ?", o:["6","8","9"], a:1}
+  ],
+  hard:[
+   {q:"12 x 12 = ?", o:["124","144","154"], a:1}
+  ]
  },
+
  english:{
-  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
-  medium:[{q:"Plural Book?",a:0,o:["Books","Book","Boks"]}],
-  hard:[{q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}]
+  easy:[
+   {q:"A for ?", o:["Apple","Ball","Cat"], a:0},
+   {q:"B for ?", o:["Bat","Dog","Egg"], a:0}
+  ],
+  medium:[
+   {q:"Plural of Book?", o:["Books","Bookies","Booked"], a:0}
+  ],
+  hard:[
+   {q:"Opposite of Happy?", o:["Joy","Sad","Glad"], a:1}
+  ]
  },
+
  gk:{
-  easy:[{q:"Days in week?",a:2,o:["5","6","7"]}],
-  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
-  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
+  easy:[
+   {q:"Days in a week?", o:["5","6","7"], a:2},
+   {q:"Capital of India?", o:["Delhi","Mumbai","Chennai"], a:0}
+  ],
+  medium:[
+   {q:"How many continents?", o:["5","6","7"], a:2}
+  ],
+  hard:[
+   {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
+  ]
  }
 };
 
-function toggleSound(){
- sound=!sound;
- document.getElementById("s").innerText = sound?"ON":"OFF";
-}
+/* ---------------- UI FLOW FIX ---------------- */
 
 function goSetup(){
  document.getElementById("home").style.display="none";
@@ -121,57 +146,79 @@ function goSetup(){
 }
 
 function setCat(c){
- cat=c;
+ cat = c;
 }
 
 function setDiff(d){
- diff=d;
+ diff = d;
 }
 
 function startGame(){
 
- // 🔥 STRONG FIX (prevents level not opening)
- if(cat==="" || diff===""){
-  alert("Please select Category AND Difficulty");
+ if(!cat || !diff){
+  alert("⚠ Please select Category and Difficulty");
   return;
  }
 
- i=0;
+ index = 0;
 
  document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- load();
+ loadQuestion();
 }
 
-function load(){
+/* ---------------- SAFE LOADER (IMPORTANT FIX) ---------------- */
 
- let q=data[cat][diff][i];
+function loadQuestion(){
+
+ let questions = data?.[cat]?.[diff];
+
+ if(!questions){
+  document.getElementById("question").innerText = "No questions found!";
+  return;
+ }
+
+ let q = questions[index];
 
  if(!q){
-  alert("Level Completed!");
+  alert("🎉 Level Completed!");
   location.reload();
   return;
  }
 
- document.getElementById("q").innerText=q.q;
+ document.getElementById("question").innerText = q.q;
 
- let html="";
- q.o.forEach((op,idx)=>{
-  html+=`<button class="btn" onclick="check(${idx})">${op}</button>`;
+ let html = "";
+
+ q.o.forEach((opt,i)=>{
+  html += `<button class="btn" onclick="check(${i})">${opt}</button>`;
  });
 
- document.getElementById("opts").innerHTML=html;
+ document.getElementById("options").innerHTML = html;
 }
 
-function check(ans){
+/* ---------------- ANSWER CHECK ---------------- */
 
- let q=data[cat][diff][i];
+function check(i){
 
- alert(ans===q.a ? "Correct ✔" : "Wrong ❌");
+ let q = data[cat][diff][index];
 
- i++;
- load();
+ if(i === q.a){
+  if(sound) console.log("Correct Sound");
+ } else {
+  if(sound) console.log("Wrong Sound");
+ }
+
+ index++;
+ loadQuestion();
+}
+
+/* ---------------- SOUND TOGGLE ---------------- */
+
+function toggleSound(){
+ sound = !sound;
+ document.getElementById("soundTxt").innerText = sound ? "ON" : "OFF";
 }
 
 </script>
