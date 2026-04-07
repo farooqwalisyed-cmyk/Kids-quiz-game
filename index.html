@@ -98,6 +98,11 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 
 <div id="emoji">🙂</div>
 
+<!-- 🎵 BACKGROUND MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=kids-happy-112194.mp3" type="audio/mpeg">
+</audio>
+
 <!-- CATEGORY -->
 <div id="screen1">
 <h3>Select Category</h3>
@@ -154,36 +159,52 @@ let timer;
 let timeLeft=10;
 
 let soundOn=true;
+let musicStarted=false;
 
-// ✅ CATEGORY-WISE UNLOCK SYSTEM
-let unlockedLevels = {
-gk: { easy:true, medium:false, hard:false },
-english: { easy:true, medium:false, hard:false },
-math: { easy:true, medium:false, hard:false }
+// 🔓 CATEGORY UNLOCK
+let unlockedLevels={
+gk:{easy:true,medium:false,hard:false},
+english:{easy:true,medium:false,hard:false},
+math:{easy:true,medium:false,hard:false}
 };
 
-// QUESTIONS
+// QUESTIONS (short for demo)
 const questions={
-gk:{
-easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
+gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
 medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
-hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]
-},
-english:{
-easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
+hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]},
+english:{easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
 medium:[{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1}],
-hard:[{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}]
-},
-math:{
-easy:[{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}],
+hard:[{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}]},
+math:{easy:[{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}],
 medium:[{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}],
-hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]
-}
+hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]}
 };
 
-// SOUND
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// 🎵 MUSIC START
+function startMusic(){
+if(musicStarted) return;
+let music=document.getElementById("bgMusic");
+music.play().catch(()=>{});
+musicStarted=true;
+}
 
+// 🔊 SOUND CONTROL
+function toggleSound(){
+soundOn=!soundOn;
+let music=document.getElementById("bgMusic");
+
+if(soundOn){
+event.target.innerText="🔊 Sound";
+if(musicStarted) music.play();
+}else{
+event.target.innerText="🔇 Mute";
+music.pause();
+}
+}
+
+// 🔔 BEEP
+let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 function beep(freq,time=0.15){
 if(!soundOn) return;
 let o=audioCtx.createOscillator();
@@ -193,11 +214,6 @@ o.connect(g);
 g.connect(audioCtx.destination);
 o.start();
 o.stop(audioCtx.currentTime+time);
-}
-
-function toggleSound(){
-soundOn=!soundOn;
-event.target.innerText = soundOn ? "🔊 Sound" : "🔇 Mute";
 }
 
 // SHUFFLE
@@ -216,54 +232,44 @@ document.getElementById("emoji").innerText=
 t==="good"?"🎉":"😢";
 }
 
-// 🔥 UPDATE BUTTONS PER CATEGORY
+// LEVEL BUTTONS
 function updateLevelButtons(){
-
-let current = unlockedLevels[category];
-
-let mediumBtn=document.getElementById("mediumBtn");
-let hardBtn=document.getElementById("hardBtn");
-
-if(current.medium){
-mediumBtn.disabled=false;
-mediumBtn.innerText="Medium";
-}else{
-mediumBtn.disabled=true;
-mediumBtn.innerText="🔒 Medium";
-}
-
-if(current.hard){
-hardBtn.disabled=false;
-hardBtn.innerText="Hard";
-}else{
-hardBtn.disabled=true;
-hardBtn.innerText="🔒 Hard";
-}
+let current=unlockedLevels[category];
+mediumBtn.disabled=!current.medium;
+hardBtn.disabled=!current.hard;
+mediumBtn.innerText=current.medium?"Medium":"🔒 Medium";
+hardBtn.innerText=current.hard?"Hard":"🔒 Hard";
 }
 
 // NAV
 function selectCategory(c){
+startMusic();
+beep(300);
+
 category=c;
 stars=0; coins=0;
 
-document.getElementById("stars").innerText=0;
-document.getElementById("coins").innerText=0;
+starsEl.innerText=0;
+coinsEl.innerText=0;
 
-document.getElementById("screen1").classList.add("hidden");
-document.getElementById("screen2").classList.remove("hidden");
+screen1.classList.add("hidden");
+screen2.classList.remove("hidden");
 
 updateLevelButtons();
 }
 
 function startGame(l){
+startMusic();
+beep(400);
+
 if(!unlockedLevels[category][l]) return;
 
 level=l;
 index=0;
 shuffledList=shuffle(questions[category][level]);
 
-document.getElementById("screen2").classList.add("hidden");
-document.getElementById("screen3").classList.remove("hidden");
+screen2.classList.add("hidden");
+screen3.classList.remove("hidden");
 
 loadQ();
 }
@@ -275,7 +281,7 @@ timeLeft=10;
 
 timer=setInterval(()=>{
 timeLeft--;
-document.getElementById("timer").innerText="⏱ "+timeLeft;
+timerEl.innerText="⏱ "+timeLeft;
 
 if(timeLeft<=0){
 clearInterval(timer);
@@ -289,7 +295,7 @@ if(locked) return;
 locked=true;
 setEmoji("bad");
 beep(200);
-setTimeout(()=>nextQ(),800);
+setTimeout(nextQ,800);
 }
 
 // LOAD
@@ -302,17 +308,16 @@ return;
 locked=false;
 
 let q=shuffledList[index];
-document.getElementById("question").innerText=q.q;
+question.innerText=q.q;
 
-let ansDiv=document.getElementById("answers");
-ansDiv.innerHTML="";
+answers.innerHTML="";
 
 q.a.forEach((a,i)=>{
 let btn=document.createElement("button");
 btn.className="btn answer-btn";
 btn.innerText=a;
 btn.onclick=()=>checkAnswer(i,q.c,btn);
-ansDiv.appendChild(btn);
+answers.appendChild(btn);
 });
 
 startTimer();
@@ -322,7 +327,6 @@ startTimer();
 function checkAnswer(sel,correct,btn){
 if(locked) return;
 locked=true;
-
 clearInterval(timer);
 
 if(sel===correct){
@@ -337,10 +341,10 @@ setEmoji("bad");
 beep(200);
 }
 
-document.getElementById("stars").innerText=stars;
-document.getElementById("coins").innerText=coins;
+starsEl.innerText=stars;
+coinsEl.innerText=coins;
 
-setTimeout(()=>nextQ(),800);
+setTimeout(nextQ,800);
 }
 
 // CONFETTI
@@ -356,64 +360,46 @@ setTimeout(()=>c.remove(),1000);
 }
 
 // NEXT
-function nextQ(){
-index++;
-loadQ();
-}
+function nextQ(){ index++; loadQ(); }
+function prevQ(){ if(index>0){ index--; loadQ(); } }
 
-function prevQ(){
-if(index>0){
-index--;
-loadQ();
-}
-}
-
-// RESULT (✅ CATEGORY BASED UNLOCK)
+// RESULT
 function showResult(){
+screen3.classList.add("hidden");
+screen4.classList.remove("hidden");
 
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen4").classList.remove("hidden");
+finalScore.innerText="⭐ "+stars+" 💰 "+coins;
 
-document.getElementById("finalScore").innerText=
-"⭐ "+stars+" 💰 "+coins;
-
-// ✅ UNLOCK ONLY CURRENT CATEGORY
-if(level==="easy"){
-unlockedLevels[category].medium=true;
-}
-if(level==="medium"){
-unlockedLevels[category].hard=true;
-}
+if(level==="easy") unlockedLevels[category].medium=true;
+if(level==="medium") unlockedLevels[category].hard=true;
 
 updateLevelButtons();
 
-// BADGE
 let badge="🌟 GENIUS";
 if(stars>=2) badge="⭐ MASTER";
 else if(stars>=1) badge="🏆 PRO";
 
-document.getElementById("badge").innerText=badge;
+badgeEl.innerText=badge;
 }
 
-function playAgain(){
-document.getElementById("screen4").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-}
+// NAV BACK
+function playAgain(){screen4.classList.add("hidden");screen1.classList.remove("hidden");}
+function backToCategory(){screen2.classList.add("hidden");screen1.classList.remove("hidden");}
+function backToLevels(){screen3.classList.add("hidden");screen2.classList.remove("hidden");}
+function home(){screen3.classList.add("hidden");screen1.classList.remove("hidden");}
 
-function backToCategory(){
-document.getElementById("screen2").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-}
-
-function backToLevels(){
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen2").classList.remove("hidden");
-}
-
-function home(){
-document.getElementById("screen3").classList.add("hidden");
-document.getElementById("screen1").classList.remove("hidden");
-}
+// ELEMENT SHORTCUTS
+let starsEl=document.getElementById("stars");
+let coinsEl=document.getElementById("coins");
+let timerEl=document.getElementById("timer");
+let question=document.getElementById("question");
+let answers=document.getElementById("answers");
+let screen1=document.getElementById("screen1");
+let screen2=document.getElementById("screen2");
+let screen3=document.getElementById("screen3");
+let screen4=document.getElementById("screen4");
+let finalScore=document.getElementById("finalScore");
+let badgeEl=document.getElementById("badge");
 
 </script>
 
