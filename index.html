@@ -8,25 +8,40 @@
 body{
  margin:0;
  font-family:Arial;
- background: radial-gradient(circle at top,#6a11cb,#2575fc);
+ background:#0f172a;
  color:white;
- display:flex;
- justify-content:center;
- align-items:center;
- height:100vh;
 }
 
+/* APP SCREENS */
 .screen{
- width:90%;
- max-width:420px;
+ display:none;
+ height:100vh;
+ width:100%;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
  text-align:center;
 }
 
+.active{
+ display:flex;
+}
+
+/* CARD */
+.card{
+ width:90%;
+ max-width:420px;
+ background:#1e293b;
+ padding:20px;
+ border-radius:16px;
+}
+
+/* BUTTONS */
 button{
  padding:12px;
  margin:6px;
  border:none;
- border-radius:12px;
+ border-radius:10px;
  font-size:16px;
  cursor:pointer;
 }
@@ -34,82 +49,71 @@ button{
 .btn{
  background:white;
  color:black;
- width:80%;
+ width:100%;
 }
 
-.hidden{display:none;}
-
+/* TOP BAR */
 .top{
- margin:10px 0;
+ display:flex;
+ justify-content:space-between;
+ margin-bottom:10px;
 }
 
 /* ANIMATION */
-.correctAnim{
- animation: pop 0.4s ease;
- background: lime !important;
- color:black !important;
+.correct{
+ background:lime !important;
+ transform:scale(1.1);
+ transition:0.2s;
 }
 
-.wrongAnim{
- animation: shake 0.4s;
- background: red !important;
- color:white !important;
+.wrong{
+ background:red !important;
 }
 
-@keyframes pop{
- 0%{transform:scale(1);}
- 50%{transform:scale(1.2);}
- 100%{transform:scale(1);}
-}
-
-@keyframes shake{
- 0%{transform:translateX(0);}
- 25%{transform:translateX(-5px);}
- 50%{transform:translateX(5px);}
- 75%{transform:translateX(-5px);}
- 100%{transform:translateX(0);}
-}
 </style>
 </head>
 
 <body>
 
-<div class="screen">
-
-<h2>🎮 Kids Quiz PRO</h2>
-
-<!-- SOUND BUTTON -->
-<button onclick="toggleSound()" class="btn">🔊 Sound: <span id="sstatus">ON</span></button>
-
 <!-- HOME -->
-<div id="home">
- <button class="btn" onclick="openSetup()">Start Game</button>
+<div id="home" class="screen active">
+  <div class="card">
+    <h2>🎮 Kids Quiz PRO</h2>
+    <button class="btn" onclick="goSetup()">Start Game</button>
+  </div>
 </div>
 
 <!-- SETUP -->
-<div id="setup" class="hidden">
+<div id="setup" class="screen">
+  <div class="card">
 
- <div class="top">Select Category</div>
- <button class="btn" onclick="setCat('math')">Math</button>
- <button class="btn" onclick="setCat('english')">English</button>
- <button class="btn" onclick="setCat('gk')">GK</button>
+    <h3>Select Category</h3>
+    <button class="btn" onclick="setCat('math')">Math</button>
+    <button class="btn" onclick="setCat('english')">English</button>
+    <button class="btn" onclick="setCat('gk')">GK</button>
 
- <div class="top">Select Difficulty</div>
- <button class="btn" onclick="setDiff('easy')">Easy</button>
- <button class="btn" onclick="setDiff('medium')">Medium</button>
- <button class="btn" onclick="setDiff('hard')">Hard</button>
+    <h3>Select Difficulty</h3>
+    <button class="btn" onclick="setDiff('easy')">Easy</button>
+    <button class="btn" onclick="setDiff('medium')">Medium</button>
+    <button class="btn" onclick="setDiff('hard')">Hard</button>
 
- <button class="btn" onclick="startGame()">Play Quiz</button>
+    <button class="btn" onclick="startGame()">Play Quiz</button>
+
+  </div>
 </div>
 
 <!-- GAME -->
-<div id="game" class="hidden">
+<div id="game" class="screen">
+  <div class="card">
 
- <h3 id="q"></h3>
- <div id="opts"></div>
+    <div class="top">
+      <div>🔊 <span id="sound">ON</span></div>
+    </div>
 
-</div>
+    <h3 id="q"></h3>
+    <div id="opts"></div>
 
+  </div>
 </div>
 
 <script>
@@ -119,35 +123,50 @@ let diff="";
 let i=0;
 let sound=true;
 
-const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-
 const data={
  math:{
-  easy:[{q:"2+2?",a:1,o:["3","4","5"]},{q:"5+1?",a:2,o:["5","6","7"]}],
-  medium:[{q:"10+5?",a:2,o:["12","13","15"]}],
-  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
+  easy:[
+   {q:"2+2?",a:1,o:["3","4","5"]},
+   {q:"3+3?",a:0,o:["6","7","8"]}
+  ],
+  medium:[
+   {q:"10+5?",a:2,o:["12","13","15"]}
+  ],
+  hard:[
+   {q:"10×2?",a:1,o:["10","20","30"]}
+  ]
  },
  english:{
-  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
-  medium:[{q:"Plural Book?",a:0,o:["Books","Book","Boks"]}],
-  hard:[{q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}]
+  easy:[
+   {q:"A for?",a:0,o:["Apple","Ball","Cat"]}
+  ],
+  medium:[
+   {q:"Plural Book?",a:0,o:["Books","Book","Boks"]}
+  ],
+  hard:[
+   {q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}
+  ]
  },
  gk:{
-  easy:[{q:"Days week?",a:2,o:["5","6","7"]}],
-  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
-  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
+  easy:[
+   {q:"Days in week?",a:2,o:["5","6","7"]}
+  ],
+  medium:[
+   {q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}
+  ],
+  hard:[
+   {q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}
+  ]
  }
 };
 
-function toggleSound(){
- sound=!sound;
- document.getElementById("sstatus").innerText = sound?"ON":"OFF";
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
 }
 
-function openSetup(){
- document.getElementById("home").style.display="none";
- document.getElementById("setup").style.display="block";
+function goSetup(){
+ showScreen("setup");
 }
 
 function setCat(c){ cat=c; }
@@ -156,20 +175,18 @@ function setDiff(d){ diff=d; }
 function startGame(){
 
  if(!cat || !diff){
-  alert("Select category and difficulty");
+  alert("Select category & difficulty");
   return;
  }
 
- document.getElementById("setup").style.display="none";
- document.getElementById("game").style.display="block";
-
  i=0;
+ showScreen("game");
  load();
 }
 
 function load(){
 
- let q=data[cat][diff][i];
+ let q = data[cat][diff][i];
 
  if(!q){
   alert("Level Completed!");
@@ -180,8 +197,8 @@ function load(){
  document.getElementById("q").innerText=q.q;
 
  let html="";
- q.o.forEach((opt,idx)=>{
-  html+=`<button class="btn" onclick="check(this,${idx})">${opt}</button>`;
+ q.o.forEach((op,idx)=>{
+  html+=`<button class="btn" onclick="check(this,${idx})">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML=html;
@@ -192,16 +209,9 @@ function check(btn,ans){
  let q=data[cat][diff][i];
 
  if(ans===q.a){
-
-  if(sound) correctSound.play();
-
-  btn.classList.add("correctAnim");
-
+  btn.classList.add("correct");
  }else{
-
-  if(sound) wrongSound.play();
-
-  btn.classList.add("wrongAnim");
+  btn.classList.add("wrong");
  }
 
  setTimeout(()=>{
