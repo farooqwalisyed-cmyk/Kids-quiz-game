@@ -168,7 +168,7 @@ english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// QUESTIONS (short for demo)
+// QUESTIONS
 const questions={
 gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
 medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
@@ -181,11 +181,13 @@ medium:[{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}],
 hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]}
 };
 
-// 🎵 MUSIC START
-function startMusic(){
+// 🎵 START MUSIC ON FIRST TAP ANYWHERE
+function startMusicOnce(){
 if(musicStarted) return;
+
 let music=document.getElementById("bgMusic");
 music.play().catch(()=>{});
+
 musicStarted=true;
 }
 
@@ -243,7 +245,6 @@ hardBtn.innerText=current.hard?"Hard":"🔒 Hard";
 
 // NAV
 function selectCategory(c){
-startMusic();
 beep(300);
 
 category=c;
@@ -259,7 +260,6 @@ updateLevelButtons();
 }
 
 function startGame(l){
-startMusic();
 beep(400);
 
 if(!unlockedLevels[category][l]) return;
@@ -388,7 +388,10 @@ function backToCategory(){screen2.classList.add("hidden");screen1.classList.remo
 function backToLevels(){screen3.classList.add("hidden");screen2.classList.remove("hidden");}
 function home(){screen3.classList.add("hidden");screen1.classList.remove("hidden");}
 
-// ELEMENT SHORTCUTS
+// 🎯 START MUSIC ON FIRST TOUCH ANYWHERE
+document.body.addEventListener("click", startMusicOnce);
+
+// ELEMENTS
 let starsEl=document.getElementById("stars");
 let coinsEl=document.getElementById("coins");
 let timerEl=document.getElementById("timer");
