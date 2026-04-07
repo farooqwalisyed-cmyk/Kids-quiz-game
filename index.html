@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Kids Quiz PRO - Step 1</title>
+<title>Kids Quiz PRO</title>
 
 <style>
-body {
+body{
   margin:0;
   font-family: Arial;
   background: linear-gradient(135deg,#6a11cb,#2575fc);
@@ -16,7 +16,7 @@ body {
   color:white;
 }
 
-.container {
+.container{
   width:90%;
   max-width:500px;
   background: rgba(0,0,0,0.35);
@@ -25,25 +25,28 @@ body {
   text-align:center;
 }
 
-button {
-  padding:10px;
-  margin:5px;
+/* BUTTONS */
+button{
+  padding:12px;
+  margin:6px;
   border:none;
   border-radius:10px;
   font-size:16px;
   cursor:pointer;
 }
 
-.btn { background:white; color:black; }
+.btn{ background:white; color:black; }
 
-.option { width:100%; margin-top:10px; }
+.option{ width:100%; }
 
-.top {
+/* TOP BAR */
+.top{
   display:flex;
   justify-content:space-between;
 }
 
-.bar {
+/* PROGRESS */
+.bar{
   width:100%;
   height:10px;
   background:#444;
@@ -51,7 +54,7 @@ button {
   margin-top:10px;
 }
 
-.fill {
+.fill{
   height:10px;
   background:lime;
   width:0%;
@@ -66,25 +69,28 @@ button {
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<!-- MENU -->
-<div id="menu">
-
-  <h3>Select Category</h3>
-  <button class="btn" onclick="selectCat('math')">Math</button>
-  <button class="btn" onclick="selectCat('english')">English</button>
-  <button class="btn" onclick="selectCat('gk')">GK</button>
-
-  <h3>Select Difficulty</h3>
-  <button class="btn" onclick="selectDiff('easy')">Easy</button>
-  <button class="btn" onclick="selectDiff('medium')">Medium</button>
-  <button class="btn" onclick="selectDiff('hard')">Hard</button>
-
-  <br><br>
-  <button class="btn" onclick="startGame()">Start Game</button>
-
+<!-- SCREEN 1 -->
+<div id="home">
+  <button class="btn" onclick="showMenu()">Start Game</button>
 </div>
 
-<!-- GAME -->
+<!-- SCREEN 2 -->
+<div id="menu" style="display:none;">
+  <h3>Select Category</h3>
+  <button class="btn" onclick="setCat('math')">Math</button>
+  <button class="btn" onclick="setCat('english')">English</button>
+  <button class="btn" onclick="setCat('gk')">GK</button>
+
+  <h3>Select Difficulty</h3>
+  <button class="btn" onclick="setDiff('easy')">Easy</button>
+  <button class="btn" onclick="setDiff('medium')">Medium</button>
+  <button class="btn" onclick="setDiff('hard')">Hard</button>
+
+  <br>
+  <button class="btn" onclick="startGame()">Play Quiz</button>
+</div>
+
+<!-- SCREEN 3 GAME -->
 <div id="game" style="display:none;">
 
   <div class="top">
@@ -97,7 +103,6 @@ button {
   <div class="bar"><div class="fill" id="progress"></div></div>
 
   <h3 id="question"></h3>
-
   <div id="options"></div>
 
 </div>
@@ -110,74 +115,69 @@ button {
 function beep(type){
   let ctx = new (window.AudioContext || window.webkitAudioContext)();
   let o = ctx.createOscillator();
-  o.type="sine";
   o.frequency.value = type==="correct"?800:200;
   o.connect(ctx.destination);
   o.start();
-  o.stop(ctx.currentTime + 0.2);
+  o.stop(ctx.currentTime+0.2);
 }
 
-// DATA (CATEGORY + DIFFICULTY)
-const data = {
- math: {
-  easy: [
-   {q:"2 + 2 = ?", o:["3","4","5","6"], a:1},
-   {q:"5 + 1 = ?", o:["6","7","5","8"], a:0},
-   {q:"3 + 3 = ?", o:["5","6","7","8"], a:1},
-   {q:"10 - 5 = ?", o:["6","5","4","3"], a:1}
+// NAVIGATION FIX
+function showMenu(){
+  document.getElementById("home").style.display="none";
+  document.getElementById("menu").style.display="block";
+}
+
+// DATA
+const data={
+ math:{
+  easy:[
+   {q:"2 + 2 = ?",o:["3","4","5","6"],a:1},
+   {q:"5 + 1 = ?",o:["6","7","5","8"],a:0}
   ],
-  medium: [
-   {q:"12 + 8 = ?", o:["18","20","22","24"], a:1},
-   {q:"15 - 7 = ?", o:["6","7","8","9"], a:2},
-   {q:"6 × 2 = ?", o:["8","10","12","14"], a:2}
+  medium:[
+   {q:"12 + 8 = ?",o:["18","20","22","24"],a:1}
   ],
-  hard: [
-   {q:"25 × 2 = ?", o:["40","45","50","60"], a:2},
-   {q:"100 ÷ 4 = ?", o:["20","25","30","35"], a:1}
+  hard:[
+   {q:"25 × 2 = ?",o:["40","45","50","60"],a:2}
   ]
  },
-
- english: {
-  easy: [
-   {q:"A for ?", o:["Apple","Ball","Cat","Dog"], a:0},
-   {q:"Opposite of Big?", o:["Small","Tall","Huge","Fat"], a:0}
+ english:{
+  easy:[
+   {q:"A for ?",o:["Apple","Ball","Cat","Dog"],a:0}
   ],
-  medium: [
-   {q:"Plural of Book?", o:["Books","Bookes","Boks","Book"], a:0},
-   {q:"He ___ running", o:["is","are","am","be"], a:0}
+  medium:[
+   {q:"Plural of Book?",o:["Books","Bookes","Boks","Book"],a:0}
   ],
-  hard: [
-   {q:"Synonym of Happy?", o:["Sad","Joyful","Angry","Tired"], a:1}
+  hard:[
+   {q:"Synonym of Happy?",o:["Sad","Joyful","Angry","Tired"],a:1}
   ]
  },
-
- gk: {
-  easy: [
-   {q:"How many days in a week?", o:["5","6","7","8"], a:2},
-   {q:"Capital of India?", o:["Delhi","Mumbai","Chennai","Kolkata"], a:0}
+ gk:{
+  easy:[
+   {q:"Days in a week?",o:["5","6","7","8"],a:2}
   ],
-  medium: [
-   {q:"Sun rises in?", o:["West","North","East","South"], a:2},
-   {q:"How many legs dog has?", o:["2","3","4","5"], a:2}
+  medium:[
+   {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
   ],
-  hard: [
-   {q:"World largest ocean?", o:["Atlantic","Pacific","Indian","Arctic"], a:1}
+  hard:[
+   {q:"Largest ocean?",o:["Atlantic","Pacific","Indian","Arctic"],a:1}
   ]
  }
 };
 
-let category="", difficulty="";
-let current=[], index=0;
+let cat="", diff="";
+let current=[], i=0;
 let lives=3, coins=0, stars=0;
-let timer, timeLeft=10;
+let timer, time=10;
 
-// SELECTORS
-function selectCat(c){ category=c; }
-function selectDiff(d){ difficulty=d; }
+// SET
+function setCat(c){cat=c;}
+function setDiff(d){diff=d;}
 
+// START GAME
 function startGame(){
 
- if(!category || !difficulty){
+ if(!cat || !diff){
   alert("Select Category + Difficulty");
   return;
  }
@@ -185,80 +185,74 @@ function startGame(){
  document.getElementById("menu").style.display="none";
  document.getElementById("game").style.display="block";
 
- current = shuffle([...data[category][difficulty]]);
- index=0;
+ current=[...data[cat][diff]];
+ shuffle(current);
+ i=0;
  lives=3; coins=0; stars=0;
 
- updateUI();
- loadQ();
+ update();
+ load();
 }
 
-// SHUFFLE (NO REPEAT)
-function shuffle(arr){
- for(let i=arr.length-1;i>0;i--){
+// SHUFFLE
+function shuffle(a){
+ for(let i=a.length-1;i>0;i--){
   let j=Math.floor(Math.random()*i);
-  [arr[i],arr[j]]=[arr[j],arr[i]];
+  [a[i],a[j]]=[a[j],a[i]];
  }
- return arr;
 }
 
-function loadQ(){
+// LOAD QUESTION
+function load(){
 
- if(index>=current.length){
-  alert("🎉 Level Complete!");
+ if(i>=current.length){
+  alert("🎉 Completed!");
   location.reload();
   return;
  }
 
- let q=current[index];
+ let q=current[i];
  document.getElementById("question").innerText=q.q;
 
  let html="";
- q.o.forEach((op,i)=>{
-  html+=`<button class="btn option" onclick="check(${i})">${op}</button>`;
+ q.o.forEach((op,idx)=>{
+  html+=`<button class="btn option" onclick="check(${idx})">${op}</button>`;
  });
 
  document.getElementById("options").innerHTML=html;
 
- timeLeft=10;
- startTimer();
-
- document.getElementById("progress").style.width =
- (index/current.length)*100 + "%";
-}
-
-// TIMER
-function startTimer(){
- clearInterval(timer);
+ time=10;
  timer=setInterval(()=>{
-  timeLeft--;
-  document.getElementById("time").innerText=timeLeft;
-
-  if(timeLeft<=0){
-   loseLife();
-   nextQ();
+  time--;
+  document.getElementById("time").innerText=time;
+  if(time<=0){
+   lose();
+   next();
   }
  },1000);
+
+ document.getElementById("progress").style.width=(i/current.length)*100+"%";
 }
 
-// CHECK ANSWER
-function check(i){
- let q=current[index];
+// CHECK
+function check(x){
+ let q=current[i];
 
- if(i===q.a){
+ if(x===q.a){
   beep("correct");
   coins+=10;
   stars+=1;
  } else {
   beep("wrong");
-  loseLife();
+  lose();
  }
 
- updateUI();
- nextQ();
+ update();
+ next();
 }
 
-function loseLife(){
+// LOSE LIFE
+function lose(){
  lives--;
  if(lives<=0){
   alert("💀 Game Over");
@@ -266,12 +260,15 @@ function loseLife(){
  }
 }
 
-function nextQ(){
- index++;
- loadQ();
+// NEXT
+function next(){
+ clearInterval(timer);
+ i++;
+ load();
 }
 
-function updateUI(){
+// UPDATE UI
+function update(){
  document.getElementById("lives").innerText=lives;
  document.getElementById("coins").innerText=coins;
  document.getElementById("stars").innerText=stars;
