@@ -34,12 +34,9 @@ body{
   border-radius:12px;
   font-size:16px;
   cursor:pointer;
-  transition:0.2s;
 }
 
-.btn:active{
-  transform:scale(0.9);
-}
+.btn:active{transform:scale(0.9);}
 
 .category-btn{background:#2575fc;color:white;}
 .level-btn{background:#6a11cb;color:white;}
@@ -71,12 +68,8 @@ body{
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
 
-#emoji{
-  font-size:40px;
-  margin:10px 0;
-}
+#emoji{font-size:40px;margin:10px 0;}
 
-/* 🎉 Confetti */
 .confetti{
 position:fixed;
 top:0;
@@ -84,12 +77,8 @@ width:10px;
 height:10px;
 animation:fall 1s linear forwards;
 }
-
 @keyframes fall{
-to{
-transform:translateY(500px) rotate(360deg);
-opacity:0;
-}
+to{transform:translateY(500px) rotate(360deg);opacity:0;}
 }
 </style>
 </head>
@@ -122,8 +111,8 @@ opacity:0;
 <h3>Select Level</h3>
 
 <button id="easyBtn" class="btn level-btn" onclick="startGame('easy')">Easy</button>
-<button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')" disabled>🔒 Medium</button>
-<button id="hardBtn" class="btn level-btn" onclick="startGame('hard')" disabled>🔒 Hard</button>
+<button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn level-btn" onclick="startGame('hard')">🔒 Hard</button>
 
 <button class="btn" onclick="backToCategory()">⬅ Back</button>
 </div>
@@ -166,42 +155,24 @@ let timeLeft=10;
 
 let soundOn=true;
 
+// ✅ LEVEL UNLOCK STATE
+let unlockedLevels = {
+easy: true,
+medium: false,
+hard: false
+};
+
 // QUESTIONS
 const questions={
-gk:{
-easy:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1}
-],
-medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}
-],
-hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
-]
-},
-english:{
-easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}
-],
-medium:[
-{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1}
-],
-hard:[
-{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}
-]
-},
-math:{
-easy:[
-{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}
-],
-medium:[
-{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}
-],
-hard:[
-{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}
-]
-}
+gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
+medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
+hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]},
+english:{easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
+medium:[{q:"Plural of Child?",a:["Childs","Children","Childes","Childer"],c:1}],
+hard:[{q:"Synonym of Happy?",a:["Sad","Joyful","Angry","Tired"],c:1}]},
+math:{easy:[{q:"2 + 2 = ?",a:["3","4","5","6"],c:1}],
+medium:[{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}],
+hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]}
 };
 
 // SOUND
@@ -227,7 +198,7 @@ event.target.innerText = soundOn ? "🔊 Sound" : "🔇 Mute";
 function shuffle(arr){
 let a=[...arr];
 for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
+let j=Math.random()* (i+1) | 0;
 [a[i],a[j]]=[a[j],a[i]];
 }
 return a;
@@ -239,18 +210,47 @@ document.getElementById("emoji").innerText=
 t==="good"?"🎉":"😢";
 }
 
+// 🔥 UPDATE BUTTONS BASED ON UNLOCK
+function updateLevelButtons(){
+
+let mediumBtn=document.getElementById("mediumBtn");
+let hardBtn=document.getElementById("hardBtn");
+
+if(unlockedLevels.medium){
+mediumBtn.disabled=false;
+mediumBtn.innerText="Medium";
+}else{
+mediumBtn.disabled=true;
+mediumBtn.innerText="🔒 Medium";
+}
+
+if(unlockedLevels.hard){
+hardBtn.disabled=false;
+hardBtn.innerText="Hard";
+}else{
+hardBtn.disabled=true;
+hardBtn.innerText="🔒 Hard";
+}
+}
+
 // NAV
 function selectCategory(c){
 category=c;
 stars=0; coins=0;
+
 document.getElementById("stars").innerText=0;
 document.getElementById("coins").innerText=0;
 
 document.getElementById("screen1").classList.add("hidden");
 document.getElementById("screen2").classList.remove("hidden");
+
+updateLevelButtons();
 }
 
 function startGame(l){
+if(l==="medium" && !unlockedLevels.medium) return;
+if(l==="hard" && !unlockedLevels.hard) return;
+
 level=l;
 index=0;
 shuffledList=shuffle(questions[category][level]);
@@ -361,20 +361,25 @@ loadQ();
 }
 }
 
-// RESULT
+// RESULT + UNLOCK FIX
 function showResult(){
+
 document.getElementById("screen3").classList.add("hidden");
 document.getElementById("screen4").classList.remove("hidden");
 
 document.getElementById("finalScore").innerText=
 "⭐ "+stars+" 💰 "+coins;
 
-let badge="🌟 GENIUS";
-if(stars>=3) document.getElementById("mediumBtn").disabled=false;
-if(stars>=6) document.getElementById("hardBtn").disabled=false;
+// 🔓 PERMANENT UNLOCK
+if(stars>=1) unlockedLevels.medium=true;
+if(stars>=2) unlockedLevels.hard=true;
 
-if(stars>=6) badge="⭐ MASTER";
-else if(stars>=3) badge="🏆 PRO";
+updateLevelButtons();
+
+// BADGE
+let badge="🌟 GENIUS";
+if(stars>=2) badge="⭐ MASTER";
+else if(stars>=1) badge="🏆 PRO";
 
 document.getElementById("badge").innerText=badge;
 }
