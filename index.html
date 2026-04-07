@@ -15,56 +15,42 @@ body{
  align-items:center;
 }
 
-/* FULL SCREEN MOBILE FIX */
 .card{
  width:100%;
- height:100%;
  max-width:600px;
- padding:20px;
- box-sizing:border-box;
+ height:100%;
  background: rgba(0,0,0,0.4);
  color:white;
+ padding:20px;
+ box-sizing:border-box;
  display:flex;
  flex-direction:column;
  justify-content:center;
 }
 
-h2{
- font-size:32px;
- text-align:center;
- color:#ffe600;
-}
-
-h3{
- text-align:center;
- color:#00e5ff;
- font-size:22px;
-}
+h2{text-align:center;color:#ffe600;}
+h3{text-align:center;color:#00e5ff;}
 
 button{
- padding:16px;
+ padding:14px;
  margin:6px 0;
  border:none;
- border-radius:14px;
+ border-radius:12px;
  font-size:18px;
- cursor:pointer;
  width:100%;
 }
 
-.btn{
- background:white;
- font-weight:bold;
-}
-
-.opt{
- color:white;
- font-weight:bold;
-}
+.btn{background:white;font-weight:bold;}
 
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
-.c4{background:#ffd43b; color:black;}
+
+.opt{color:white;font-weight:bold;}
+.c4{background:#ffd43b;color:black;}
+
+.correct{background:#2ecc71 !important;}
+.wrong{background:#e74c3c !important;}
 
 .nav{
  display:flex;
@@ -75,22 +61,6 @@ button{
  flex:1;
 }
 
-/* ANIMATIONS */
-.correct{animation:pop 0.4s ease; background:#2ecc71 !important;}
-.wrong{animation:shake 0.4s ease; background:#e74c3c !important;}
-
-@keyframes pop{
-0%{transform:scale(1);}
-50%{transform:scale(1.2);}
-100%{transform:scale(1);}
-}
-
-@keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-6px);}
-50%{transform:translateX(6px);}
-100%{transform:translateX(0);}
-}
 </style>
 </head>
 
@@ -103,10 +73,10 @@ button{
 <button class="btn" onclick="toggleSound()">🔊 Sound: <span id="s">ON</span></button>
 
 <div id="home">
- <button class="btn" onclick="startGame()">Start Game</button>
+ <button class="btn" onclick="openMenu()">Start Game</button>
 </div>
 
-<div id="setup" style="display:none">
+<div id="menu" style="display:none">
 
 <h3>Select Category</h3>
 <button class="c1" onclick="setCat('math')">Math</button>
@@ -117,6 +87,8 @@ button{
 <button class="c1" onclick="setDiff('easy')">Easy</button>
 <button class="c2" onclick="setDiff('medium')">Medium</button>
 <button class="c3" onclick="setDiff('hard')">Hard</button>
+
+<button class="btn" onclick="startQuiz()">▶ Play Quiz</button>
 
 </div>
 
@@ -139,11 +111,15 @@ button{
 
 <script>
 
-/* ---------------- AUDIO ENGINE (FIXED) ---------------- */
+let cat=null;
+let diff=null;
+let i=0;
+let sound=true;
+
+/* ---------------- AUDIO FIX (SAFE) ---------------- */
 
 let audioCtx=null;
 let unlocked=false;
-let sound=true;
 
 function unlockAudio(){
  if(unlocked) return;
@@ -152,7 +128,6 @@ function unlockAudio(){
  unlocked=true;
 }
 
-/* GUARANTEED SOUND */
 function playSound(type){
  if(!sound || !unlocked) return;
 
@@ -167,15 +142,11 @@ function playSound(type){
  if(type==="wrong") o.frequency.value=160;
 
  o.start();
- g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.35);
- o.stop(audioCtx.currentTime + 0.35);
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+ o.stop(audioCtx.currentTime + 0.4);
 }
 
-/* ---------------- GAME DATA ---------------- */
-
-let cat=null;
-let diff=null;
-let i=0;
+/* ---------------- DATA ---------------- */
 
 const data={
  math:{
@@ -213,39 +184,37 @@ const data={
   ]
 };
 
-/* ---------------- START ---------------- */
+/* ---------------- FLOW FIX ---------------- */
 
-function startGame(){
- unlockAudio(); // MUST FIRST TOUCH
+function openMenu(){
+ unlockAudio();
  document.getElementById("home").style.display="none";
- document.getElementById("setup").style.display="block";
-
- setTimeout(()=>playSound("welcome"),200);
+ document.getElementById("menu").style.display="block";
+ playSound("welcome");
 }
 
-function setCat(c){ cat=c; tryStart(); }
-function setDiff(d){ diff=d; tryStart(); }
+function setCat(c){ cat=c; }
+function setDiff(d){ diff=d; }
 
-function tryStart(){
- if(cat && diff){
-  document.getElementById("setup").style.display="none";
-  document.getElementById("game").style.display="block";
-  i=0;
-  load();
+function startQuiz(){
+
+ if(!cat || !diff){
+  alert("Please select category and difficulty");
+  return;
  }
+
+ document.getElementById("menu").style.display="none";
+ document.getElementById("game").style.display="block";
+
+ i=0;
+ load();
 }
 
-/* ---------------- LOAD ---------------- */
+/* ---------------- GAME ---------------- */
 
 function load(){
 
  let q=data[cat][diff][i];
-
- if(!q){
-  alert("🎉 Level Completed!");
-  restart();
-  return;
- }
 
  document.getElementById("q").innerText=q.q;
 
@@ -272,14 +241,21 @@ function check(ans,btn){
   playSound("wrong");
   btn.classList.add("wrong");
  }
+
+ setTimeout(()=>{
+  next();
+ },600);
 }
 
-/* ---------------- NAVIGATION FIXED ---------------- */
+/* ---------------- NAV ---------------- */
 
 function next(){
  if(i < data[cat][diff].length-1){
   i++;
   load();
+ } else {
+  alert("Level Completed!");
+  home();
  }
 }
 
@@ -301,7 +277,7 @@ function home(){
  location.reload();
 }
 
-/* ---------------- SOUND TOGGLE ---------------- */
+/* ---------------- SOUND ---------------- */
 
 function toggleSound(){
  sound=!sound;
