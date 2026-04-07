@@ -155,11 +155,11 @@ let timeLeft=10;
 
 let soundOn=true;
 
-// ✅ LEVEL UNLOCK STATE
+// ✅ CATEGORY-WISE UNLOCK SYSTEM
 let unlockedLevels = {
-easy: true,
-medium: false,
-hard: false
+gk: { easy:true, medium:false, hard:false },
+english: { easy:true, medium:false, hard:false },
+math: { easy:true, medium:false, hard:false }
 };
 
 // QUESTIONS
@@ -216,13 +216,15 @@ document.getElementById("emoji").innerText=
 t==="good"?"🎉":"😢";
 }
 
-// 🔥 UPDATE BUTTONS
+// 🔥 UPDATE BUTTONS PER CATEGORY
 function updateLevelButtons(){
+
+let current = unlockedLevels[category];
 
 let mediumBtn=document.getElementById("mediumBtn");
 let hardBtn=document.getElementById("hardBtn");
 
-if(unlockedLevels.medium){
+if(current.medium){
 mediumBtn.disabled=false;
 mediumBtn.innerText="Medium";
 }else{
@@ -230,7 +232,7 @@ mediumBtn.disabled=true;
 mediumBtn.innerText="🔒 Medium";
 }
 
-if(unlockedLevels.hard){
+if(current.hard){
 hardBtn.disabled=false;
 hardBtn.innerText="Hard";
 }else{
@@ -254,8 +256,7 @@ updateLevelButtons();
 }
 
 function startGame(l){
-if(l==="medium" && !unlockedLevels.medium) return;
-if(l==="hard" && !unlockedLevels.hard) return;
+if(!unlockedLevels[category][l]) return;
 
 level=l;
 index=0;
@@ -367,7 +368,7 @@ loadQ();
 }
 }
 
-// RESULT (✅ FIXED UNLOCK)
+// RESULT (✅ CATEGORY BASED UNLOCK)
 function showResult(){
 
 document.getElementById("screen3").classList.add("hidden");
@@ -376,12 +377,12 @@ document.getElementById("screen4").classList.remove("hidden");
 document.getElementById("finalScore").innerText=
 "⭐ "+stars+" 💰 "+coins;
 
-// ✅ UNLOCK BASED ON COMPLETION
+// ✅ UNLOCK ONLY CURRENT CATEGORY
 if(level==="easy"){
-unlockedLevels.medium=true;
+unlockedLevels[category].medium=true;
 }
 if(level==="medium"){
-unlockedLevels.hard=true;
+unlockedLevels[category].hard=true;
 }
 
 updateLevelButtons();
