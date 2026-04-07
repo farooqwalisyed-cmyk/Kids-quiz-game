@@ -42,6 +42,33 @@ button{
 .top{
  margin:10px 0;
 }
+
+/* ANIMATION */
+.correctAnim{
+ animation: pop 0.4s ease;
+ background: lime !important;
+ color:black !important;
+}
+
+.wrongAnim{
+ animation: shake 0.4s;
+ background: red !important;
+ color:white !important;
+}
+
+@keyframes pop{
+ 0%{transform:scale(1);}
+ 50%{transform:scale(1.2);}
+ 100%{transform:scale(1);}
+}
+
+@keyframes shake{
+ 0%{transform:translateX(0);}
+ 25%{transform:translateX(-5px);}
+ 50%{transform:translateX(5px);}
+ 75%{transform:translateX(-5px);}
+ 100%{transform:translateX(0);}
+}
 </style>
 </head>
 
@@ -50,6 +77,9 @@ button{
 <div class="screen">
 
 <h2>🎮 Kids Quiz PRO</h2>
+
+<!-- SOUND BUTTON -->
+<button onclick="toggleSound()" class="btn">🔊 Sound: <span id="sstatus">ON</span></button>
 
 <!-- HOME -->
 <div id="home">
@@ -84,14 +114,18 @@ button{
 
 <script>
 
-let cat = "";
-let diff = "";
-let i = 0;
+let cat="";
+let diff="";
+let i=0;
+let sound=true;
 
-const data = {
+const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+const data={
  math:{
-  easy:[{q:"2+2?",a:1,o:["3","4","5"]}],
-  medium:[{q:"5+5?",a:2,o:["8","9","10"]}],
+  easy:[{q:"2+2?",a:1,o:["3","4","5"]},{q:"5+1?",a:2,o:["5","6","7"]}],
+  medium:[{q:"10+5?",a:2,o:["12","13","15"]}],
   hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
  },
  english:{
@@ -106,47 +140,36 @@ const data = {
  }
 };
 
+function toggleSound(){
+ sound=!sound;
+ document.getElementById("sstatus").innerText = sound?"ON":"OFF";
+}
+
 function openSetup(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
 }
 
-function setCat(c){
- cat = c;
-}
-
-function setDiff(d){
- diff = d;
-}
+function setCat(c){ cat=c; }
+function setDiff(d){ diff=d; }
 
 function startGame(){
 
- // ✅ HARD SAFETY FIX
- if(!cat){
-  alert("Please select CATEGORY");
-  return;
- }
-
- if(!diff){
-  alert("Please select DIFFICULTY");
-  return;
- }
-
- if(!data[cat] || !data[cat][diff]){
-  alert("Level data missing");
+ if(!cat || !diff){
+  alert("Select category and difficulty");
   return;
  }
 
  document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- i = 0;
+ i=0;
  load();
 }
 
 function load(){
 
- let q = data[cat][diff][i];
+ let q=data[cat][diff][i];
 
  if(!q){
   alert("Level Completed!");
@@ -154,28 +177,37 @@ function load(){
   return;
  }
 
- document.getElementById("q").innerText = q.q;
+ document.getElementById("q").innerText=q.q;
 
- let html = "";
+ let html="";
  q.o.forEach((opt,idx)=>{
-  html += `<button class="btn" onclick="check(${idx})">${opt}</button>`;
+  html+=`<button class="btn" onclick="check(this,${idx})">${opt}</button>`;
  });
 
- document.getElementById("opts").innerHTML = html;
+ document.getElementById("opts").innerHTML=html;
 }
 
-function check(ans){
+function check(btn,ans){
 
- let q = data[cat][diff][i];
+ let q=data[cat][diff][i];
 
- if(ans === q.a){
-  alert("Correct ✔");
- } else {
-  alert("Wrong ❌");
+ if(ans===q.a){
+
+  if(sound) correctSound.play();
+
+  btn.classList.add("correctAnim");
+
+ }else{
+
+  if(sound) wrongSound.play();
+
+  btn.classList.add("wrongAnim");
  }
 
- i++;
- load();
+ setTimeout(()=>{
+  i++;
+  load();
+ },500);
 }
 
 </script>
