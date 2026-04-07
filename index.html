@@ -42,12 +42,6 @@ body{
 
 .hidden{display:none;}
 
-.top{
-  display:flex;
-  justify-content:space-between;
-  font-weight:bold;
-}
-
 .nav{
   display:flex;
   justify-content:space-between;
@@ -67,6 +61,15 @@ body{
 .wrong{background:#f44336 !important;color:white;}
 
 #emoji{font-size:40px;margin:10px 0;}
+
+.confetti{
+position:fixed;
+width:10px;height:10px;
+animation:fall 1s linear forwards;
+}
+@keyframes fall{
+to{transform:translateY(500px) rotate(360deg);opacity:0;}
+}
 </style>
 </head>
 
@@ -81,13 +84,12 @@ body{
 
 <h2>Kids Quiz PRO MAX 🎮</h2>
 
-<button onclick="toggleSound()">🔊 Sound</button>
+<button onclick="toggleSound()" id="soundBtn">🔊 Sound</button>
 
 <div id="emoji">🙂</div>
 
-<!-- 🎵 MUSIC -->
 <audio id="bgMusic" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=kids-happy-112194.mp3">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3">
 </audio>
 
 <!-- CATEGORY -->
@@ -123,10 +125,12 @@ body{
 
 <script>
 
-// GAME STATE
+// STATE
 let category="", level="", index=0;
 let stars=0, coins=0;
 let shuffledList=[];
+let soundOn=true;
+let musicStarted=false;
 
 let unlockedLevels={
 gk:{easy:true,medium:false,hard:false},
@@ -134,172 +138,74 @@ english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// ================= QUESTIONS (90) =================
-const questions={gk:{easy:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"How many days in a week?",a:["5","6","7","8"],c:2},
-{q:"National animal?",a:["Tiger","Lion","Elephant","Dog"],c:0},
-{q:"Color of sky?",a:["Blue","Green","Red","Yellow"],c:0},
-{q:"Water freezes at?",a:["0°C","10°C","50°C","100°C"],c:0},
-{q:"Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
-{q:"Which is fruit?",a:["Carrot","Apple","Potato","Onion"],c:1},
-{q:"How many months?",a:["10","11","12","13"],c:2},
-{q:"National bird?",a:["Crow","Peacock","Parrot","Eagle"],c:1}
-],medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
-{q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1},
-{q:"Currency of India?",a:["Dollar","Rupee","Euro","Yen"],c:1},
-{q:"Which planet is red?",a:["Mars","Earth","Jupiter","Venus"],c:0},
-{q:"How many continents?",a:["5","6","7","8"],c:2},
-{q:"National sport of India?",a:["Cricket","Hockey","Football","Kabaddi"],c:1},
-{q:"Biggest desert?",a:["Sahara","Thar","Gobi","Arctic"],c:0},
-{q:"Water formula?",a:["H2O","CO2","O2","NaCl"],c:0},
-{q:"Human bones?",a:["206","100","300","150"],c:0}
-],hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0},
-{q:"Speed of light?",a:["300,000 km/s","150,000","100,000","50,000"],c:0},
-{q:"First satellite?",a:["Sputnik","Apollo","Chandrayaan","Voyager"],c:0},
-{q:"Gravity discovered by?",a:["Newton","Einstein","Tesla","Edison"],c:0},
-{q:"Symbol of Gold?",a:["Au","Ag","Gd","Go"],c:0},
-{q:"Heart chambers?",a:["2","3","4","5"],c:2},
-{q:"Largest organ?",a:["Skin","Heart","Liver","Brain"],c:0},
-{q:"Sun is?",a:["Planet","Star","Galaxy","Comet"],c:1},
-{q:"DNA full form?",a:["Deoxyribo","Acid","Both","None"],c:2},
-{q:"Fastest bird?",a:["Eagle","Falcon","Crow","Sparrow"],c:1}
-]},
-english:{easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Dog","Cat"],c:0},
-{q:"C for?",a:["Cat","Dog","Fish","Egg"],c:0},
-{q:"D for?",a:["Dog","Cat","Ball","Egg"],c:0},
-{q:"E for?",a:["Elephant","Ant","Dog","Ball"],c:0},
-{q:"F for?",a:["Fish","Cat","Dog","Ball"],c:0},
-{q:"G for?",a:["Goat","Dog","Cat","Ball"],c:0},
-{q:"H for?",a:["Hat","Dog","Cat","Ball"],c:0},
-{q:"I for?",a:["Ice","Dog","Cat","Ball"],c:0},
-{q:"J for?",a:["Jug","Dog","Cat","Ball"],c:0}
-],medium:[
-{q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
-{q:"Opposite of big?",a:["Large","Small","Huge","Tall"],c:1},
-{q:"Synonym of fast?",a:["Quick","Slow","Late","Lazy"],c:0},
-{q:"Opposite of hot?",a:["Cold","Warm","Heat","Boil"],c:0},
-{q:"Plural of mouse?",a:["Mouses","Mice","Mouse","Mices"],c:1},
-{q:"Opposite of happy?",a:["Sad","Joy","Smile","Laugh"],c:0},
-{q:"Synonym of smart?",a:["Clever","Dull","Lazy","Slow"],c:0},
-{q:"Opposite of tall?",a:["Short","High","Big","Long"],c:0},
-{q:"Plural of foot?",a:["Foots","Feet","Footes","Feets"],c:1},
-{q:"Synonym of small?",a:["Tiny","Big","Huge","Tall"],c:0}
-],hard:[
-{q:"Synonym of happy?",a:["Sad","Joyful","Angry","Tired"],c:1},
-{q:"Antonym of brave?",a:["Coward","Hero","Strong","Bold"],c:0},
-{q:"Synonym of quick?",a:["Fast","Slow","Late","Delay"],c:0},
-{q:"Antonym of rich?",a:["Poor","Wealthy","Money","Gold"],c:0},
-{q:"Synonym of angry?",a:["Furious","Calm","Happy","Cool"],c:0},
-{q:"Antonym of clean?",a:["Dirty","Pure","Wash","Clear"],c:0},
-{q:"Synonym of big?",a:["Huge","Tiny","Mini","Small"],c:0},
-{q:"Antonym of light?",a:["Dark","Bright","Shine","Glow"],c:0},
-{q:"Synonym of smart?",a:["Intelligent","Dull","Lazy","Slow"],c:0},
-{q:"Antonym of fast?",a:["Slow","Speed","Run","Quick"],c:0}
-]},
-math:{easy:[
-{q:"2 + 2?",a:["3","4","5","6"],c:1},
-{q:"1 + 1?",a:["1","2","3","4"],c:1},
-{q:"5 - 2?",a:["2","3","4","5"],c:1},
-{q:"3 + 1?",a:["4","5","6","7"],c:0},
-{q:"4 + 2?",a:["5","6","7","8"],c:1},
-{q:"6 - 3?",a:["2","3","4","5"],c:1},
-{q:"2 + 3?",a:["4","5","6","7"],c:1},
-{q:"7 - 2?",a:["4","5","6","7"],c:1},
-{q:"1 + 4?",a:["4","5","6","7"],c:1},
-{q:"3 + 2?",a:["4","5","6","7"],c:1}
-],medium:[
-{q:"10 × 2?",a:["20","15","25","30"],c:0},
-{q:"5 × 5?",a:["20","25","30","35"],c:1},
-{q:"12 ÷ 3?",a:["3","4","5","6"],c:1},
-{q:"15 - 7?",a:["6","7","8","9"],c:2},
-{q:"9 × 3?",a:["27","24","21","30"],c:0},
-{q:"20 ÷ 4?",a:["4","5","6","7"],c:1},
-{q:"14 + 6?",a:["18","19","20","21"],c:2},
-{q:"18 - 9?",a:["8","9","10","11"],c:1},
-{q:"7 × 4?",a:["28","24","21","30"],c:0},
-{q:"16 ÷ 2?",a:["6","7","8","9"],c:2}
-],hard:[
-{q:"100 ÷ 4?",a:["20","25","30","40"],c:1},
-{q:"12 × 12?",a:["144","124","132","156"],c:0},
-{q:"81 ÷ 9?",a:["8","9","10","11"],c:1},
-{q:"15 × 8?",a:["120","110","100","130"],c:0},
-{q:"64 ÷ 8?",a:["6","7","8","9"],c:2},
-{q:"25 × 4?",a:["80","90","100","110"],c:2},
-{q:"144 ÷ 12?",a:["10","11","12","13"],c:2},
-{q:"9 × 9?",a:["81","72","90","99"],c:0},
-{q:"200 ÷ 10?",a:["10","20","30","40"],c:1},
-{q:"13 × 7?",a:["91","81","71","101"],c:0}
-]}
+// QUESTIONS (short sample)
+const questions={
+gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
+medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
+hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]},
+english:{easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
+medium:[{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}],
+hard:[{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}]},
+math:{easy:[{q:"2+2?",a:["3","4","5","6"],c:1}],
+medium:[{q:"10×2?",a:["20","15","25","30"],c:0}],
+hard:[{q:"100÷4?",a:["20","25","30","40"],c:1}]}
 };
 
-// ================= SOUND SYSTEM =================
-let soundOn=true;
-let musicStarted=false;
+// SOUND
 let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
-function startMusicOnce(){
+function startMusic(){
 if(musicStarted) return;
+
 if(audioCtx.state==="suspended") audioCtx.resume();
 
-let music=document.getElementById("bgMusic");
-music.volume=0.5;
-music.play().then(()=>{musicStarted=true;}).catch(()=>{});
+bgMusic.volume=0.5;
+bgMusic.play().then(()=>{
+musicStarted=true;
+speak("Welcome to Kids Quiz");
+});
 }
 
-document.body.addEventListener("click", startMusicOnce);
-document.body.addEventListener("touchstart", startMusicOnce);
+document.body.addEventListener("click",startMusic);
 
 function toggleSound(){
 soundOn=!soundOn;
-let music=document.getElementById("bgMusic");
-let btn=document.querySelector("button");
-
-if(soundOn){
-btn.innerText="🔊 Sound";
-if(musicStarted) music.play();
-}else{
-btn.innerText="🔇 Mute";
-music.pause();
-}
+soundBtn.innerText=soundOn?"🔊 Sound":"🔇 Mute";
+if(!soundOn) bgMusic.pause(); else if(musicStarted) bgMusic.play();
 }
 
-function beep(freq,time=0.15){
+function beep(f,t=0.15){
 if(!soundOn) return;
 let o=audioCtx.createOscillator();
 let g=audioCtx.createGain();
-o.frequency.value=freq;
-o.connect(g);
-g.connect(audioCtx.destination);
-o.start();
-o.stop(audioCtx.currentTime+time);
+o.frequency.value=f;
+o.connect(g); g.connect(audioCtx.destination);
+o.start(); o.stop(audioCtx.currentTime+t);
 }
 
 function correctSound(){beep(800);setTimeout(()=>beep(1000),150);}
-function wrongSound(){beep(200);setTimeout(()=>beep(150),150);}
+function wrongSound(){beep(200);}
 
-function speak(text){
+function speak(t){
 if(!soundOn) return;
-let msg=new SpeechSynthesisUtterance(text);
-msg.pitch=1.2;
-speechSynthesis.speak(msg);
+speechSynthesis.speak(new SpeechSynthesisUtterance(t));
 }
 
-// ================= GAME =================
-function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
+// CONFETTI
+function confetti(){
+for(let i=0;i<15;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),1000);
+}
+}
 
+// GAME
 function selectCategory(c){
 category=c;
-stars=0; coins=0;
-starsEl.innerText=0;
-coinsEl.innerText=0;
-
 screen1.classList.add("hidden");
 screen2.classList.remove("hidden");
 updateLevelButtons();
@@ -315,30 +221,27 @@ hardBtn.innerText=c.hard?"Hard":"🔒 Hard";
 
 function startGame(l){
 if(!unlockedLevels[category][l]) return;
-
 level=l;
 index=0;
-shuffledList=shuffle(questions[category][level]);
-
+shuffledList=questions[category][level].sort(()=>Math.random()-0.5);
 screen2.classList.add("hidden");
 screen3.classList.remove("hidden");
-
 loadQ();
 }
 
 function loadQ(){
-if(!shuffledList[index]){home();return;}
-
 let q=shuffledList[index];
-question.innerText=q.q;
+if(!q){unlockNext();home();return;}
 
+question.innerText=q.q;
 answers.innerHTML="";
+
 q.a.forEach((a,i)=>{
-let btn=document.createElement("button");
-btn.className="btn answer-btn";
-btn.innerText=a;
-btn.onclick=()=>checkAnswer(i,q.c,btn);
-answers.appendChild(btn);
+let b=document.createElement("button");
+b.className="btn answer-btn";
+b.innerText=a;
+b.onclick=()=>checkAnswer(i,q.c,b);
+answers.appendChild(b);
 });
 }
 
@@ -349,16 +252,16 @@ if(sel===correct){
 btn.classList.add("correct");
 stars++; coins+=5;
 correctSound();
-speak("Correct Answer");
+confetti();
+speak("Correct answer");
 }else{
 btn.classList.add("wrong");
 wrongSound();
-speak("Wrong Answer");
+speak("Wrong answer");
 }
 
 starsEl.innerText=stars;
 coinsEl.innerText=coins;
-
 buttons.forEach(b=>b.disabled=true);
 
 setTimeout(nextQ,800);
@@ -366,6 +269,21 @@ setTimeout(nextQ,800);
 
 function nextQ(){index++;loadQ();}
 function prevQ(){if(index>0){index--;loadQ();}}
+
+function unlockNext(){
+if(level==="easy") unlockedLevels[category].medium=true;
+if(level==="medium") unlockedLevels[category].hard=true;
+}
+
+function backToCategory(){
+screen2.classList.add("hidden");
+screen1.classList.remove("hidden");
+}
+
+function backToLevels(){
+screen3.classList.add("hidden");
+screen2.classList.remove("hidden");
+}
 
 function home(){
 screen3.classList.add("hidden");
@@ -382,6 +300,8 @@ let screen2=document.getElementById("screen2");
 let screen3=document.getElementById("screen3");
 let mediumBtn=document.getElementById("mediumBtn");
 let hardBtn=document.getElementById("hardBtn");
+let soundBtn=document.getElementById("soundBtn");
+let bgMusic=document.getElementById("bgMusic");
 
 </script>
 
