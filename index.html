@@ -18,16 +18,23 @@ body{
 
 .card{
  width:95%;
- max-width:500px;   /* BIGGER SCREEN FIX */
+ max-width:520px;
  background: rgba(0,0,0,0.35);
  padding:25px;
  border-radius:25px;
  text-align:center;
- backdrop-filter: blur(10px);
+ backdrop-filter: blur(12px);
 }
 
-h2{ font-size:28px; }
-h3{ font-size:22px; }
+h2{
+ font-size:30px;
+ color:#fff700;
+ text-shadow:1px 1px 3px black;
+}
+
+h3{
+ color:#00e5ff;
+}
 
 button{
  padding:14px;
@@ -36,19 +43,27 @@ button{
  border-radius:14px;
  font-size:18px;
  cursor:pointer;
+ transition:0.2s;
 }
 
-.btn{ width:100%; background:white; color:black; }
+button:hover{
+ transform:scale(1.05);
+}
+
+.btn{
+ width:100%;
+ background: linear-gradient(90deg,#ffffff,#e0e0e0);
+ color:black;
+ font-weight:bold;
+}
 
 .opt{
  width:100%;
  color:white;
- font-size:18px;
+ font-weight:bold;
 }
 
-.hidden{display:none;}
-
-/* COLORS */
+/* COLOURED UI BUTTONS */
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
@@ -88,14 +103,14 @@ button{
 <div id="setup" class="hidden">
 
  <h3>Select Category</h3>
- <button class="btn" onclick="setCat('math')">Math</button>
- <button class="btn" onclick="setCat('english')">English</button>
- <button class="btn" onclick="setCat('gk')">GK</button>
+ <button class="c1" onclick="setCat('math')">Math</button>
+ <button class="c2" onclick="setCat('english')">English</button>
+ <button class="c3" onclick="setCat('gk')">GK</button>
 
  <h3>Select Difficulty</h3>
- <button class="btn" onclick="setDiff('easy')">Easy</button>
- <button class="btn" onclick="setDiff('medium')">Medium</button>
- <button class="btn" onclick="setDiff('hard')">Hard</button>
+ <button class="c1" onclick="setDiff('easy')">Easy</button>
+ <button class="c2" onclick="setDiff('medium')">Medium</button>
+ <button class="c3" onclick="setDiff('hard')">Hard</button>
 
 </div>
 
@@ -119,18 +134,19 @@ let i=0;
 let sound=true;
 let audioCtx=null;
 
-/* ---------------- SOUND FIX (IMPORTANT) ---------------- */
+/* ---------------- SOUND FIX (MOBILE SAFE) ---------------- */
 
 function initAudio(){
  if(!audioCtx){
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume(); // IMPORTANT FIX FOR ANDROID
  }
 }
 
 function beep(type){
  if(!sound) return;
 
- initAudio(); // unlock audio
+ initAudio();
 
  const o = audioCtx.createOscillator();
  const g = audioCtx.createGain();
@@ -147,19 +163,16 @@ function beep(type){
  o.stop(audioCtx.currentTime + 0.4);
 }
 
-/* ---------------- FIXED QUESTIONS (REAL LOGIC) ---------------- */
+/* ---------------- DATA ---------------- */
 
 const data={
  math:{
   easy:[
    {q:"2 + 2 = ?", o:["3","4","5"], a:1},
-   {q:"5 + 3 = ?", o:["8","9","7"], a:0},
-   {q:"10 - 4 = ?", o:["6","5","7"], a:0},
-   {q:"3 + 6 = ?", o:["8","9","10"], a:1}
+   {q:"5 + 3 = ?", o:["8","9","7"], a:0}
   ],
   medium:[
-   {q:"12 + 8 = ?", o:["18","20","22"], a:1},
-   {q:"15 - 7 = ?", o:["6","8","9"], a:1}
+   {q:"12 + 8 = ?", o:["18","20","22"], a:1}
   ],
   hard:[
    {q:"12 x 12 = ?", o:["124","144","154"], a:1}
@@ -168,24 +181,22 @@ const data={
 
  english:{
   easy:[
-   {q:"A for ?", o:["Apple","Ball","Cat"], a:0},
-   {q:"B for ?", o:["Bat","Dog","Egg"], a:0}
+   {q:"A for ?", o:["Apple","Ball","Cat"], a:0}
   ],
   medium:[
    {q:"Plural of Book?", o:["Books","Bookies","Booked"], a:0}
   ],
   hard:[
-   {q:"Opposite of Happy?", o:["Sad","Joy","Glad"], a:0}
+   {q:"Opposite Happy?", o:["Sad","Joy","Glad"], a:0}
   ]
  },
 
  gk:{
   easy:[
-   {q:"Days in week?", o:["5","6","7"], a:2},
-   {q:"Capital of India?", o:["Delhi","Mumbai","Chennai"], a:0}
+   {q:"Days in week?", o:["5","6","7"], a:2}
   ],
   medium:[
-   {q:"How many continents?", o:["5","6","7"], a:2}
+   {q:"Capital India?", o:["Delhi","Mumbai","Chennai"], a:0}
   ],
   hard:[
    {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
@@ -198,7 +209,9 @@ const data={
 function startSetup(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
- beep("welcome"); // FIXED WORKING SOUND
+
+ initAudio();        // FIX SOUND ON FIRST CLICK
+ beep("welcome");    // NOW WORKS
 }
 
 function setCat(c){ cat=c; tryStart(); }
@@ -221,7 +234,7 @@ function load(){
 
  if(!q){
   alert("🎉 Level Completed!");
-  location.reload();
+  restart();
   return;
  }
 
@@ -237,7 +250,7 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- CHECK FIXED ---------------- */
+/* ---------------- CHECK ---------------- */
 
 function check(ans,btn){
 
@@ -257,10 +270,16 @@ function check(ans,btn){
  },500);
 }
 
-/* ---------------- NAV ---------------- */
+/* ---------------- FIXED RESTART ---------------- */
 
-function home(){ location.reload(); }
-function restart(){ i=0; load(); }
+function restart(){
+ i=0;
+ load();   // FIXED: actually reloads game properly
+}
+
+function home(){
+ location.reload();
+}
 
 /* ---------------- SOUND ---------------- */
 
