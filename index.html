@@ -13,7 +13,6 @@ body{
  justify-content:center;
  align-items:center;
  height:100vh;
- color:white;
 }
 
 .card{
@@ -23,18 +22,14 @@ body{
  padding:25px;
  border-radius:25px;
  text-align:center;
- backdrop-filter: blur(12px);
+ color:white;
 }
 
 h2{
- font-size:30px;
- color:#fff700;
- text-shadow:1px 1px 3px black;
+ color:#ffe600;
 }
 
-h3{
- color:#00e5ff;
-}
+h3{color:#00e5ff;}
 
 button{
  padding:14px;
@@ -43,35 +38,32 @@ button{
  border-radius:14px;
  font-size:18px;
  cursor:pointer;
- transition:0.2s;
 }
 
-button:hover{
- transform:scale(1.05);
-}
+.btn{width:100%; background:white; font-weight:bold;}
+.opt{width:100%; color:white; font-weight:bold;}
 
-.btn{
- width:100%;
- background: linear-gradient(90deg,#ffffff,#e0e0e0);
- color:black;
- font-weight:bold;
-}
-
-.opt{
- width:100%;
- color:white;
- font-weight:bold;
-}
-
-/* COLOURED UI BUTTONS */
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
 .c4{background:#ffd43b; color:black;}
 
-/* ANIMATION */
-.correct{ animation:pop 0.4s ease; background:#2ecc71 !important; }
-.wrong{ animation:shake 0.4s ease; background:#e74c3c !important; }
+/* ✅ CORRECT CELEBRATION */
+.correct{
+ animation:pop 0.4s ease;
+ background:#2ecc71 !important;
+}
+
+/* ❌ WRONG SHAKE */
+.wrong{
+ animation:shake 0.4s ease;
+ background:#e74c3c !important;
+}
+
+/* 🎉 BIG CELEBRATION EFFECT */
+.celebrate{
+ animation:boom 0.6s ease;
+}
 
 @keyframes pop{
  0%{transform:scale(1);}
@@ -85,6 +77,14 @@ button:hover{
  50%{transform:translateX(6px);}
  100%{transform:translateX(0);}
 }
+
+@keyframes boom{
+ 0%{transform:scale(1);}
+ 30%{transform:scale(1.4) rotate(3deg);}
+ 60%{transform:scale(1.2) rotate(-3deg);}
+ 100%{transform:scale(1);}
+}
+
 </style>
 </head>
 
@@ -97,10 +97,10 @@ button:hover{
 <button class="btn" onclick="toggleSound()">🔊 Sound: <span id="s">ON</span></button>
 
 <div id="home">
- <button class="btn" onclick="startSetup()">Start Game</button>
+ <button class="btn" onclick="startGame()">Start Game</button>
 </div>
 
-<div id="setup" class="hidden">
+<div id="setup" style="display:none">
 
  <h3>Select Category</h3>
  <button class="c1" onclick="setCat('math')">Math</button>
@@ -114,13 +114,10 @@ button:hover{
 
 </div>
 
-<div id="game" class="hidden">
+<div id="game" style="display:none">
 
  <h3 id="q"></h3>
  <div id="opts"></div>
-
- <button class="btn" onclick="home()">🏠 Home</button>
- <button class="btn" onclick="restart()">🔄 Restart</button>
 
 </div>
 
@@ -134,16 +131,18 @@ let i=0;
 let sound=true;
 let audioCtx=null;
 
-/* ---------------- SOUND FIX (MOBILE SAFE) ---------------- */
+/* ---------------- AUDIO FIX ---------------- */
 
 function initAudio(){
  if(!audioCtx){
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  audioCtx.resume(); // IMPORTANT FIX FOR ANDROID
  }
+ audioCtx.resume();
 }
 
-function beep(type){
+/* ---------------- SOUNDS ---------------- */
+
+function playSound(type){
  if(!sound) return;
 
  initAudio();
@@ -155,10 +154,11 @@ function beep(type){
  g.connect(audioCtx.destination);
 
  if(type==="welcome") o.frequency.value=600;
- if(type==="correct") o.frequency.value=800;
- if(type==="wrong") o.frequency.value=200;
+ if(type==="correct") o.frequency.value=900;
+ if(type==="wrong") o.frequency.value=180;
 
  o.start();
+
  g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
  o.stop(audioCtx.currentTime + 0.4);
 }
@@ -169,16 +169,15 @@ const data={
  math:{
   easy:[
    {q:"2 + 2 = ?", o:["3","4","5"], a:1},
-   {q:"5 + 3 = ?", o:["8","9","7"], a:0}
+   {q:"5 + 5 = ?", o:["10","11","9"], a:0}
   ],
   medium:[
    {q:"12 + 8 = ?", o:["18","20","22"], a:1}
   ],
   hard:[
-   {q:"12 x 12 = ?", o:["124","144","154"], a:1}
+   {q:"12 x 12 = ?", o:["144","124","154"], a:0}
   ]
  },
-
  english:{
   easy:[
    {q:"A for ?", o:["Apple","Ball","Cat"], a:0}
@@ -190,7 +189,6 @@ const data={
    {q:"Opposite Happy?", o:["Sad","Joy","Glad"], a:0}
   ]
  },
-
  gk:{
   easy:[
    {q:"Days in week?", o:["5","6","7"], a:2}
@@ -204,14 +202,14 @@ const data={
  }
 };
 
-/* ---------------- FLOW ---------------- */
+/* ---------------- START ---------------- */
 
-function startSetup(){
+function startGame(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
 
- initAudio();        // FIX SOUND ON FIRST CLICK
- beep("welcome");    // NOW WORKS
+ initAudio();
+ playSound("welcome");   // ✅ FIXED
 }
 
 function setCat(c){ cat=c; tryStart(); }
@@ -230,7 +228,7 @@ function tryStart(){
 
 function load(){
 
- let q=data?.[cat]?.[diff]?.[i];
+ let q=data[cat][diff][i];
 
  if(!q){
   alert("🎉 Level Completed!");
@@ -250,38 +248,39 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- CHECK ---------------- */
+/* ---------------- ANSWER CHECK ---------------- */
 
 function check(ans,btn){
 
  let q=data[cat][diff][i];
 
  if(ans === q.a){
-  beep("correct");
-  btn.classList.add("correct");
- }else{
-  beep("wrong");
+
+  playSound("correct");
+
+  btn.classList.add("correct","celebrate");
+
+ } else {
+
+  playSound("wrong");
+
   btn.classList.add("wrong");
  }
 
  setTimeout(()=>{
   i++;
   load();
- },500);
+ },700);
 }
 
-/* ---------------- FIXED RESTART ---------------- */
+/* ---------------- RESTART ---------------- */
 
 function restart(){
  i=0;
- load();   // FIXED: actually reloads game properly
+ load();
 }
 
-function home(){
- location.reload();
-}
-
-/* ---------------- SOUND ---------------- */
+/* ---------------- SOUND TOGGLE ---------------- */
 
 function toggleSound(){
  sound=!sound;
