@@ -25,7 +25,7 @@ body{
   text-align:center;
 }
 
-/* BUTTONS */
+/* BUTTON STYLE */
 button{
   padding:12px;
   margin:6px;
@@ -43,9 +43,10 @@ button{
 .top{
   display:flex;
   justify-content:space-between;
+  align-items:center;
 }
 
-/* PROGRESS */
+/* PROGRESS BAR */
 .bar{
   width:100%;
   height:10px;
@@ -60,6 +61,12 @@ button{
   width:0%;
   border-radius:10px;
 }
+
+/* SMALL LABELS */
+.small{
+  font-size:14px;
+  opacity:0.9;
+}
 </style>
 </head>
 
@@ -69,35 +76,42 @@ button{
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<!-- SCREEN 1 -->
+<!-- HOME SCREEN -->
 <div id="home">
-  <button class="btn" onclick="showMenu()">Start Game</button>
+  <button class="btn" onclick="openSetup()">Start Game</button>
 </div>
 
-<!-- SCREEN 2 -->
-<div id="menu" style="display:none;">
-  <h3>Select Category</h3>
+<!-- SETUP SCREEN -->
+<div id="setup" style="display:none;">
+
+  <div class="small">Select Category</div>
   <button class="btn" onclick="setCat('math')">Math</button>
   <button class="btn" onclick="setCat('english')">English</button>
   <button class="btn" onclick="setCat('gk')">GK</button>
 
-  <h3>Select Difficulty</h3>
+  <div class="small">Select Difficulty</div>
   <button class="btn" onclick="setDiff('easy')">Easy</button>
   <button class="btn" onclick="setDiff('medium')">Medium</button>
   <button class="btn" onclick="setDiff('hard')">Hard</button>
 
   <br>
+
   <button class="btn" onclick="startGame()">Play Quiz</button>
+
 </div>
 
-<!-- SCREEN 3 GAME -->
+<!-- GAME SCREEN -->
 <div id="game" style="display:none;">
 
   <div class="top">
     <div>❤️ <span id="lives">3</span></div>
     <div>💰 <span id="coins">0</span></div>
     <div>⭐ <span id="stars">0</span></div>
-    <div>⏱️ <span id="time">10</span></div>
+
+    <!-- SOUND BUTTON -->
+    <div>
+      🔊 <button class="btn" onclick="toggleSound()" id="soundBtn">ON</button>
+    </div>
   </div>
 
   <div class="bar"><div class="fill" id="progress"></div></div>
@@ -111,8 +125,18 @@ button{
 
 <script>
 
+let sound=true;
+
+// 🔊 SOUND CONTROL (FIXED STEP A)
+function toggleSound(){
+  sound=!sound;
+  document.getElementById("soundBtn").innerText = sound ? "ON" : "OFF";
+}
+
 // SOUND
 function beep(type){
+  if(!sound) return;
+
   let ctx = new (window.AudioContext || window.webkitAudioContext)();
   let o = ctx.createOscillator();
   o.frequency.value = type==="correct"?800:200;
@@ -122,20 +146,22 @@ function beep(type){
 }
 
 // NAVIGATION FIX
-function showMenu(){
+function openSetup(){
   document.getElementById("home").style.display="none";
-  document.getElementById("menu").style.display="block";
+  document.getElementById("setup").style.display="block";
 }
 
-// DATA
+// DATA (SAFE + SIMPLE FOR STEP 1)
 const data={
  math:{
   easy:[
    {q:"2 + 2 = ?",o:["3","4","5","6"],a:1},
-   {q:"5 + 1 = ?",o:["6","7","5","8"],a:0}
+   {q:"5 + 1 = ?",o:["6","7","5","8"],a:0},
+   {q:"3 + 3 = ?",o:["5","6","7","8"],a:1}
   ],
   medium:[
-   {q:"12 + 8 = ?",o:["18","20","22","24"],a:1}
+   {q:"10 + 5 = ?",o:["13","14","15","16"],a:2},
+   {q:"12 - 4 = ?",o:["6","7","8","9"],a:2}
   ],
   hard:[
    {q:"25 × 2 = ?",o:["40","45","50","60"],a:2}
@@ -166,11 +192,10 @@ const data={
 };
 
 let cat="", diff="";
-let current=[], i=0;
+let qlist=[], i=0;
 let lives=3, coins=0, stars=0;
-let timer, time=10;
 
-// SET
+// SETTERS
 function setCat(c){cat=c;}
 function setDiff(d){diff=d;}
 
@@ -182,11 +207,11 @@ function startGame(){
   return;
  }
 
- document.getElementById("menu").style.display="none";
+ document.getElementById("setup").style.display="none";
  document.getElementById("game").style.display="block";
 
- current=[...data[cat][diff]];
- shuffle(current);
+ qlist=[...data[cat][diff]];
+ shuffle(qlist);
  i=0;
  lives=3; coins=0; stars=0;
 
@@ -205,13 +230,13 @@ function shuffle(a){
 // LOAD QUESTION
 function load(){
 
- if(i>=current.length){
-  alert("🎉 Completed!");
+ if(i>=qlist.length){
+  alert("🎉 Level Completed!");
   location.reload();
   return;
  }
 
- let q=current[i];
+ let q=qlist[i];
  document.getElementById("question").innerText=q.q;
 
  let html="";
@@ -221,22 +246,14 @@ function load(){
 
  document.getElementById("options").innerHTML=html;
 
- time=10;
- timer=setInterval(()=>{
-  time--;
-  document.getElementById("time").innerText=time;
-  if(time<=0){
-   lose();
-   next();
-  }
- },1000);
-
- document.getElementById("progress").style.width=(i/current.length)*100+"%";
+ document.getElementById("progress").style.width =
+ (i/qlist.length)*100 + "%";
 }
 
-// CHECK
+// CHECK ANSWER
 function check(x){
- let q=current[i];
+
+ let q=qlist[i];
 
  if(x===q.a){
   beep("correct");
@@ -244,30 +261,20 @@ function check(x){
   stars+=1;
  } else {
   beep("wrong");
-  lose();
+  lives--;
  }
 
- update();
- next();
-}
-
-// LOSE LIFE
-function lose(){
- lives--;
  if(lives<=0){
   alert("💀 Game Over");
   location.reload();
  }
-}
 
-// NEXT
-function next(){
- clearInterval(timer);
  i++;
  load();
+ update();
 }
 
-// UPDATE UI
+// UI UPDATE
 function update(){
  document.getElementById("lives").innerText=lives;
  document.getElementById("coins").innerText=coins;
