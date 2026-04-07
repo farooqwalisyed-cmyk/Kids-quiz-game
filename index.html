@@ -9,49 +9,79 @@ body{
  margin:0;
  font-family:Arial;
  background: linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
+ height:100vh;
  display:flex;
  justify-content:center;
  align-items:center;
- height:100vh;
 }
 
+/* FULL SCREEN MOBILE FIX */
 .card{
- width:95%;
- max-width:520px;
+ width:100%;
+ height:100%;
+ max-width:600px;
+ padding:20px;
+ box-sizing:border-box;
  background: rgba(0,0,0,0.4);
- padding:25px;
- border-radius:25px;
- text-align:center;
  color:white;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
 }
 
-h2{color:#ffe600;}
-h3{color:#00e5ff;}
+h2{
+ font-size:32px;
+ text-align:center;
+ color:#ffe600;
+}
+
+h3{
+ text-align:center;
+ color:#00e5ff;
+ font-size:22px;
+}
 
 button{
- padding:12px;
- margin:5px;
+ padding:16px;
+ margin:6px 0;
  border:none;
- border-radius:12px;
- font-size:16px;
+ border-radius:14px;
+ font-size:18px;
  cursor:pointer;
+ width:100%;
 }
 
-.btn{width:100%; background:white; font-weight:bold;}
-.opt{width:100%; color:white; font-weight:bold;}
+.btn{
+ background:white;
+ font-weight:bold;
+}
+
+.opt{
+ color:white;
+ font-weight:bold;
+}
 
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
 .c4{background:#ffd43b; color:black;}
 
+.nav{
+ display:flex;
+ gap:8px;
+}
+
+.nav button{
+ flex:1;
+}
+
+/* ANIMATIONS */
 .correct{animation:pop 0.4s ease; background:#2ecc71 !important;}
 .wrong{animation:shake 0.4s ease; background:#e74c3c !important;}
-.celebrate{animation:boom 0.6s ease;}
 
 @keyframes pop{
 0%{transform:scale(1);}
-50%{transform:scale(1.3);}
+50%{transform:scale(1.2);}
 100%{transform:scale(1);}
 }
 
@@ -60,13 +90,6 @@ button{
 25%{transform:translateX(-6px);}
 50%{transform:translateX(6px);}
 100%{transform:translateX(0);}
-}
-
-@keyframes boom{
-0%{transform:scale(1);}
-30%{transform:scale(1.4) rotate(3deg);}
-60%{transform:scale(1.2) rotate(-3deg);}
-100%{transform:scale(1);}
 }
 </style>
 </head>
@@ -102,6 +125,11 @@ button{
 <h3 id="q"></h3>
 <div id="opts"></div>
 
+<div class="nav">
+ <button class="btn" onclick="prev()">⬅ Prev</button>
+ <button class="btn" onclick="next()">Next ➡</button>
+</div>
+
 <button class="btn" onclick="restart()">🔄 Restart</button>
 <button class="btn" onclick="home()">🏠 Home</button>
 
@@ -111,25 +139,20 @@ button{
 
 <script>
 
-let cat=null;
-let diff=null;
-let i=0;
-let sound=true;
+/* ---------------- AUDIO ENGINE (FIXED) ---------------- */
+
 let audioCtx=null;
 let unlocked=false;
-
-/* ---------------- AUDIO FIX ---------------- */
+let sound=true;
 
 function unlockAudio(){
  if(unlocked) return;
-
  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
  audioCtx.resume();
  unlocked=true;
 }
 
-/* ---------------- SOUND ENGINE ---------------- */
-
+/* GUARANTEED SOUND */
 function playSound(type){
  if(!sound || !unlocked) return;
 
@@ -141,15 +164,18 @@ function playSound(type){
 
  if(type==="welcome") o.frequency.value=600;
  if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=180;
+ if(type==="wrong") o.frequency.value=160;
 
  o.start();
-
- g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
- o.stop(audioCtx.currentTime + 0.4);
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.35);
+ o.stop(audioCtx.currentTime + 0.35);
 }
 
-/* ---------------- DATA ---------------- */
+/* ---------------- GAME DATA ---------------- */
+
+let cat=null;
+let diff=null;
+let i=0;
 
 const data={
  math:{
@@ -185,15 +211,15 @@ const data={
   hard:[
    {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
   ]
- }
 };
 
 /* ---------------- START ---------------- */
 
 function startGame(){
- unlockAudio();
+ unlockAudio(); // MUST FIRST TOUCH
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
+
  setTimeout(()=>playSound("welcome"),200);
 }
 
@@ -233,34 +259,43 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- CHECK + AUTO NEXT FIX ---------------- */
+/* ---------------- ANSWER ---------------- */
 
 function check(ans,btn){
 
  let q=data[cat][diff][i];
 
- if(ans === q.a){
+ if(ans===q.a){
   playSound("correct");
-  btn.classList.add("correct","celebrate");
+  btn.classList.add("correct");
  } else {
   playSound("wrong");
   btn.classList.add("wrong");
  }
-
- setTimeout(()=>{
-  i++;              // ✅ FIXED AUTO NEXT
-  load();
- },700);
 }
 
-/* ---------------- RESTART FIX ---------------- */
+/* ---------------- NAVIGATION FIXED ---------------- */
+
+function next(){
+ if(i < data[cat][diff].length-1){
+  i++;
+  load();
+ }
+}
+
+function prev(){
+ if(i > 0){
+  i--;
+  load();
+ }
+}
+
+/* ---------------- RESET ---------------- */
 
 function restart(){
  i=0;
  load();
 }
-
-/* ---------------- HOME ---------------- */
 
 function home(){
  location.reload();
