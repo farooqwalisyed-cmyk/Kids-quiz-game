@@ -98,8 +98,8 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 
 <div id="emoji">🙂</div>
 
-<!-- 🎵 BACKGROUND MUSIC -->
-<audio id="bgMusic" loop>
+<!-- 🎵 MUSIC -->
+<audio id="bgMusic" loop preload="auto">
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=kids-happy-112194.mp3" type="audio/mpeg">
 </audio>
 
@@ -114,11 +114,9 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 <!-- LEVEL -->
 <div id="screen2" class="hidden">
 <h3>Select Level</h3>
-
 <button id="easyBtn" class="btn level-btn" onclick="startGame('easy')">Easy</button>
 <button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')">🔒 Medium</button>
 <button id="hardBtn" class="btn level-btn" onclick="startGame('hard')">🔒 Hard</button>
-
 <button class="btn" onclick="backToCategory()">⬅ Back</button>
 </div>
 
@@ -150,18 +148,17 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 
 <script>
 
+// GAME STATE
 let category="", level="", index=0;
 let stars=0, coins=0;
 let shuffledList=[];
 let locked=false;
-
-let timer;
-let timeLeft=10;
+let timer, timeLeft=10;
 
 let soundOn=true;
 let musicStarted=false;
 
-// 🔓 CATEGORY UNLOCK
+// UNLOCK SYSTEM
 let unlockedLevels={
 gk:{easy:true,medium:false,hard:false},
 english:{easy:true,medium:false,hard:false},
@@ -181,17 +178,45 @@ medium:[{q:"10 × 2 = ?",a:["20","15","25","30"],c:0}],
 hard:[{q:"100 ÷ 4 = ?",a:["20","25","30","40"],c:1}]}
 };
 
-// 🎵 START MUSIC ON FIRST TAP ANYWHERE
+// 🎤 VOICE
+function speak(text){
+if(!soundOn) return;
+let msg=new SpeechSynthesisUtterance(text);
+msg.rate=1;
+msg.pitch=1.3;
+speechSynthesis.speak(msg);
+}
+
+// 🔊 SOUND
+let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+function beep(freq,time=0.15){
+if(!soundOn) return;
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+o.frequency.value=freq;
+o.connect(g);
+g.connect(audioCtx.destination);
+o.start();
+o.stop(audioCtx.currentTime+time);
+}
+
+// 🎵 MUSIC FIX
 function startMusicOnce(){
 if(musicStarted) return;
 
-let music=document.getElementById("bgMusic");
-music.play().catch(()=>{});
+if(audioCtx.state==="suspended") audioCtx.resume();
 
+let music=document.getElementById("bgMusic");
+music.volume=0.5;
+
+music.play().then(()=>{
 musicStarted=true;
+}).catch(()=>{});
 }
 
-// 🔊 SOUND CONTROL
+document.body.addEventListener("touchstart", startMusicOnce);
+document.body.addEventListener("click", startMusicOnce);
+
 function toggleSound(){
 soundOn=!soundOn;
 let music=document.getElementById("bgMusic");
@@ -205,51 +230,37 @@ music.pause();
 }
 }
 
-// 🔔 BEEP
-let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-function beep(freq,time=0.15){
-if(!soundOn) return;
-let o=audioCtx.createOscillator();
-let g=audioCtx.createGain();
-o.frequency.value=freq;
-o.connect(g);
-g.connect(audioCtx.destination);
-o.start();
-o.stop(audioCtx.currentTime+time);
-}
+// 🎉 FUN SOUNDS
+function popSound(){beep(600,0.1);}
+function funnyWrong(){beep(200,0.2);setTimeout(()=>beep(150,0.2),150);}
+function winSound(){beep(800,0.2);setTimeout(()=>beep(1000,0.2),150);}
 
 // SHUFFLE
 function shuffle(arr){
-let a=[...arr];
-for(let i=a.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[a[i],a[j]]=[a[j],a[i]];
-}
-return a;
+return arr.sort(()=>Math.random()-0.5);
 }
 
 // UI
 function setEmoji(t){
-document.getElementById("emoji").innerText=
-t==="good"?"🎉":"😢";
+emoji.innerText=t==="good"?"🎉":"😢";
 }
 
 // LEVEL BUTTONS
 function updateLevelButtons(){
-let current=unlockedLevels[category];
-mediumBtn.disabled=!current.medium;
-hardBtn.disabled=!current.hard;
-mediumBtn.innerText=current.medium?"Medium":"🔒 Medium";
-hardBtn.innerText=current.hard?"Hard":"🔒 Hard";
+let c=unlockedLevels[category];
+mediumBtn.disabled=!c.medium;
+hardBtn.disabled=!c.hard;
+mediumBtn.innerText=c.medium?"Medium":"🔒 Medium";
+hardBtn.innerText=c.hard?"Hard":"🔒 Hard";
 }
 
 // NAV
 function selectCategory(c){
-beep(300);
+popSound();
+speak("Welcome to Kids Quiz");
 
 category=c;
 stars=0; coins=0;
-
 starsEl.innerText=0;
 coinsEl.innerText=0;
 
@@ -260,8 +271,7 @@ updateLevelButtons();
 }
 
 function startGame(l){
-beep(400);
-
+popSound();
 if(!unlockedLevels[category][l]) return;
 
 level=l;
@@ -294,24 +304,20 @@ function autoWrong(){
 if(locked) return;
 locked=true;
 setEmoji("bad");
-beep(200);
+funnyWrong();
+speak("Time is up");
 setTimeout(nextQ,800);
 }
 
 // LOAD
 function loadQ(){
-if(!shuffledList[index]){
-showResult();
-return;
-}
-
+if(!shuffledList[index]){showResult();return;}
 locked=false;
 
 let q=shuffledList[index];
 question.innerText=q.q;
 
 answers.innerHTML="";
-
 q.a.forEach((a,i)=>{
 let btn=document.createElement("button");
 btn.className="btn answer-btn";
@@ -333,12 +339,14 @@ if(sel===correct){
 btn.classList.add("correct");
 stars++; coins+=5;
 setEmoji("good");
-beep(800);
+winSound();
+speak("Correct Answer");
 showConfetti();
 }else{
 btn.classList.add("wrong");
 setEmoji("bad");
-beep(200);
+funnyWrong();
+speak("Try Again");
 }
 
 starsEl.innerText=stars;
@@ -359,9 +367,9 @@ setTimeout(()=>c.remove(),1000);
 }
 }
 
-// NEXT
-function nextQ(){ index++; loadQ(); }
-function prevQ(){ if(index>0){ index--; loadQ(); } }
+// FLOW
+function nextQ(){index++;loadQ();}
+function prevQ(){if(index>0){index--;loadQ();}}
 
 // RESULT
 function showResult(){
@@ -380,6 +388,9 @@ if(stars>=2) badge="⭐ MASTER";
 else if(stars>=1) badge="🏆 PRO";
 
 badgeEl.innerText=badge;
+
+speak("Great job! Level completed");
+winSound();
 }
 
 // NAV BACK
@@ -387,9 +398,6 @@ function playAgain(){screen4.classList.add("hidden");screen1.classList.remove("h
 function backToCategory(){screen2.classList.add("hidden");screen1.classList.remove("hidden");}
 function backToLevels(){screen3.classList.add("hidden");screen2.classList.remove("hidden");}
 function home(){screen3.classList.add("hidden");screen1.classList.remove("hidden");}
-
-// 🎯 START MUSIC ON FIRST TOUCH ANYWHERE
-document.body.addEventListener("click", startMusicOnce);
 
 // ELEMENTS
 let starsEl=document.getElementById("stars");
@@ -403,6 +411,7 @@ let screen3=document.getElementById("screen3");
 let screen4=document.getElementById("screen4");
 let finalScore=document.getElementById("finalScore");
 let badgeEl=document.getElementById("badge");
+let emoji=document.getElementById("emoji");
 
 </script>
 
