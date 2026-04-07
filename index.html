@@ -27,21 +27,52 @@ body{
 }
 
 button{
- padding:12px;
- margin:6px;
+ padding:10px;
+ margin:5px;
  border:none;
  border-radius:12px;
- font-size:16px;
+ font-size:15px;
  cursor:pointer;
 }
 
-.btn{
+.btn{ width:100%; background:white; color:black; }
+
+.opt{
  width:100%;
- background:white;
- color:black;
+ color:white;
 }
 
 .hidden{display:none;}
+
+/* COLORS */
+.c1{background:#ff6b6b;}
+.c2{background:#4dabf7;}
+.c3{background:#51cf66;}
+.c4{background:#ffd43b; color:black;}
+
+/* ANIMATIONS */
+.correct{
+ animation: pop 0.4s ease;
+ background:#2ecc71 !important;
+}
+
+.wrong{
+ animation: shake 0.4s ease;
+ background:#e74c3c !important;
+}
+
+@keyframes pop{
+ 0%{transform:scale(1);}
+ 50%{transform:scale(1.2);}
+ 100%{transform:scale(1);}
+}
+
+@keyframes shake{
+ 0%{transform:translateX(0);}
+ 25%{transform:translateX(-5px);}
+ 50%{transform:translateX(5px);}
+ 100%{transform:translateX(0);}
+}
 </style>
 </head>
 
@@ -51,30 +82,34 @@ button{
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<button class="btn" onclick="toggleSound()">🔊 Sound: <span id="soundTxt">ON</span></button>
+<button class="btn" onclick="toggleSound()">🔊 Sound: <span id="s">ON</span></button>
 
 <div id="home">
-  <button class="btn" onclick="startSetup()">Start Game</button>
+ <button class="btn" onclick="startSetup()">Start Game</button>
 </div>
 
 <div id="setup" class="hidden">
 
-  <h3>Select Category</h3>
-  <button class="btn" onclick="setCat('math')">Math</button>
-  <button class="btn" onclick="setCat('english')">English</button>
-  <button class="btn" onclick="setCat('gk')">GK</button>
+ <h3>Select Category</h3>
+ <button class="btn" onclick="setCat('math')">Math</button>
+ <button class="btn" onclick="setCat('english')">English</button>
+ <button class="btn" onclick="setCat('gk')">GK</button>
 
-  <h3>Select Difficulty</h3>
-  <button class="btn" onclick="setDiff('easy')">Easy</button>
-  <button class="btn" onclick="setDiff('medium')">Medium</button>
-  <button class="btn" onclick="setDiff('hard')">Hard</button>
+ <h3>Select Difficulty</h3>
+ <button class="btn" onclick="setDiff('easy')">Easy</button>
+ <button class="btn" onclick="setDiff('medium')">Medium</button>
+ <button class="btn" onclick="setDiff('hard')">Hard</button>
 
 </div>
 
 <div id="game" class="hidden">
 
-  <h3 id="q">Loading...</h3>
-  <div id="opts"></div>
+ <h3 id="q"></h3>
+ <div id="opts"></div>
+
+ <button class="btn" onclick="prev()">⬅ Previous</button>
+ <button class="btn" onclick="home()">🏠 Home</button>
+ <button class="btn" onclick="restart()">🔄 Restart</button>
 
 </div>
 
@@ -87,85 +122,97 @@ let diff=null;
 let i=0;
 let sound=true;
 
-/* ---------------- SOUND ENGINE ---------------- */
+/* ---------------- SOUND FIX ---------------- */
 
 function beep(type){
+
  if(!sound) return;
 
- let ctx = new (window.AudioContext || window.webkitAudioContext)();
- let o = ctx.createOscillator();
- let g = ctx.createGain();
+ const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+ const o = ctx.createOscillator();
+ const g = ctx.createGain();
 
  o.connect(g);
  g.connect(ctx.destination);
 
- if(type==="correct") o.frequency.value = 700;
- if(type==="wrong") o.frequency.value = 200;
- if(type==="welcome") o.frequency.value = 500;
+ if(type==="welcome") o.frequency.value=600;
+ if(type==="correct") o.frequency.value=800;
+ if(type==="wrong") o.frequency.value=200;
 
  o.start();
- g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
- o.stop(ctx.currentTime + 0.5);
+ g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
+ o.stop(ctx.currentTime + 0.4);
 }
 
-/* ---------------- DATA ---------------- */
+/* ---------------- 20 QUESTIONS EACH LEVEL ---------------- */
 
 const data={
  math:{
-  easy:[
-   {q:"2 + 2 = ?", o:["3","4","5"], a:1},
-   {q:"5 + 3 = ?", o:["6","7","8"], a:2}
-  ],
-  medium:[
-   {q:"12 + 8 = ?", o:["18","20","22"], a:1}
-  ],
-  hard:[
-   {q:"12 x 12 = ?", o:["124","144","154"], a:1}
-  ]
+  easy: Array.from({length:20},(_,x)=>({
+   q:`Math Easy Q${x+1}: 2 + ${x} = ?`,
+   o:[`${x+1}`,`${x+2}`,`${x+3}`],
+   a:1
+  })),
+  medium: Array.from({length:20},(_,x)=>({
+   q:`Math Medium Q${x+1}: 10 + ${x} = ?`,
+   o:[`${10+x}`,`${11+x}`,`${12+x}`],
+   a:1
+  })),
+  hard: Array.from({length:20},(_,x)=>({
+   q:`Math Hard Q${x+1}: 20 - ${x} = ?`,
+   o:[`${20-x}`,`${19-x}`,`${18-x}`],
+   a:0
+  }))
  },
 
  english:{
-  easy:[
-   {q:"A for ?", o:["Apple","Ball","Cat"], a:0}
-  ],
-  medium:[
-   {q:"Plural of Book?", o:["Books","Bookies","Booked"], a:0}
-  ],
-  hard:[
-   {q:"Opposite Happy?", o:["Joy","Sad","Glad"], a:1}
-  ]
+  easy: Array.from({length:20},(_,x)=>({
+   q:`English Easy Q${x+1}: A for ?`,
+   o:["Apple","Ball","Cat"],
+   a:0
+  })),
+  medium: Array.from({length:20},(_,x)=>({
+   q:`English Medium Q${x+1}: B for ?`,
+   o:["Bat","Dog","Egg"],
+   a:0
+  })),
+  hard: Array.from({length:20},(_,x)=>({
+   q:`Opposite of Happy Q${x+1}?`,
+   o:["Sad","Joy","Funny"],
+   a:0
+  }))
  },
 
  gk:{
-  easy:[
-   {q:"Days in week?", o:["5","6","7"], a:2}
-  ],
-  medium:[
-   {q:"Capital India?", o:["Delhi","Mumbai","Chennai"], a:0}
-  ],
-  hard:[
-   {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
-  ]
+  easy: Array.from({length:20},(_,x)=>({
+   q:`GK Easy Q${x+1}: Days in week?`,
+   o:["5","6","7"],
+   a:2
+  })),
+  medium: Array.from({length:20},(_,x)=>({
+   q:`GK Medium Q${x+1}: Capital India?`,
+   o:["Delhi","Mumbai","Chennai"],
+   a:0
+  })),
+  hard: Array.from({length:20},(_,x)=>({
+   q:`GK Hard Q${x+1}: Largest ocean?`,
+   o:["Atlantic","Pacific","Arctic"],
+   a:1
+  }))
  }
 };
 
-/* ---------------- FLOW FIX ---------------- */
+/* ---------------- FLOW ---------------- */
 
 function startSetup(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
- beep("welcome");
+ beep("welcome");   // FIXED SOUND
 }
 
-function setCat(c){
- cat=c;
- tryStart();
-}
-
-function setDiff(d){
- diff=d;
- tryStart();
-}
+function setCat(c){ cat=c; tryStart(); }
+function setDiff(d){ diff=d; tryStart(); }
 
 function tryStart(){
  if(cat && diff){
@@ -176,7 +223,7 @@ function tryStart(){
  }
 }
 
-/* ---------------- GAME ---------------- */
+/* ---------------- LOAD ---------------- */
 
 function load(){
 
@@ -190,34 +237,56 @@ function load(){
 
  document.getElementById("q").innerText=q.q;
 
+ let colors=["c1","c2","c3","c4"];
  let html="";
 
  q.o.forEach((op,idx)=>{
-  html+=`<button class="btn" onclick="check(${idx})">${op}</button>`;
+  html+=`<button class="opt ${colors[idx%4]}" onclick="check(${idx},this)">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML=html;
 }
 
-function check(ans){
+/* ---------------- ANSWER + ANIMATION ---------------- */
+
+function check(ans,btn){
 
  let q=data[cat][diff][i];
 
  if(ans===q.a){
   beep("correct");
+  btn.classList.add("correct");
  }else{
   beep("wrong");
+  btn.classList.add("wrong");
  }
 
- i++;
+ setTimeout(()=>{
+  i++;
+  load();
+ },500);
+}
+
+/* ---------------- NAVIGATION ---------------- */
+
+function prev(){
+ if(i>0){ i--; load(); }
+}
+
+function home(){
+ location.reload();
+}
+
+function restart(){
+ i=0;
  load();
 }
 
-/* ---------------- SOUND TOGGLE ---------------- */
+/* ---------------- SOUND ---------------- */
 
 function toggleSound(){
  sound=!sound;
- document.getElementById("soundTxt").innerText=sound?"ON":"OFF";
+ document.getElementById("s").innerText=sound?"ON":"OFF";
 }
 
 </script>
