@@ -1,225 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Kids Quiz PRO</title>
-
-<style>
-body{
- margin:0;
- font-family:Arial;
- background:linear-gradient(135deg,#6a11cb,#2575fc);
- display:flex;
- justify-content:center;
- align-items:center;
- height:100vh;
- color:white;
-}
-
-.box{
- width:90%;
- max-width:420px;
- text-align:center;
-}
-
-button{
- padding:12px;
- margin:8px;
- border:none;
- border-radius:10px;
- font-size:16px;
- cursor:pointer;
-}
-
-.btn{background:white;color:black;}
-.option{width:100%;}
-
-.hidden{display:none;}
-
-.top{
- display:flex;
- justify-content:space-between;
-}
-
-.bar{
- width:100%;
- height:10px;
- background:#444;
- border-radius:10px;
-}
-
-.fill{
- height:10px;
- width:0%;
- background:lime;
-}
-</style>
+<title>Debug Quiz</title>
 </head>
 
-<body>
+<body style="font-family:Arial;text-align:center;padding-top:50px;">
 
-<div class="box">
+<h2>DEBUG START</h2>
 
-<!-- HOME -->
-<div id="home">
-  <h2>🎮 Kids Quiz PRO</h2>
-  <button class="btn" onclick="openSetup()">Start Game</button>
-</div>
+<button onclick="test()">Test Start Game</button>
 
-<!-- SETUP -->
-<div id="setup" class="hidden">
-
-  <h3>Category</h3>
-  <button class="btn" onclick="selectCat('math')">Math</button>
-  <button class="btn" onclick="selectCat('english')">English</button>
-  <button class="btn" onclick="selectCat('gk')">GK</button>
-
-  <h3>Difficulty</h3>
-  <button class="btn" onclick="selectDiff('easy')">Easy</button>
-  <button class="btn" onclick="selectDiff('medium')">Medium</button>
-  <button class="btn" onclick="selectDiff('hard')">Hard</button>
-
-  <br>
-  <button class="btn" onclick="startGame()">Play Quiz</button>
-
-</div>
-
-<!-- GAME -->
-<div id="game" class="hidden">
-
- <div class="top">
-  <div>❤️ <span id="life">3</span></div>
-  <div>💰 <span id="coin">0</span></div>
-  <div>⭐ <span id="star">0</span></div>
- </div>
-
- <div class="bar"><div class="fill" id="bar"></div></div>
-
- <h3 id="q"></h3>
- <div id="opt"></div>
-
-</div>
-
-</div>
+<h3 id="status">Waiting...</h3>
 
 <script>
 
-let cat = "";
-let diff = "";
+function test(){
+ document.getElementById("status").innerText = "Button clicked ✔";
 
-let qlist = [];
-let i = 0;
-
-let life = 3;
-let coin = 0;
-let star = 0;
-
-// NAV
-function openSetup(){
- document.getElementById("home").style.display="none";
- document.getElementById("setup").style.display="block";
-}
-
-// SAVE CATEGORY
-function selectCat(c){
- cat = c;
- alert("Selected: " + c);
-}
-
-// SAVE DIFFICULTY
-function selectDiff(d){
- diff = d;
- alert("Selected: " + d);
-}
-
-// DATA
-const data = {
- math:{
-  easy:[{q:"2+2?",o:["3","4","5","6"],a:1}],
-  medium:[{q:"10+5?",o:["13","14","15","16"],a:2}],
-  hard:[{q:"20×2?",o:["30","40","50","60"],a:1}]
- },
- english:{
-  easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}],
-  medium:[{q:"Plural Book?",o:["Books","Book","Boks","Bookes"],a:0}],
-  hard:[{q:"Happy synonym?",o:["Sad","Joyful","Angry","Tired"],a:1}]
- },
- gk:{
-  easy:[{q:"Days week?",o:["5","6","7","8"],a:2}],
-  medium:[{q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}],
-  hard:[{q:"Largest ocean?",o:["Atlantic","Pacific","Indian","Arctic"],a:1}]
+ try {
+   startGame();
+ } catch(e){
+   document.getElementById("status").innerText = "Error: " + e.message;
  }
-};
+}
 
-// START GAME (FIXED)
 function startGame(){
-
- if(cat==="" || diff===""){
-  alert("Please select Category AND Difficulty");
-  return;
- }
-
- document.getElementById("setup").style.display="none";
- document.getElementById("game").style.display="block";
-
- qlist = [...data[cat][diff]];
- i=0;
- life=3;
- coin=0;
- star=0;
-
- load();
-}
-
-// LOAD QUESTION
-function load(){
-
- if(i>=qlist.length){
-  alert("Completed!");
-  location.reload();
-  return;
- }
-
- let x = qlist[i];
- document.getElementById("q").innerText = x.q;
-
- let html="";
- x.o.forEach((op,idx)=>{
-  html+=`<button class="btn option" onclick="check(${idx})">${op}</button>`;
- });
-
- document.getElementById("opt").innerHTML = html;
-
- document.getElementById("bar").style.width =
- (i/qlist.length)*100 + "%";
-
- update();
-}
-
-// CHECK ANSWER
-function check(n){
-
- if(n === qlist[i].a){
-  coin+=10;
-  star++;
- } else {
-  life--;
- }
-
- if(life<=0){
-  alert("Game Over");
-  location.reload();
- }
-
- i++;
- load();
-}
-
-// UPDATE UI
-function update(){
- document.getElementById("life").innerText = life;
- document.getElementById("coin").innerText = coin;
- document.getElementById("star").innerText = star;
+ document.getElementById("status").innerText = "Game function running ✔";
 }
 
 </script>
