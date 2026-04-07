@@ -1,21 +1,172 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ultra Debug</title>
+<meta charset="UTF-8">
+<title>Kids Quiz PRO</title>
+
+<style>
+body{
+ margin:0;
+ font-family:Arial;
+ background:linear-gradient(135deg,#6a11cb,#2575fc);
+ color:white;
+ text-align:center;
+}
+
+.box{
+ max-width:420px;
+ margin:auto;
+ padding-top:40px;
+}
+
+button{
+ padding:12px;
+ margin:6px;
+ border:none;
+ border-radius:10px;
+ font-size:16px;
+ cursor:pointer;
+}
+
+.btn{background:white;color:black;}
+
+.hidden{display:none;}
+</style>
 </head>
 
-<body style="font-family:Arial;text-align:center;padding-top:50px;">
+<body>
 
-<h2>ULTRA DEBUG</h2>
+<div class="box">
 
-<button id="btn">Click Me</button>
+<h2>🎮 Kids Quiz PRO</h2>
 
-<h3 id="status">Waiting...</h3>
+<!-- HOME -->
+<div id="home">
+ <button class="btn" onclick="showSetup()">Start Game</button>
+</div>
+
+<!-- SETUP -->
+<div id="setup" class="hidden">
+
+ <h3>Category</h3>
+ <button class="btn" onclick="setCat('math')">Math</button>
+ <button class="btn" onclick="setCat('english')">English</button>
+ <button class="btn" onclick="setCat('gk')">GK</button>
+
+ <h3>Difficulty</h3>
+ <button class="btn" onclick="setDiff('easy')">Easy</button>
+ <button class="btn" onclick="setDiff('medium')">Medium</button>
+ <button class="btn" onclick="setDiff('hard')">Hard</button>
+
+ <br>
+ <button class="btn" onclick="startGame()">Play Quiz</button>
+
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden">
+
+ <h3 id="q"></h3>
+ <div id="opts"></div>
+
+</div>
+
+</div>
 
 <script>
-document.getElementById("btn").addEventListener("click", function(){
- document.getElementById("status").innerText = "BUTTON WORKS ✔";
-});
+
+let cat = null;
+let diff = null;
+let i = 0;
+
+const data = {
+ math:{
+  easy:[{q:"2+2?",a:1,o:["3","4","5"]}],
+  medium:[{q:"5+5?",a:2,o:["8","9","10"]}],
+  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
+ },
+ english:{
+  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
+  medium:[{q:"Plural of Book?",a:0,o:["Books","Book","Boks"]}],
+  hard:[{q:"Opposite of Happy?",a:1,o:["Joy","Sad","Angry"]}]
+ },
+ gk:{
+  easy:[{q:"Days in week?",a:2,o:["5","6","7"]}],
+  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
+  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
+ }
+};
+
+function showSetup(){
+ document.getElementById("home").style.display="none";
+ document.getElementById("setup").style.display="block";
+}
+
+function setCat(c){
+ cat = c;
+ alert("Category: " + c);
+}
+
+function setDiff(d){
+ diff = d;
+ alert("Difficulty: " + d);
+}
+
+function startGame(){
+
+ // SAFE CHECK (IMPORTANT FIX)
+ if(!cat || !diff){
+  alert("Select Category and Difficulty first!");
+  return;
+ }
+
+ if(!data[cat] || !data[cat][diff]){
+  alert("Data missing!");
+  return;
+ }
+
+ document.getElementById("setup").style.display="none";
+ document.getElementById("game").style.display="block";
+
+ i = 0;
+ load();
+}
+
+function load(){
+
+ let qData = data[cat][diff][i];
+
+ if(!qData){
+  alert("Quiz finished!");
+  location.reload();
+  return;
+ }
+
+ document.getElementById("q").innerText = qData.q;
+
+ let html = "";
+
+ qData.o.forEach((opt, idx)=>{
+  html += `<button class="btn" onclick="check(${idx})">${opt}</button>`;
+ });
+
+ document.getElementById("opts").innerHTML = html;
+}
+
+function check(ans){
+
+ let qData = data[cat][diff][i];
+
+ if(ans === qData.a){
+  alert("Correct ✔");
+ } else {
+  alert("Wrong ❌");
+ }
+
+ i++;
+ load();
+}
+
 </script>
 
 </body>
