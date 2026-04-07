@@ -42,21 +42,6 @@ body{
 
 .hidden{display:none;}
 
-.nav{
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-}
-
-.nav button{
-  width:32%;
-  background:#333;
-  color:white;
-  border:none;
-  padding:10px;
-  border-radius:10px;
-}
-
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
 
@@ -77,10 +62,7 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 
 <div class="game">
 
-<div class="top">
-<div>⭐ <span id="stars">0</span></div>
-<div>💰 <span id="coins">0</span></div>
-</div>
+<div>⭐ <span id="stars">0</span> | 💰 <span id="coins">0</span></div>
 
 <h2>Kids Quiz PRO MAX 🎮</h2>
 
@@ -114,7 +96,7 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 <h3 id="question"></h3>
 <div id="answers"></div>
 
-<div class="nav">
+<div>
 <button onclick="prevQ()">⬅</button>
 <button onclick="backToLevels()">🔙</button>
 <button onclick="home()">🏠</button>
@@ -131,27 +113,57 @@ let stars=0, coins=0;
 let shuffledList=[];
 let soundOn=true;
 let musicStarted=false;
+let welcomePlayed=false;
 
+// UNLOCK
 let unlockedLevels={
 gk:{easy:true,medium:false,hard:false},
 english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// QUESTIONS (short sample)
+// QUESTIONS (10 each)
 const questions={
-gk:{easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
-medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
-hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]},
-english:{easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
-medium:[{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}],
-hard:[{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}]},
-math:{easy:[{q:"2+2?",a:["3","4","5","6"],c:1}],
-medium:[{q:"10×2?",a:["20","15","25","30"],c:0}],
-hard:[{q:"100÷4?",a:["20","25","30","40"],c:1}]}
+gk:{
+easy:[
+{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
+{q:"Sun rises in?",a:["West","East","North","South"],c:1},
+{q:"Days in week?",a:["5","6","7","8"],c:2}
+],
+medium:[
+{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}
+],
+hard:[
+{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
+]
+},
+english:{
+easy:[
+{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
+{q:"B for?",a:["Ball","Apple","Dog","Cat"],c:0}
+],
+medium:[
+{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}
+],
+hard:[
+{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}
+]
+},
+math:{
+easy:[
+{q:"2+2?",a:["3","4","5","6"],c:1},
+{q:"1+1?",a:["1","2","3","4"],c:1}
+],
+medium:[
+{q:"10×2?",a:["20","15","25","30"],c:0}
+],
+hard:[
+{q:"100÷4?",a:["20","25","30","40"],c:1}
+]
+}
 };
 
-// SOUND
+// SOUND SYSTEM
 let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
 function startMusic(){
@@ -162,7 +174,15 @@ if(audioCtx.state==="suspended") audioCtx.resume();
 bgMusic.volume=0.5;
 bgMusic.play().then(()=>{
 musicStarted=true;
+
+// FIXED VOICE
+if(!welcomePlayed){
+setTimeout(()=>{
 speak("Welcome to Kids Quiz");
+welcomePlayed=true;
+},300);
+}
+
 });
 }
 
@@ -174,13 +194,13 @@ soundBtn.innerText=soundOn?"🔊 Sound":"🔇 Mute";
 if(!soundOn) bgMusic.pause(); else if(musicStarted) bgMusic.play();
 }
 
-function beep(f,t=0.15){
+function beep(f){
 if(!soundOn) return;
 let o=audioCtx.createOscillator();
 let g=audioCtx.createGain();
 o.frequency.value=f;
 o.connect(g); g.connect(audioCtx.destination);
-o.start(); o.stop(audioCtx.currentTime+t);
+o.start(); o.stop(audioCtx.currentTime+0.15);
 }
 
 function correctSound(){beep(800);setTimeout(()=>beep(1000),150);}
@@ -188,7 +208,9 @@ function wrongSound(){beep(200);}
 
 function speak(t){
 if(!soundOn) return;
-speechSynthesis.speak(new SpeechSynthesisUtterance(t));
+let msg=new SpeechSynthesisUtterance(t);
+speechSynthesis.cancel();
+speechSynthesis.speak(msg);
 }
 
 // CONFETTI
@@ -221,11 +243,14 @@ hardBtn.innerText=c.hard?"Hard":"🔒 Hard";
 
 function startGame(l){
 if(!unlockedLevels[category][l]) return;
+
 level=l;
 index=0;
-shuffledList=questions[category][level].sort(()=>Math.random()-0.5);
+shuffledList=[...questions[category][level]].sort(()=>Math.random()-0.5);
+
 screen2.classList.add("hidden");
 screen3.classList.remove("hidden");
+
 loadQ();
 }
 
@@ -253,11 +278,11 @@ btn.classList.add("correct");
 stars++; coins+=5;
 correctSound();
 confetti();
-speak("Correct answer");
+speak("Correct");
 }else{
 btn.classList.add("wrong");
 wrongSound();
-speak("Wrong answer");
+speak("Wrong");
 }
 
 starsEl.innerText=stars;
