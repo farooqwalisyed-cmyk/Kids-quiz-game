@@ -8,40 +8,30 @@
 body{
  margin:0;
  font-family:Arial;
- background:#0f172a;
- color:white;
-}
-
-/* APP SCREENS */
-.screen{
- display:none;
- height:100vh;
- width:100%;
+ background: linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1);
+ color:#fff;
+ display:flex;
  justify-content:center;
  align-items:center;
- flex-direction:column;
- text-align:center;
+ height:100vh;
 }
 
-.active{
- display:flex;
-}
-
-/* CARD */
+/* CARD STYLE (OLD BEAUTIFUL LOOK) */
 .card{
  width:90%;
  max-width:420px;
- background:#1e293b;
+ background: rgba(0,0,0,0.25);
  padding:20px;
- border-radius:16px;
+ border-radius:20px;
+ text-align:center;
+ backdrop-filter: blur(10px);
 }
 
-/* BUTTONS */
 button{
  padding:12px;
  margin:6px;
  border:none;
- border-radius:10px;
+ border-radius:12px;
  font-size:16px;
  cursor:pointer;
 }
@@ -52,68 +42,46 @@ button{
  width:100%;
 }
 
-/* TOP BAR */
-.top{
- display:flex;
- justify-content:space-between;
- margin-bottom:10px;
-}
-
-/* ANIMATION */
-.correct{
- background:lime !important;
- transform:scale(1.1);
- transition:0.2s;
-}
-
-.wrong{
- background:red !important;
-}
-
+/* HIDE */
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
+<div class="card">
+
+<h2>🎮 Kids Quiz PRO</h2>
+
 <!-- HOME -->
-<div id="home" class="screen active">
-  <div class="card">
-    <h2>🎮 Kids Quiz PRO</h2>
-    <button class="btn" onclick="goSetup()">Start Game</button>
-  </div>
+<div id="home">
+ <button class="btn" onclick="goSetup()">Start Game</button>
 </div>
 
 <!-- SETUP -->
-<div id="setup" class="screen">
-  <div class="card">
+<div id="setup" class="hidden">
 
-    <h3>Select Category</h3>
-    <button class="btn" onclick="setCat('math')">Math</button>
-    <button class="btn" onclick="setCat('english')">English</button>
-    <button class="btn" onclick="setCat('gk')">GK</button>
+ <h3>Select Category</h3>
+ <button class="btn" onclick="setCat('math')">Math</button>
+ <button class="btn" onclick="setCat('english')">English</button>
+ <button class="btn" onclick="setCat('gk')">GK</button>
 
-    <h3>Select Difficulty</h3>
-    <button class="btn" onclick="setDiff('easy')">Easy</button>
-    <button class="btn" onclick="setDiff('medium')">Medium</button>
-    <button class="btn" onclick="setDiff('hard')">Hard</button>
+ <h3>Select Difficulty</h3>
+ <button class="btn" onclick="setDiff('easy')">Easy</button>
+ <button class="btn" onclick="setDiff('medium')">Medium</button>
+ <button class="btn" onclick="setDiff('hard')">Hard</button>
 
-    <button class="btn" onclick="startGame()">Play Quiz</button>
-
-  </div>
+ <button class="btn" onclick="startGame()">Play Quiz</button>
 </div>
 
 <!-- GAME -->
-<div id="game" class="screen">
-  <div class="card">
+<div id="game" class="hidden">
 
-    <div class="top">
-      <div>🔊 <span id="sound">ON</span></div>
-    </div>
+ <h3 id="q"></h3>
+ <div id="opts"></div>
 
-    <h3 id="q"></h3>
-    <div id="opts"></div>
+</div>
 
-  </div>
 </div>
 
 <script>
@@ -121,52 +89,28 @@ button{
 let cat="";
 let diff="";
 let i=0;
-let sound=true;
 
 const data={
  math:{
-  easy:[
-   {q:"2+2?",a:1,o:["3","4","5"]},
-   {q:"3+3?",a:0,o:["6","7","8"]}
-  ],
-  medium:[
-   {q:"10+5?",a:2,o:["12","13","15"]}
-  ],
-  hard:[
-   {q:"10×2?",a:1,o:["10","20","30"]}
-  ]
+  easy:[{q:"2+2?",a:1,o:["3","4","5"]},{q:"5+1?",a:2,o:["5","6","7"]}],
+  medium:[{q:"10+5?",a:2,o:["12","13","15"]}],
+  hard:[{q:"10×2?",a:1,o:["10","20","30"]}]
  },
  english:{
-  easy:[
-   {q:"A for?",a:0,o:["Apple","Ball","Cat"]}
-  ],
-  medium:[
-   {q:"Plural Book?",a:0,o:["Books","Book","Boks"]}
-  ],
-  hard:[
-   {q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}
-  ]
+  easy:[{q:"A for?",a:0,o:["Apple","Ball","Cat"]}],
+  medium:[{q:"Plural Book?",a:0,o:["Books","Book","Boks"]}],
+  hard:[{q:"Opposite Happy?",a:1,o:["Sad","Joyful","Angry"]}]
  },
  gk:{
-  easy:[
-   {q:"Days in week?",a:2,o:["5","6","7"]}
-  ],
-  medium:[
-   {q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}
-  ],
-  hard:[
-   {q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}
-  ]
+  easy:[{q:"Days in week?",a:2,o:["5","6","7"]}],
+  medium:[{q:"Capital India?",a:0,o:["Delhi","Mumbai","Chennai"]}],
+  hard:[{q:"Ocean?",a:1,o:["Atlantic","Pacific","Arctic"]}]
  }
 };
 
-function showScreen(id){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
-}
-
 function goSetup(){
- showScreen("setup");
+ document.getElementById("home").style.display="none";
+ document.getElementById("setup").style.display="block";
 }
 
 function setCat(c){ cat=c; }
@@ -175,18 +119,20 @@ function setDiff(d){ diff=d; }
 function startGame(){
 
  if(!cat || !diff){
-  alert("Select category & difficulty");
+  alert("Select Category and Difficulty");
   return;
  }
 
  i=0;
- showScreen("game");
+ document.getElementById("setup").style.display="none";
+ document.getElementById("game").style.display="block";
+
  load();
 }
 
 function load(){
 
- let q = data[cat][diff][i];
+ let q=data[cat][diff][i];
 
  if(!q){
   alert("Level Completed!");
@@ -198,26 +144,20 @@ function load(){
 
  let html="";
  q.o.forEach((op,idx)=>{
-  html+=`<button class="btn" onclick="check(this,${idx})">${op}</button>`;
+  html+=`<button class="btn" onclick="check(${idx})">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML=html;
 }
 
-function check(btn,ans){
+function check(ans){
 
  let q=data[cat][diff][i];
 
- if(ans===q.a){
-  btn.classList.add("correct");
- }else{
-  btn.classList.add("wrong");
- }
+ alert(ans===q.a ? "Correct ✔" : "Wrong ❌");
 
- setTimeout(()=>{
-  i++;
-  load();
- },500);
+ i++;
+ load();
 }
 
 </script>
