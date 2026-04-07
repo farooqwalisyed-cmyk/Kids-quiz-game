@@ -8,45 +8,83 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  font-family:'Comic Sans MS', Arial;
+  background:linear-gradient(45deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb);
+  background-size:300% 300%;
+  animation:bgMove 8s infinite alternate;
   display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
 }
 
+@keyframes bgMove{
+  0%{background-position:left;}
+  100%{background-position:right;}
+}
+
 .game{
   width:95%;
   max-width:520px;
   background:white;
-  border-radius:20px;
+  border-radius:25px;
   padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  box-shadow:0 15px 40px rgba(0,0,0,0.3);
   text-align:center;
 }
 
-.btn{
-  padding:12px;
-  margin:6px;
-  width:90%;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
-  cursor:pointer;
+h2{
+  color:#444;
 }
 
-.category-btn{background:#2575fc;color:white;}
-.level-btn{background:#6a11cb;color:white;}
-.answer-btn{background:#eee;}
+.btn{
+  padding:14px;
+  margin:8px;
+  width:90%;
+  border:none;
+  border-radius:15px;
+  font-size:18px;
+  cursor:pointer;
+  transition:0.2s;
+}
 
-.hidden{display:none;}
+.btn:hover{
+  transform:scale(1.05);
+}
+
+.category-btn{
+  background:linear-gradient(45deg,#36d1dc,#5b86e5);
+  color:white;
+}
+
+.level-btn{
+  background:linear-gradient(45deg,#ff758c,#ff7eb3);
+  color:white;
+}
+
+.answer-btn{
+  background:#f1f1f1;
+}
 
 .correct{background:#4CAF50 !important;color:white;}
 .wrong{background:#f44336 !important;color:white;}
 
-#emoji{font-size:40px;margin:10px 0;}
+.hidden{display:none;}
 
+#emoji{
+  font-size:50px;
+  margin:10px 0;
+}
+
+.nav button{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#333;
+  color:white;
+}
+
+/* Confetti */
 .confetti{
 position:fixed;
 width:10px;height:10px;
@@ -77,17 +115,17 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 <!-- CATEGORY -->
 <div id="screen1">
 <h3>Select Category</h3>
-<button class="btn category-btn" onclick="selectCategory('gk')">GK</button>
-<button class="btn category-btn" onclick="selectCategory('english')">English</button>
-<button class="btn category-btn" onclick="selectCategory('math')">Math</button>
+<button class="btn category-btn" onclick="startExperience('gk')">GK</button>
+<button class="btn category-btn" onclick="startExperience('english')">English</button>
+<button class="btn category-btn" onclick="startExperience('math')">Math</button>
 </div>
 
 <!-- LEVEL -->
 <div id="screen2" class="hidden">
 <h3>Select Level</h3>
-<button id="easyBtn" class="btn level-btn" onclick="startGame('easy')">Easy</button>
-<button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn level-btn" onclick="startGame('hard')">🔒 Hard</button>
+<button class="btn level-btn" onclick="startGame('easy')">Easy</button>
+<button class="btn level-btn" onclick="startGame('medium')">Medium</button>
+<button class="btn level-btn" onclick="startGame('hard')">Hard</button>
 <button class="btn" onclick="backToCategory()">⬅ Back</button>
 </div>
 
@@ -112,86 +150,46 @@ let category="", level="", index=0;
 let stars=0, coins=0;
 let shuffledList=[];
 let soundOn=true;
-let musicStarted=false;
-let welcomePlayed=false;
+let started=false;
 
-// UNLOCK
-let unlockedLevels={
-gk:{easy:true,medium:false,hard:false},
-english:{easy:true,medium:false,hard:false},
-math:{easy:true,medium:false,hard:false}
-};
-
-// QUESTIONS (10 each)
+// QUESTIONS (few demo)
 const questions={
-gk:{
-easy:[
+gk:{easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"Days in week?",a:["5","6","7","8"],c:2}
-],
-medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}
-],
-hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
-]
-},
-english:{
-easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Dog","Cat"],c:0}
-],
-medium:[
-{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}
-],
-hard:[
-{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}
-]
-},
-math:{
-easy:[
-{q:"2+2?",a:["3","4","5","6"],c:1},
-{q:"1+1?",a:["1","2","3","4"],c:1}
-],
-medium:[
-{q:"10×2?",a:["20","15","25","30"],c:0}
-],
-hard:[
-{q:"100÷4?",a:["20","25","30","40"],c:1}
-]
-}
+{q:"Sun rises in?",a:["West","East","North","South"],c:1}
+]}
 };
 
-// SOUND SYSTEM
+// SOUND ENGINE
 let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
-function startMusic(){
-if(musicStarted) return;
+function startExperience(c){
 
-if(audioCtx.state==="suspended") audioCtx.resume();
+// 🔥 FIRST CLICK HANDLER (FIXED)
+if(!started){
+started=true;
+
+audioCtx.resume();
 
 bgMusic.volume=0.5;
-bgMusic.play().then(()=>{
-musicStarted=true;
+bgMusic.play();
 
-// FIXED VOICE
-if(!welcomePlayed){
+// 🎤 GUARANTEED VOICE
 setTimeout(()=>{
 speak("Welcome to Kids Quiz");
-welcomePlayed=true;
 },300);
 }
 
-});
-}
+category=c;
 
-document.body.addEventListener("click",startMusic);
+screen1.classList.add("hidden");
+screen2.classList.remove("hidden");
+}
 
 function toggleSound(){
 soundOn=!soundOn;
 soundBtn.innerText=soundOn?"🔊 Sound":"🔇 Mute";
-if(!soundOn) bgMusic.pause(); else if(musicStarted) bgMusic.play();
+if(!soundOn) bgMusic.pause(); else bgMusic.play();
 }
 
 function beep(f){
@@ -203,47 +201,14 @@ o.connect(g); g.connect(audioCtx.destination);
 o.start(); o.stop(audioCtx.currentTime+0.15);
 }
 
-function correctSound(){beep(800);setTimeout(()=>beep(1000),150);}
-function wrongSound(){beep(200);}
-
 function speak(t){
 if(!soundOn) return;
-let msg=new SpeechSynthesisUtterance(t);
 speechSynthesis.cancel();
-speechSynthesis.speak(msg);
-}
-
-// CONFETTI
-function confetti(){
-for(let i=0;i<15;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*100+"%";
-c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),1000);
-}
+speechSynthesis.speak(new SpeechSynthesisUtterance(t));
 }
 
 // GAME
-function selectCategory(c){
-category=c;
-screen1.classList.add("hidden");
-screen2.classList.remove("hidden");
-updateLevelButtons();
-}
-
-function updateLevelButtons(){
-let c=unlockedLevels[category];
-mediumBtn.disabled=!c.medium;
-hardBtn.disabled=!c.hard;
-mediumBtn.innerText=c.medium?"Medium":"🔒 Medium";
-hardBtn.innerText=c.hard?"Hard":"🔒 Hard";
-}
-
 function startGame(l){
-if(!unlockedLevels[category][l]) return;
-
 level=l;
 index=0;
 shuffledList=[...questions[category][level]].sort(()=>Math.random()-0.5);
@@ -256,7 +221,7 @@ loadQ();
 
 function loadQ(){
 let q=shuffledList[index];
-if(!q){unlockNext();home();return;}
+if(!q){home();return;}
 
 question.innerText=q.q;
 answers.innerHTML="";
@@ -276,44 +241,37 @@ let buttons=document.querySelectorAll(".answer-btn");
 if(sel===correct){
 btn.classList.add("correct");
 stars++; coins+=5;
-correctSound();
+beep(800);
 confetti();
-speak("Correct");
 }else{
 btn.classList.add("wrong");
-wrongSound();
-speak("Wrong");
+beep(200);
 }
 
 starsEl.innerText=stars;
 coinsEl.innerText=coins;
-buttons.forEach(b=>b.disabled=true);
 
+buttons.forEach(b=>b.disabled=true);
 setTimeout(nextQ,800);
 }
 
+function confetti(){
+for(let i=0;i<15;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),1000);
+}
+}
+
+// NAV
 function nextQ(){index++;loadQ();}
 function prevQ(){if(index>0){index--;loadQ();}}
-
-function unlockNext(){
-if(level==="easy") unlockedLevels[category].medium=true;
-if(level==="medium") unlockedLevels[category].hard=true;
-}
-
-function backToCategory(){
-screen2.classList.add("hidden");
-screen1.classList.remove("hidden");
-}
-
-function backToLevels(){
-screen3.classList.add("hidden");
-screen2.classList.remove("hidden");
-}
-
-function home(){
-screen3.classList.add("hidden");
-screen1.classList.remove("hidden");
-}
+function backToCategory(){screen2.classList.add("hidden");screen1.classList.remove("hidden");}
+function backToLevels(){screen3.classList.add("hidden");screen2.classList.remove("hidden");}
+function home(){screen3.classList.add("hidden");screen1.classList.remove("hidden");}
 
 // ELEMENTS
 let starsEl=document.getElementById("stars");
@@ -323,8 +281,6 @@ let answers=document.getElementById("answers");
 let screen1=document.getElementById("screen1");
 let screen2=document.getElementById("screen2");
 let screen3=document.getElementById("screen3");
-let mediumBtn=document.getElementById("mediumBtn");
-let hardBtn=document.getElementById("hardBtn");
 let soundBtn=document.getElementById("soundBtn");
 let bgMusic=document.getElementById("bgMusic");
 
