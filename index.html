@@ -81,7 +81,14 @@ body{
 
 <h2>Kids Quiz PRO MAX 🎮</h2>
 
+<button onclick="toggleSound()">🔊 Sound</button>
+
 <div id="emoji">🙂</div>
+
+<!-- 🎵 MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=kids-happy-112194.mp3">
+</audio>
 
 <!-- CATEGORY -->
 <div id="screen1">
@@ -116,10 +123,10 @@ body{
 
 <script>
 
+// GAME STATE
 let category="", level="", index=0;
 let stars=0, coins=0;
 let shuffledList=[];
-let locked=false;
 
 let unlockedLevels={
 gk:{easy:true,medium:false,hard:false},
@@ -127,10 +134,8 @@ english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// ================= QUESTIONS (90 SAFE) =================
-const questions={
-gk:{
-easy:[
+// ================= QUESTIONS (90) =================
+const questions={gk:{easy:[
 {q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
 {q:"Sun rises in?",a:["West","East","North","South"],c:1},
 {q:"How many days in a week?",a:["5","6","7","8"],c:2},
@@ -141,8 +146,7 @@ easy:[
 {q:"Which is fruit?",a:["Carrot","Apple","Potato","Onion"],c:1},
 {q:"How many months?",a:["10","11","12","13"],c:2},
 {q:"National bird?",a:["Crow","Peacock","Parrot","Eagle"],c:1}
-],
-medium:[
+],medium:[
 {q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
 {q:"Capital of USA?",a:["New York","Washington DC","LA","Chicago"],c:1},
 {q:"Fastest land animal?",a:["Tiger","Cheetah","Lion","Horse"],c:1},
@@ -153,8 +157,7 @@ medium:[
 {q:"Biggest desert?",a:["Sahara","Thar","Gobi","Arctic"],c:0},
 {q:"Water formula?",a:["H2O","CO2","O2","NaCl"],c:0},
 {q:"Human bones?",a:["206","100","300","150"],c:0}
-],
-hard:[
+],hard:[
 {q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0},
 {q:"Speed of light?",a:["300,000 km/s","150,000","100,000","50,000"],c:0},
 {q:"First satellite?",a:["Sputnik","Apollo","Chandrayaan","Voyager"],c:0},
@@ -165,11 +168,8 @@ hard:[
 {q:"Sun is?",a:["Planet","Star","Galaxy","Comet"],c:1},
 {q:"DNA full form?",a:["Deoxyribo","Acid","Both","None"],c:2},
 {q:"Fastest bird?",a:["Eagle","Falcon","Crow","Sparrow"],c:1}
-]
-},
-
-english:{
-easy:[
+]},
+english:{easy:[
 {q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
 {q:"B for?",a:["Ball","Apple","Dog","Cat"],c:0},
 {q:"C for?",a:["Cat","Dog","Fish","Egg"],c:0},
@@ -180,8 +180,7 @@ easy:[
 {q:"H for?",a:["Hat","Dog","Cat","Ball"],c:0},
 {q:"I for?",a:["Ice","Dog","Cat","Ball"],c:0},
 {q:"J for?",a:["Jug","Dog","Cat","Ball"],c:0}
-],
-medium:[
+],medium:[
 {q:"Plural of child?",a:["Childs","Children","Childes","Childer"],c:1},
 {q:"Opposite of big?",a:["Large","Small","Huge","Tall"],c:1},
 {q:"Synonym of fast?",a:["Quick","Slow","Late","Lazy"],c:0},
@@ -192,8 +191,7 @@ medium:[
 {q:"Opposite of tall?",a:["Short","High","Big","Long"],c:0},
 {q:"Plural of foot?",a:["Foots","Feet","Footes","Feets"],c:1},
 {q:"Synonym of small?",a:["Tiny","Big","Huge","Tall"],c:0}
-],
-hard:[
+],hard:[
 {q:"Synonym of happy?",a:["Sad","Joyful","Angry","Tired"],c:1},
 {q:"Antonym of brave?",a:["Coward","Hero","Strong","Bold"],c:0},
 {q:"Synonym of quick?",a:["Fast","Slow","Late","Delay"],c:0},
@@ -204,11 +202,8 @@ hard:[
 {q:"Antonym of light?",a:["Dark","Bright","Shine","Glow"],c:0},
 {q:"Synonym of smart?",a:["Intelligent","Dull","Lazy","Slow"],c:0},
 {q:"Antonym of fast?",a:["Slow","Speed","Run","Quick"],c:0}
-]
-},
-
-math:{
-easy:[
+]},
+math:{easy:[
 {q:"2 + 2?",a:["3","4","5","6"],c:1},
 {q:"1 + 1?",a:["1","2","3","4"],c:1},
 {q:"5 - 2?",a:["2","3","4","5"],c:1},
@@ -219,8 +214,7 @@ easy:[
 {q:"7 - 2?",a:["4","5","6","7"],c:1},
 {q:"1 + 4?",a:["4","5","6","7"],c:1},
 {q:"3 + 2?",a:["4","5","6","7"],c:1}
-],
-medium:[
+],medium:[
 {q:"10 × 2?",a:["20","15","25","30"],c:0},
 {q:"5 × 5?",a:["20","25","30","35"],c:1},
 {q:"12 ÷ 3?",a:["3","4","5","6"],c:1},
@@ -231,8 +225,7 @@ medium:[
 {q:"18 - 9?",a:["8","9","10","11"],c:1},
 {q:"7 × 4?",a:["28","24","21","30"],c:0},
 {q:"16 ÷ 2?",a:["6","7","8","9"],c:2}
-],
-hard:[
+],hard:[
 {q:"100 ÷ 4?",a:["20","25","30","40"],c:1},
 {q:"12 × 12?",a:["144","124","132","156"],c:0},
 {q:"81 ÷ 9?",a:["8","9","10","11"],c:1},
@@ -243,12 +236,62 @@ hard:[
 {q:"9 × 9?",a:["81","72","90","99"],c:0},
 {q:"200 ÷ 10?",a:["10","20","30","40"],c:1},
 {q:"13 × 7?",a:["91","81","71","101"],c:0}
-]
-}
+]}
 };
 
-// ================= GAME LOGIC =================
+// ================= SOUND SYSTEM =================
+let soundOn=true;
+let musicStarted=false;
+let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
+function startMusicOnce(){
+if(musicStarted) return;
+if(audioCtx.state==="suspended") audioCtx.resume();
+
+let music=document.getElementById("bgMusic");
+music.volume=0.5;
+music.play().then(()=>{musicStarted=true;}).catch(()=>{});
+}
+
+document.body.addEventListener("click", startMusicOnce);
+document.body.addEventListener("touchstart", startMusicOnce);
+
+function toggleSound(){
+soundOn=!soundOn;
+let music=document.getElementById("bgMusic");
+let btn=document.querySelector("button");
+
+if(soundOn){
+btn.innerText="🔊 Sound";
+if(musicStarted) music.play();
+}else{
+btn.innerText="🔇 Mute";
+music.pause();
+}
+}
+
+function beep(freq,time=0.15){
+if(!soundOn) return;
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+o.frequency.value=freq;
+o.connect(g);
+g.connect(audioCtx.destination);
+o.start();
+o.stop(audioCtx.currentTime+time);
+}
+
+function correctSound(){beep(800);setTimeout(()=>beep(1000),150);}
+function wrongSound(){beep(200);setTimeout(()=>beep(150),150);}
+
+function speak(text){
+if(!soundOn) return;
+let msg=new SpeechSynthesisUtterance(text);
+msg.pitch=1.2;
+speechSynthesis.speak(msg);
+}
+
+// ================= GAME =================
 function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
 
 function selectCategory(c){
@@ -305,8 +348,12 @@ let buttons=document.querySelectorAll(".answer-btn");
 if(sel===correct){
 btn.classList.add("correct");
 stars++; coins+=5;
+correctSound();
+speak("Correct Answer");
 }else{
 btn.classList.add("wrong");
+wrongSound();
+speak("Wrong Answer");
 }
 
 starsEl.innerText=stars;
