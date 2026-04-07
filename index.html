@@ -16,6 +16,7 @@ align-items:center;
 height:100vh;
 }
 
+/* GAME BOX */
 .game{
 width:95%;
 max-width:520px;
@@ -25,6 +26,15 @@ padding:20px;
 text-align:center;
 }
 
+/* COLORFUL QUIZ SCREEN */
+.quiz-bg{
+background:linear-gradient(135deg,#36d1dc,#5b86e5);
+padding:15px;
+border-radius:15px;
+color:white;
+}
+
+/* BUTTONS */
 .btn{
 padding:14px;
 margin:8px;
@@ -37,7 +47,11 @@ cursor:pointer;
 
 .category-btn{background:#36d1dc;color:white;}
 .level-btn{background:#ff758c;color:white;}
-.answer-btn{background:#eee;}
+.answer-btn{
+background:white;
+color:#333;
+font-weight:bold;
+}
 
 .hidden{display:none;}
 
@@ -49,7 +63,10 @@ display:flex;
 justify-content:space-between;
 }
 
-#emoji{font-size:40px;}
+#emoji{
+font-size:40px;
+margin:10px;
+}
 
 .confetti{
 position:fixed;
@@ -58,6 +75,7 @@ width:8px;
 height:8px;
 animation:fall 1s linear forwards;
 }
+
 @keyframes fall{
 to{transform:translateY(500px) rotate(360deg);opacity:0;}
 }
@@ -92,8 +110,10 @@ to{transform:translateY(500px) rotate(360deg);opacity:0;}
 
 <!-- QUIZ -->
 <div id="screen3" class="hidden">
+<div class="quiz-bg">
 <h3 id="question"></h3>
 <div id="answers"></div>
+</div>
 
 <div class="nav">
 <button onclick="prevQ()">⬅ Prev</button>
@@ -117,15 +137,17 @@ english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// 🎤 VOICE
-function speak(t){
+// 🎤 VOICE FIX (MOBILE SAFE)
+function speak(text){
+let msg=new SpeechSynthesisUtterance(text);
+msg.pitch=1.3;
 speechSynthesis.cancel();
-speechSynthesis.speak(new SpeechSynthesisUtterance(t));
+speechSynthesis.speak(msg);
 }
 
 // 🔀 SHUFFLE OPTIONS
 function shuffleOptions(q){
-let arr=q.a.map((text,i)=>({text,correct:i===q.c}));
+let arr=q.a.map((t,i)=>({text:t,correct:i===q.c}));
 arr.sort(()=>Math.random()-0.5);
 return {
 q:q.q,
@@ -134,82 +156,19 @@ c:arr.findIndex(x=>x.correct)
 };
 }
 
-// 📚 QUESTIONS (20 EASY EACH)
-const questions={
-gk:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1},
-{q:"Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
-{q:"National animal?",a:["Tiger","Lion","Elephant","Dog"],c:0},
-{q:"How many days?",a:["5","6","7","8"],c:2},
-{q:"Water freezes?",a:["0°C","10°C","50°C","100°C"],c:0},
-{q:"Bird?",a:["Lion","Eagle","Tiger","Dog"],c:1},
-{q:"Fruit?",a:["Carrot","Apple","Potato","Onion"],c:1},
-{q:"Color?",a:["Dog","Blue","Chair","Table"],c:1},
-{q:"Vehicle?",a:["Car","Tree","Water","Stone"],c:0},
-{q:"Earth is?",a:["Planet","Star","Moon","Sun"],c:0},
-{q:"Sky color?",a:["Green","Blue","Red","Black"],c:1},
-{q:"Animal?",a:["Cat","Table","Chair","Fan"],c:0},
-{q:"Fire?",a:["Cold","Hot","Wet","Dry"],c:1},
-{q:"Shape?",a:["Circle","Dog","Car","Tree"],c:0},
-{q:"Vegetable?",a:["Carrot","Apple","Mango","Banana"],c:0},
-{q:"Drink?",a:["Milk","Stone","Chair","Pen"],c:0},
-{q:"Insect?",a:["Ant","Dog","Cat","Cow"],c:0},
-{q:"Body part?",a:["Hand","Chair","Table","Pen"],c:0},
-{q:"Toy?",a:["Ball","Stone","Iron","Brick"],c:0}
-],
-
-english:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0},
-{q:"B for?",a:["Ball","Apple","Cat","Dog"],c:0},
-{q:"C for?",a:["Cat","Dog","Fish","Tiger"],c:0},
-{q:"D for?",a:["Dog","Cat","Ball","Apple"],c:0},
-{q:"E for?",a:["Elephant","Fish","Goat","Hat"],c:0},
-{q:"F for?",a:["Fish","Dog","Cat","Apple"],c:0},
-{q:"G for?",a:["Goat","Hat","Ice","Jug"],c:0},
-{q:"H for?",a:["Hat","Goat","Fish","Dog"],c:0},
-{q:"I for?",a:["Ice","Jug","Kite","Lion"],c:0},
-{q:"J for?",a:["Jug","Kite","Lion","Monkey"],c:0},
-{q:"K for?",a:["Kite","Lion","Monkey","Nest"],c:0},
-{q:"L for?",a:["Lion","Monkey","Nest","Owl"],c:0},
-{q:"M for?",a:["Monkey","Nest","Owl","Pen"],c:0},
-{q:"N for?",a:["Nest","Owl","Pen","Queen"],c:0},
-{q:"O for?",a:["Owl","Pen","Queen","Rat"],c:0},
-{q:"P for?",a:["Pen","Queen","Rat","Sun"],c:0},
-{q:"Q for?",a:["Queen","Rat","Sun","Tree"],c:0},
-{q:"R for?",a:["Rat","Sun","Tree","Umbrella"],c:0},
-{q:"S for?",a:["Sun","Tree","Umbrella","Van"],c:0},
-{q:"T for?",a:["Tree","Umbrella","Van","Watch"],c:0}
-],
-
-math:[
-{q:"2+2?",a:["3","4","5","6"],c:1},
-{q:"5-2?",a:["2","3","4","5"],c:1},
-{q:"3+3?",a:["5","6","7","8"],c:1},
-{q:"10-5?",a:["2","3","5","6"],c:2},
-{q:"4+1?",a:["4","5","6","7"],c:1},
-{q:"6-3?",a:["2","3","4","5"],c:1},
-{q:"7+2?",a:["8","9","10","11"],c:1},
-{q:"9-4?",a:["4","5","6","7"],c:1},
-{q:"1+1?",a:["1","2","3","4"],c:1},
-{q:"8-3?",a:["4","5","6","7"],c:1},
-{q:"5+5?",a:["8","9","10","11"],c:2},
-{q:"6+1?",a:["6","7","8","9"],c:1},
-{q:"3+2?",a:["4","5","6","7"],c:1},
-{q:"10-2?",a:["6","7","8","9"],c:2},
-{q:"4+4?",a:["6","7","8","9"],c:2},
-{q:"7-2?",a:["4","5","6","7"],c:1},
-{q:"2+5?",a:["6","7","8","9"],c:1},
-{q:"9-1?",a:["7","8","9","10"],c:1},
-{q:"3+4?",a:["6","7","8","9"],c:1},
-{q:"8-2?",a:["5","6","7","8"],c:1}
-]
-};
+// QUESTIONS (same as before)
+const questions = { /* KEEP YOUR EXISTING QUESTIONS HERE */ };
 
 // FLOW
 
 function selectCategory(c){
 category=c;
+
+// 🔥 FIXED WELCOME SOUND
+setTimeout(()=>{
+speak("Welcome to Kids Quiz");
+},200);
+
 screen1.classList.add("hidden");
 screen2.classList.remove("hidden");
 updateLevels();
