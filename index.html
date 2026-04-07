@@ -26,15 +26,14 @@ body{
 }
 
 h2{color:#ffe600;}
-
 h3{color:#00e5ff;}
 
 button{
- padding:14px;
- margin:6px;
+ padding:12px;
+ margin:5px;
  border:none;
- border-radius:14px;
- font-size:18px;
+ border-radius:12px;
+ font-size:16px;
  cursor:pointer;
 }
 
@@ -103,6 +102,10 @@ button{
 <h3 id="q"></h3>
 <div id="opts"></div>
 
+<button class="btn" onclick="prev()">⬅ Prev</button>
+<button class="btn" onclick="next()">➡ Next</button>
+<button class="btn" onclick="home()">🏠 Home</button>
+
 </div>
 
 </div>
@@ -114,24 +117,22 @@ let diff=null;
 let i=0;
 let sound=true;
 let audioCtx=null;
-let audioUnlocked=false;
+let unlocked=false;
 
-/* ---------------- AUDIO ENGINE FIX ---------------- */
+/* ---------------- AUDIO FIX ---------------- */
 
 function unlockAudio(){
- if(audioUnlocked) return;
+ if(unlocked) return;
 
  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
- audioCtx.resume().then(()=>{
-  audioUnlocked=true;
- });
+ audioCtx.resume();
+ unlocked=true;
 }
 
-/* ---------------- SOUND ---------------- */
+/* ---------------- SOUND ENGINE ---------------- */
 
 function playSound(type){
- if(!sound || !audioUnlocked) return;
+ if(!sound || !unlocked) return;
 
  const o = audioCtx.createOscillator();
  const g = audioCtx.createGain();
@@ -139,14 +140,14 @@ function playSound(type){
  o.connect(g);
  g.connect(audioCtx.destination);
 
- if(type==="welcome") o.frequency.value=650;
+ if(type==="welcome") o.frequency.value=600;
  if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=160;
+ if(type==="wrong") o.frequency.value=180;
 
  o.start();
 
- g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
- o.stop(audioCtx.currentTime + 0.4);
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.35);
+ o.stop(audioCtx.currentTime + 0.35);
 }
 
 /* ---------------- DATA ---------------- */
@@ -192,14 +193,12 @@ const data={
 
 function startGame(){
 
- unlockAudio(); // 🔥 MUST BE FIRST USER ACTION
+ unlockAudio(); // 🔊 FIRST TOUCH FIX
 
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
 
- setTimeout(()=>{
-  playSound("welcome"); // ✔ NOW ALWAYS WORKS
- },300);
+ setTimeout(()=>playSound("welcome"),200);
 }
 
 function setCat(c){ cat=c; tryStart(); }
@@ -222,7 +221,7 @@ function load(){
 
  if(!q){
   alert("🎉 Level Completed!");
-  restart();
+  home();
   return;
  }
 
@@ -245,29 +244,34 @@ function check(ans,btn){
  let q=data[cat][diff][i];
 
  if(ans === q.a){
-
   playSound("correct");
-
   btn.classList.add("correct","celebrate");
-
  } else {
-
   playSound("wrong");
-
   btn.classList.add("wrong");
  }
-
- setTimeout(()=>{
-  i++;
-  load();
- },700);
 }
 
-/* ---------------- RESTART ---------------- */
+/* ---------------- NAVIGATION ---------------- */
 
-function restart(){
- i=0;
- load();
+function next(){
+ if(i < data[cat][diff].length - 1){
+  i++;
+  load();
+ }
+}
+
+function prev(){
+ if(i > 0){
+  i--;
+  load();
+ }
+}
+
+/* ---------------- HOME ---------------- */
+
+function home(){
+ location.reload();
 }
 
 /* ---------------- SOUND TOGGLE ---------------- */
