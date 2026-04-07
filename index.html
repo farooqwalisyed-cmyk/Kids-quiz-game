@@ -17,21 +17,24 @@ body{
 }
 
 .card{
- width:92%;
- max-width:420px;
- background: rgba(0,0,0,0.3);
- padding:20px;
- border-radius:20px;
+ width:95%;
+ max-width:500px;   /* BIGGER SCREEN FIX */
+ background: rgba(0,0,0,0.35);
+ padding:25px;
+ border-radius:25px;
  text-align:center;
  backdrop-filter: blur(10px);
 }
 
+h2{ font-size:28px; }
+h3{ font-size:22px; }
+
 button{
- padding:10px;
- margin:5px;
+ padding:14px;
+ margin:6px;
  border:none;
- border-radius:12px;
- font-size:15px;
+ border-radius:14px;
+ font-size:18px;
  cursor:pointer;
 }
 
@@ -40,6 +43,7 @@ button{
 .opt{
  width:100%;
  color:white;
+ font-size:18px;
 }
 
 .hidden{display:none;}
@@ -50,27 +54,20 @@ button{
 .c3{background:#51cf66;}
 .c4{background:#ffd43b; color:black;}
 
-/* ANIMATIONS */
-.correct{
- animation: pop 0.4s ease;
- background:#2ecc71 !important;
-}
-
-.wrong{
- animation: shake 0.4s ease;
- background:#e74c3c !important;
-}
+/* ANIMATION */
+.correct{ animation:pop 0.4s ease; background:#2ecc71 !important; }
+.wrong{ animation:shake 0.4s ease; background:#e74c3c !important; }
 
 @keyframes pop{
  0%{transform:scale(1);}
- 50%{transform:scale(1.2);}
+ 50%{transform:scale(1.3);}
  100%{transform:scale(1);}
 }
 
 @keyframes shake{
  0%{transform:translateX(0);}
- 25%{transform:translateX(-5px);}
- 50%{transform:translateX(5px);}
+ 25%{transform:translateX(-6px);}
+ 50%{transform:translateX(6px);}
  100%{transform:translateX(0);}
 }
 </style>
@@ -107,7 +104,6 @@ button{
  <h3 id="q"></h3>
  <div id="opts"></div>
 
- <button class="btn" onclick="prev()">⬅ Previous</button>
  <button class="btn" onclick="home()">🏠 Home</button>
  <button class="btn" onclick="restart()">🔄 Restart</button>
 
@@ -121,85 +117,79 @@ let cat=null;
 let diff=null;
 let i=0;
 let sound=true;
+let audioCtx=null;
 
-/* ---------------- SOUND FIX ---------------- */
+/* ---------------- SOUND FIX (IMPORTANT) ---------------- */
+
+function initAudio(){
+ if(!audioCtx){
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ }
+}
 
 function beep(type){
-
  if(!sound) return;
 
- const ctx = new (window.AudioContext || window.webkitAudioContext)();
+ initAudio(); // unlock audio
 
- const o = ctx.createOscillator();
- const g = ctx.createGain();
+ const o = audioCtx.createOscillator();
+ const g = audioCtx.createGain();
 
  o.connect(g);
- g.connect(ctx.destination);
+ g.connect(audioCtx.destination);
 
  if(type==="welcome") o.frequency.value=600;
  if(type==="correct") o.frequency.value=800;
  if(type==="wrong") o.frequency.value=200;
 
  o.start();
- g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
- o.stop(ctx.currentTime + 0.4);
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+ o.stop(audioCtx.currentTime + 0.4);
 }
 
-/* ---------------- 20 QUESTIONS EACH LEVEL ---------------- */
+/* ---------------- FIXED QUESTIONS (REAL LOGIC) ---------------- */
 
 const data={
  math:{
-  easy: Array.from({length:20},(_,x)=>({
-   q:`Math Easy Q${x+1}: 2 + ${x} = ?`,
-   o:[`${x+1}`,`${x+2}`,`${x+3}`],
-   a:1
-  })),
-  medium: Array.from({length:20},(_,x)=>({
-   q:`Math Medium Q${x+1}: 10 + ${x} = ?`,
-   o:[`${10+x}`,`${11+x}`,`${12+x}`],
-   a:1
-  })),
-  hard: Array.from({length:20},(_,x)=>({
-   q:`Math Hard Q${x+1}: 20 - ${x} = ?`,
-   o:[`${20-x}`,`${19-x}`,`${18-x}`],
-   a:0
-  }))
+  easy:[
+   {q:"2 + 2 = ?", o:["3","4","5"], a:1},
+   {q:"5 + 3 = ?", o:["8","9","7"], a:0},
+   {q:"10 - 4 = ?", o:["6","5","7"], a:0},
+   {q:"3 + 6 = ?", o:["8","9","10"], a:1}
+  ],
+  medium:[
+   {q:"12 + 8 = ?", o:["18","20","22"], a:1},
+   {q:"15 - 7 = ?", o:["6","8","9"], a:1}
+  ],
+  hard:[
+   {q:"12 x 12 = ?", o:["124","144","154"], a:1}
+  ]
  },
 
  english:{
-  easy: Array.from({length:20},(_,x)=>({
-   q:`English Easy Q${x+1}: A for ?`,
-   o:["Apple","Ball","Cat"],
-   a:0
-  })),
-  medium: Array.from({length:20},(_,x)=>({
-   q:`English Medium Q${x+1}: B for ?`,
-   o:["Bat","Dog","Egg"],
-   a:0
-  })),
-  hard: Array.from({length:20},(_,x)=>({
-   q:`Opposite of Happy Q${x+1}?`,
-   o:["Sad","Joy","Funny"],
-   a:0
-  }))
+  easy:[
+   {q:"A for ?", o:["Apple","Ball","Cat"], a:0},
+   {q:"B for ?", o:["Bat","Dog","Egg"], a:0}
+  ],
+  medium:[
+   {q:"Plural of Book?", o:["Books","Bookies","Booked"], a:0}
+  ],
+  hard:[
+   {q:"Opposite of Happy?", o:["Sad","Joy","Glad"], a:0}
+  ]
  },
 
  gk:{
-  easy: Array.from({length:20},(_,x)=>({
-   q:`GK Easy Q${x+1}: Days in week?`,
-   o:["5","6","7"],
-   a:2
-  })),
-  medium: Array.from({length:20},(_,x)=>({
-   q:`GK Medium Q${x+1}: Capital India?`,
-   o:["Delhi","Mumbai","Chennai"],
-   a:0
-  })),
-  hard: Array.from({length:20},(_,x)=>({
-   q:`GK Hard Q${x+1}: Largest ocean?`,
-   o:["Atlantic","Pacific","Arctic"],
-   a:1
-  }))
+  easy:[
+   {q:"Days in week?", o:["5","6","7"], a:2},
+   {q:"Capital of India?", o:["Delhi","Mumbai","Chennai"], a:0}
+  ],
+  medium:[
+   {q:"How many continents?", o:["5","6","7"], a:2}
+  ],
+  hard:[
+   {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
+  ]
  }
 };
 
@@ -208,7 +198,7 @@ const data={
 function startSetup(){
  document.getElementById("home").style.display="none";
  document.getElementById("setup").style.display="block";
- beep("welcome");   // FIXED SOUND
+ beep("welcome"); // FIXED WORKING SOUND
 }
 
 function setCat(c){ cat=c; tryStart(); }
@@ -247,13 +237,13 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ---------------- ANSWER + ANIMATION ---------------- */
+/* ---------------- CHECK FIXED ---------------- */
 
 function check(ans,btn){
 
  let q=data[cat][diff][i];
 
- if(ans===q.a){
+ if(ans === q.a){
   beep("correct");
   btn.classList.add("correct");
  }else{
@@ -267,20 +257,10 @@ function check(ans,btn){
  },500);
 }
 
-/* ---------------- NAVIGATION ---------------- */
+/* ---------------- NAV ---------------- */
 
-function prev(){
- if(i>0){ i--; load(); }
-}
-
-function home(){
- location.reload();
-}
-
-function restart(){
- i=0;
- load();
-}
+function home(){ location.reload(); }
+function restart(){ i=0; load(); }
 
 /* ---------------- SOUND ---------------- */
 
