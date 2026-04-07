@@ -1,33 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Debug Quiz</title>
+<title>Ultra Debug</title>
 </head>
 
 <body style="font-family:Arial;text-align:center;padding-top:50px;">
 
-<h2>DEBUG START</h2>
+<h2>ULTRA DEBUG</h2>
 
-<button onclick="test()">Test Start Game</button>
+<button id="btn">Click Me</button>
 
 <h3 id="status">Waiting...</h3>
 
 <script>
-
-function test(){
- document.getElementById("status").innerText = "Button clicked ✔";
-
- try {
-   startGame();
- } catch(e){
-   document.getElementById("status").innerText = "Error: " + e.message;
- }
-}
-
-function startGame(){
- document.getElementById("status").innerText = "Game function running ✔";
-}
-
+document.getElementById("btn").addEventListener("click", function(){
+ document.getElementById("status").innerText = "BUTTON WORKS ✔";
+});
 </script>
 
 </body>
