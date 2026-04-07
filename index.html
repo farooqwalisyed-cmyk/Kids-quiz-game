@@ -1,6 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids Quiz PRO MAX</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.game{
+  width:95%;
+  max-width:520px;
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  text-align:center;
+}
+
+.btn{
+  padding:12px;
+  margin:6px;
+  width:90%;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.category-btn{background:#4facfe;color:white;}
+.level-btn{background:#f857a6;color:white;}
+.answer-btn{background:#eee;}
+
+.hidden{display:none;}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  font-weight:bold;
+}
+
+.correct{background:#4CAF50 !important;color:white;}
+.wrong{background:#f44336 !important;color:white;}
+
+.confetti{
+position:fixed;
+top:0;
+width:8px;
+height:8px;
+animation:fall 1s linear forwards;
+}
+@keyframes fall{
+to{transform:translateY(500px) rotate(360deg);opacity:0;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+<div class="top">
+<div>⭐ <span id="stars">0</span></div>
+<div>💰 <span id="coins">0</span></div>
+</div>
+
+<h2>Kids Quiz PRO MAX 🎮</h2>
+
+<button id="soundBtn" onclick="toggleSound()">🔊 Sound</button>
+
+<br><br>
+
+<audio id="bgMusic" loop>
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3">
+</audio>
+
+<!-- CATEGORY -->
+<div id="screen1">
+<h3>Select Category</h3>
+<button class="btn category-btn" onclick="startExperience('gk')">GK</button>
+<button class="btn category-btn" onclick="startExperience('english')">English</button>
+<button class="btn category-btn" onclick="startExperience('math')">Math</button>
+</div>
+
+<!-- LEVEL -->
+<div id="screen2" class="hidden">
+<h3>Select Level</h3>
+<button class="btn level-btn" onclick="startGame('easy')">Easy</button>
+<button id="mediumBtn" class="btn level-btn" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn level-btn" onclick="startGame('hard')">🔒 Hard</button>
+<button class="btn" onclick="backToCategory()">⬅ Back</button>
+</div>
+
+<!-- QUIZ -->
+<div id="screen3" class="hidden">
+<h3 id="question"></h3>
+<div id="answers"></div>
+
+<button onclick="prevQ()">⬅</button>
+<button onclick="backToLevels()">🔙</button>
+<button onclick="home()">🏠</button>
+</div>
+
+</div>
+
 <script>
 
-// ================= STATE =================
+// STATE
 let category="", level="", index=0;
 let stars=0, coins=0;
 let shuffledList=[];
@@ -8,71 +122,46 @@ let locked=false;
 let soundOn=true;
 let started=false;
 
-// ================= UNLOCK SYSTEM =================
+// UNLOCK
 let unlockedLevels={
 gk:{easy:true,medium:false,hard:false},
 english:{easy:true,medium:false,hard:false},
 math:{easy:true,medium:false,hard:false}
 };
 
-// ================= QUESTIONS =================
+// QUESTIONS
 const questions={
 gk:{
-easy:[
-{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0},
-{q:"Sun rises in?",a:["West","East","North","South"],c:1}
-],
-medium:[
-{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2},
-{q:"Capital of USA?",a:["NY","Washington DC","LA","Chicago"],c:1}
-],
-hard:[
-{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}
-]
+easy:[{q:"Capital of India?",a:["Delhi","Mumbai","Kolkata","Chennai"],c:0}],
+medium:[{q:"Largest ocean?",a:["Atlantic","Indian","Pacific","Arctic"],c:2}],
+hard:[{q:"Smallest country?",a:["Vatican","India","USA","UK"],c:0}]
 },
 english:{
-easy:[
-{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}
-],
-medium:[
-{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}
-],
-hard:[
-{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}
-]
+easy:[{q:"A for?",a:["Apple","Ball","Cat","Dog"],c:0}],
+medium:[{q:"Plural of child?",a:["Children","Childs","Childes","Childer"],c:0}],
+hard:[{q:"Synonym of happy?",a:["Joyful","Sad","Angry","Tired"],c:0}]
 },
 math:{
-easy:[
-{q:"2+2?",a:["3","4","5","6"],c:1}
-],
-medium:[
-{q:"10×2?",a:["20","15","25","30"],c:0}
-],
-hard:[
-{q:"100÷4?",a:["20","25","30","40"],c:1}
-]
+easy:[{q:"2+2?",a:["3","4","5","6"],c:1}],
+medium:[{q:"10×2?",a:["20","15","25","30"],c:0}],
+hard:[{q:"100÷4?",a:["20","25","30","40"],c:1}]
 }
 };
 
-// ================= SOUND =================
+// SOUND
 let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
 function startExperience(c){
 if(!started){
 started=true;
 audioCtx.resume();
-
-bgMusic.volume=0.5;
 bgMusic.play();
-
-setTimeout(()=>speak("Welcome to Kids Quiz"),300);
+speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz"));
 }
-
 category=c;
 screen1.classList.add("hidden");
 screen2.classList.remove("hidden");
-
-updateLevelButtons(); // IMPORTANT FIX
+updateLevelButtons();
 }
 
 function toggleSound(){
@@ -86,46 +175,26 @@ if(!soundOn) return;
 let o=audioCtx.createOscillator();
 let g=audioCtx.createGain();
 o.frequency.value=freq;
-o.connect(g);
-g.connect(audioCtx.destination);
+o.connect(g); g.connect(audioCtx.destination);
 o.start();
 o.stop(audioCtx.currentTime+0.15);
 }
 
-function correctSound(){
-beep(700);
-setTimeout(()=>beep(1000),150);
-}
+function correctSound(){beep(700);}
+function wrongSound(){beep(200);}
 
-function wrongSound(){
-beep(200);
-}
-
-function speak(t){
-if(!soundOn) return;
-speechSynthesis.cancel();
-speechSynthesis.speak(new SpeechSynthesisUtterance(t));
-}
-
-// ================= LEVEL BUTTON FIX =================
+// LEVEL BUTTONS
 function updateLevelButtons(){
 let c=unlockedLevels[category];
-
 mediumBtn.disabled=!c.medium;
 hardBtn.disabled=!c.hard;
-
 mediumBtn.innerText=c.medium?"Medium":"🔒 Medium";
 hardBtn.innerText=c.hard?"Hard":"🔒 Hard";
 }
 
-// ================= GAME =================
+// GAME
 function startGame(l){
-
-// 🚨 IMPORTANT FIX
-if(!unlockedLevels[category][l]){
-beep(150);
-return;
-}
+if(!unlockedLevels[category][l]) return;
 
 level=l;
 index=0;
@@ -141,16 +210,13 @@ loadQ();
 
 function loadQ(){
 let q=shuffledList[index];
-
 if(!q){
-unlockNextLevel();   // FIX
-updateLevelButtons();// FIX
+unlockNext();
 home();
 return;
 }
 
 locked=false;
-
 question.innerText=q.q;
 answers.innerHTML="";
 
@@ -163,55 +229,37 @@ answers.appendChild(b);
 });
 }
 
-// ================= ANSWER =================
 function checkAnswer(sel,correct,btn){
-
 if(locked) return;
 locked=true;
-
-let buttons=document.querySelectorAll(".answer-btn");
 
 if(sel===correct){
 btn.classList.add("correct");
 stars++; coins+=5;
-
 correctSound();
 confetti();
-speak("Correct");
 }else{
 btn.classList.add("wrong");
 wrongSound();
-speak("Wrong");
 }
 
 starsEl.innerText=stars;
 coinsEl.innerText=coins;
 
-buttons.forEach(b=>b.disabled=true);
-
-setTimeout(nextQ,900);
+setTimeout(nextQ,800);
 }
 
-// ================= FLOW =================
 function nextQ(){index++;loadQ();}
 function prevQ(){if(index>0){index--;loadQ();}}
 
-// ================= UNLOCK FIX =================
-function unlockNextLevel(){
-
-if(level==="easy"){
-unlockedLevels[category].medium=true;
+function unlockNext(){
+if(level==="easy") unlockedLevels[category].medium=true;
+if(level==="medium") unlockedLevels[category].hard=true;
 }
 
-if(level==="medium"){
-unlockedLevels[category].hard=true;
-}
-
-}
-
-// ================= CONFETTI =================
+// CONFETTI
 function confetti(){
-for(let i=0;i<15;i++){
+for(let i=0;i<10;i++){
 let c=document.createElement("div");
 c.className="confetti";
 c.style.left=Math.random()*100+"%";
@@ -221,24 +269,22 @@ setTimeout(()=>c.remove(),1000);
 }
 }
 
-// ================= NAV =================
+// NAV
 function backToCategory(){
 screen2.classList.add("hidden");
 screen1.classList.remove("hidden");
 }
-
 function backToLevels(){
 screen3.classList.add("hidden");
 screen2.classList.remove("hidden");
-updateLevelButtons(); // FIX
+updateLevelButtons();
 }
-
 function home(){
 screen3.classList.add("hidden");
 screen1.classList.remove("hidden");
 }
 
-// ================= ELEMENTS =================
+// ELEMENTS
 let starsEl=document.getElementById("stars");
 let coinsEl=document.getElementById("coins");
 let question=document.getElementById("question");
@@ -252,3 +298,6 @@ let soundBtn=document.getElementById("soundBtn");
 let bgMusic=document.getElementById("bgMusic");
 
 </script>
+
+</body>
+</html>
