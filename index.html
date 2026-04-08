@@ -15,6 +15,7 @@ body{
  background: linear-gradient(135deg,#9b8cff,#ffb3b3);
 }
 
+/* CARD */
 .card{
  width:95%;
  max-width:420px;
@@ -25,6 +26,7 @@ body{
  text-align:center;
 }
 
+/* HEADER */
 .top{
  display:flex;
  justify-content:center;
@@ -34,9 +36,14 @@ body{
 }
 
 h1{font-size:26px;}
+h2{margin-top:10px;}
 
-.emoji{font-size:50px;}
+.emoji{
+ font-size:60px;
+ margin:20px 0;
+}
 
+/* BUTTONS */
 button{
  width:100%;
  padding:16px;
@@ -64,6 +71,18 @@ button{
 .nav{display:flex;gap:10px;}
 .nav button{flex:1;}
 
+.tap{
+ font-size:22px;
+ font-weight:bold;
+ margin-top:20px;
+ color:#555;
+ animation: blink 1s infinite;
+}
+
+@keyframes blink{
+ 50%{opacity:0.3;}
+}
+
 </style>
 </head>
 
@@ -78,12 +97,15 @@ button{
 
 <h1>Kids Quiz PRO MAX 🎮</h1>
 
-<button onclick="playWelcome()">🔊 Sound</button>
+<div class="emoji">🎉</div>
 
-<div class="emoji">🙂</div>
+<!-- TAP TO START -->
+<div id="start" class="screen active" onclick="startApp()">
+ <div class="tap">👉 Tap to Start</div>
+</div>
 
-<!-- CATEGORY (HOME SCREEN) -->
-<div id="category" class="screen active">
+<!-- CATEGORY -->
+<div id="category" class="screen">
 <h2>Select Category</h2>
 <button class="btn-blue" onclick="selectCat('gk')">GK</button>
 <button class="btn-blue" onclick="selectCat('english')">English</button>
@@ -130,9 +152,10 @@ function speak(text){
  speechSynthesis.speak(msg);
 }
 
-/* PLAY WELCOME */
-function playWelcome(){
+/* START APP */
+function startApp(){
  speak("Welcome to Kids Quiz Pro");
+ show("category");
 }
 
 /* DATA */
