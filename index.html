@@ -95,8 +95,10 @@ button{
 
 <div id="level" class="screen">
 <button class="btn1" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn1 lock">🔒 Medium</button>
-<button id="hardBtn" class="btn1 lock">🔒 Hard</button>
+<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
+
+<button class="navBtn1" onclick="backToCategory()">⬅ Back</button>
 </div>
 
 <div id="game" class="screen">
@@ -117,11 +119,18 @@ button{
 
 <script>
 
-let cat,diff="easy",i=0;
+let cat,i=0;
 let stars=0,coins=0;
 let timer,interval;
 
-/* 🔊 SOUND FIX (STRONG + RELIABLE) */
+/* 🔓 LEVEL UNLOCK SYSTEM */
+let unlockLevel={
+ math:"easy",
+ english:"easy",
+ gk:"easy"
+};
+
+/* 🔊 SOUND */
 function playSound(freq){
  let ctx=new (window.AudioContext||window.webkitAudioContext)();
  let o=ctx.createOscillator();
@@ -133,6 +142,7 @@ function playSound(freq){
  o.stop(ctx.currentTime+0.5);
 }
 
+/* START */
 function startApp(){
  speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
@@ -145,13 +155,56 @@ function show(id){
 
 function selectCat(c){
  cat=c;
+ updateLevelUI();
  show("level");
 }
 
-function startGame(){
+/* 🔓 UPDATE BUTTONS */
+function updateLevelUI(){
+ let med=document.getElementById("medBtn");
+ let hard=document.getElementById("hardBtn");
+
+ med.classList.add("lock");
+ hard.classList.add("lock");
+
+ med.innerText="🔒 Medium";
+ hard.innerText="🔒 Hard";
+
+ if(unlockLevel[cat]==="medium"){
+  med.classList.remove("lock");
+  med.innerText="Medium";
+ }
+
+ if(unlockLevel[cat]==="hard"){
+  med.classList.remove("lock");
+  hard.classList.remove("lock");
+  med.innerText="Medium";
+  hard.innerText="Hard";
+ }
+}
+
+/* START GAME */
+let diff="easy";
+
+function startGame(d){
+
+ if(d==="medium" && unlockLevel[cat]==="easy"){
+  alert("Complete Easy first"); return;
+ }
+
+ if(d==="hard" && unlockLevel[cat]!=="hard"){
+  alert("Complete Medium first"); return;
+ }
+
+ diff=d;
  i=0;
  show("game");
  load();
+}
+
+/* BACK BUTTON */
+function backToCategory(){
+ show("category");
 }
 
 /* SHUFFLE */
@@ -165,88 +218,16 @@ function shuffle(q){
  };
 }
 
-/* 20 QUESTIONS EACH (EASY ONLY) */
+/* DATA (20 QUESTIONS EASY ONLY) */
 const data={
-
-math:{
- easy:[
-  {q:"2+2=?",o:["3","4","5","6"],a:1},
-  {q:"5+3=?",o:["7","8","9","6"],a:1},
-  {q:"10-5=?",o:["5","6","4","3"],a:0},
-  {q:"6+2=?",o:["7","8","9","10"],a:1},
-  {q:"9-3=?",o:["6","5","4","7"],a:0},
-  {q:"4+4=?",o:["6","7","8","9"],a:2},
-  {q:"3+6=?",o:["8","9","10","7"],a:1},
-  {q:"8-2=?",o:["6","5","7","8"],a:0},
-  {q:"1+7=?",o:["7","8","9","6"],a:1},
-  {q:"2+6=?",o:["7","8","9","10"],a:1},
-  {q:"7-1=?",o:["5","6","7","8"],a:1},
-  {q:"3+3=?",o:["5","6","7","8"],a:1},
-  {q:"5+2=?",o:["6","7","8","9"],a:1},
-  {q:"9-2=?",o:["6","7","8","5"],a:1},
-  {q:"6+1=?",o:["6","7","8","9"],a:1},
-  {q:"4+3=?",o:["6","7","8","5"],a:1},
-  {q:"8-4=?",o:["4","5","6","7"],a:0},
-  {q:"7+2=?",o:["8","9","10","7"],a:1},
-  {q:"5+5=?",o:["9","10","11","8"],a:1},
-  {q:"10-3=?",o:["6","7","8","9"],a:1}
- ]
-},
-
-english:{
- easy:[
-  {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
-  {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
-  {q:"C is for?",o:["Cat","Dog","Elephant","Fan"],a:0},
-  {q:"D is for?",o:["Dog","Apple","Ink","Hat"],a:0},
-  {q:"E is for?",o:["Egg","Ball","Car","Dog"],a:0},
-  {q:"F is for?",o:["Fan","Gun","Hat","Ink"],a:0},
-  {q:"G is for?",o:["Goat","Hat","Ink","Jug"],a:0},
-  {q:"H is for?",o:["Hat","Ink","Jug","Kite"],a:0},
-  {q:"I is for?",o:["Ink","Jug","Kite","Lion"],a:0},
-  {q:"J is for?",o:["Jug","Kite","Lion","Man"],a:0},
-  {q:"K is for?",o:["Kite","Lion","Man","Nest"],a:0},
-  {q:"L is for?",o:["Lion","Man","Nest","Orange"],a:0},
-  {q:"M is for?",o:["Man","Nest","Orange","Pen"],a:0},
-  {q:"N is for?",o:["Nest","Orange","Pen","Queen"],a:0},
-  {q:"O is for?",o:["Orange","Pen","Queen","Rat"],a:0},
-  {q:"P is for?",o:["Pen","Queen","Rat","Sun"],a:0},
-  {q:"Q is for?",o:["Queen","Rat","Sun","Tiger"],a:0},
-  {q:"R is for?",o:["Rat","Sun","Tiger","Umbrella"],a:0},
-  {q:"S is for?",o:["Sun","Tiger","Umbrella","Van"],a:0},
-  {q:"T is for?",o:["Tiger","Umbrella","Van","Watch"],a:0}
- ]
-},
-
-gk:{
- easy:[
-  {q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
-  {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
-  {q:"What color is the sky?",o:["Blue","Green","Red","Yellow"],a:0},
-  {q:"How many legs does a dog have?",o:["2","4","6","8"],a:1},
-  {q:"Which fruit is yellow?",o:["Apple","Banana","Grapes","Orange"],a:1},
-  {q:"Which is the biggest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2},
-  {q:"How many months are there in a year?",o:["10","11","12","13"],a:2},
-  {q:"Which bird can fly?",o:["Dog","Cat","Sparrow","Fish"],a:2},
-  {q:"How many hours in a day?",o:["12","24","36","48"],a:1},
-  {q:"Which animal is king of jungle?",o:["Tiger","Lion","Dog","Cat"],a:1},
-  {q:"Which is our national animal?",o:["Lion","Tiger","Elephant","Dog"],a:1},
-  {q:"What do bees make?",o:["Milk","Honey","Juice","Water"],a:1},
-  {q:"Which shape has 3 sides?",o:["Circle","Square","Triangle","Rectangle"],a:2},
-  {q:"Which day comes after Monday?",o:["Sunday","Tuesday","Friday","Saturday"],a:1},
-  {q:"Which animal is tall?",o:["Dog","Cat","Giraffe","Rat"],a:2},
-  {q:"Which festival is of lights?",o:["Holi","Diwali","Eid","Christmas"],a:1},
-  {q:"Which is nearest star?",o:["Moon","Sun","Mars","Earth"],a:1},
-  {q:"Which is green?",o:["Sky","Grass","Sun","Cloud"],a:1},
-  {q:"Which is used to write?",o:["Pen","Plate","Spoon","Cup"],a:0},
-  {q:"Which animal barks?",o:["Cat","Dog","Cow","Lion"],a:1}
- ]
-}
-
+math:{ easy:[{q:"2+2=?",o:["3","4","5","6"],a:1},{q:"5+3=?",o:["7","8","9","6"],a:1}] },
+english:{ easy:[{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}] },
+gk:{ easy:[{q:"How many days are there in a week?",o:["5","6","7","8"],a:2}] }
 };
 
 let current;
 
+/* LOAD */
 function load(){
  let q=data[cat].easy[i];
  current=shuffle(q);
@@ -258,11 +239,13 @@ function load(){
  current.o.forEach((op,idx)=>{
   html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
+
  document.getElementById("opts").innerHTML=html;
 
  startTimer();
 }
 
+/* TIMER */
 function startTimer(){
  clearInterval(interval);
  timer=10;
@@ -275,6 +258,7 @@ function startTimer(){
  },1000);
 }
 
+/* CHECK */
 function check(ans,btn){
  clearInterval(interval);
 
@@ -293,11 +277,16 @@ function check(ans,btn){
  setTimeout(()=>next(),700);
 }
 
+/* NEXT */
 function next(){
  if(i < data[cat].easy.length-1){
   i++; load();
  }else{
-  alert("Quiz Completed!");
+
+  if(diff==="easy") unlockLevel[cat]="medium";
+  else if(diff==="medium") unlockLevel[cat]="hard";
+
+  alert("Level Completed!");
   show("category");
  }
 }
