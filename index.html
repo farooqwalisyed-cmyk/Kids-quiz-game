@@ -33,8 +33,6 @@ body{
  font-size:16px;
 }
 
-h1{font-size:24px;}
-
 button{
  width:100%;
  padding:14px;
@@ -47,7 +45,7 @@ button{
 
 .btn-blue{background:linear-gradient(90deg,#43cea2,#185a9d);}
 .btn-pink{background:linear-gradient(90deg,#ff758c,#ff7eb3);}
-.btn-gray{background:#ddd;color:black;}
+.btn-gray{background:#ccc;color:#555;}
 
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
@@ -55,37 +53,20 @@ button{
 .screen{display:none;}
 .active{display:block;}
 
-#q{font-size:20px;margin:10px 0;}
-
-.nav{display:flex;gap:10px;}
-.nav button{flex:1;}
-
 .tap{
  font-size:20px;
  animation: blink 1s infinite;
 }
 @keyframes blink{50%{opacity:0.3;}}
 
-/* SHAKE ANIMATION */
-@keyframes shake{
- 0%{transform:translateX(0);}
- 25%{transform:translateX(-5px);}
- 50%{transform:translateX(5px);}
- 75%{transform:translateX(-5px);}
- 100%{transform:translateX(0);}
-}
+.nav{display:flex;gap:10px;}
+.nav button{flex:1;}
 
-.shake{
- animation:shake 0.4s;
-}
-
-/* PROGRESS */
 .progress{
  height:8px;
  background:#eee;
  border-radius:10px;
  margin:10px 0;
- overflow:hidden;
 }
 .bar{
  height:100%;
@@ -93,27 +74,20 @@ button{
  background:#4dabf7;
 }
 
-/* TIMER */
-.timer{
- font-weight:bold;
- color:#ff4d4d;
+.timer{color:red;font-weight:bold;}
+
+.lock{
+ opacity:0.5;
 }
 
-/* CONFETTI */
-.confetti{
- position:absolute;
- width:6px;
- height:6px;
- background:red;
- top:-10px;
- animation:fall 2s linear forwards;
+@keyframes shake{
+ 0%{transform:translateX(0);}
+ 25%{transform:translateX(-5px);}
+ 50%{transform:translateX(5px);}
+ 75%{transform:translateX(-5px);}
+ 100%{transform:translateX(0);}
 }
-@keyframes fall{
- to{
-  transform:translateY(400px) rotate(360deg);
-  opacity:0;
- }
-}
+.shake{animation:shake 0.4s;}
 
 </style>
 </head>
@@ -128,30 +102,34 @@ button{
  ⏱️ <span class="timer" id="time">10</span>
 </div>
 
-<h1>Kids Quiz PRO MAX 🎮</h1>
+<h2>Kids Quiz PRO MAX 🎮</h2>
 
+<!-- START -->
 <div id="start" class="screen active" onclick="startApp()">
  <div class="tap">👉 Tap to Start</div>
 </div>
 
+<!-- CATEGORY -->
 <div id="category" class="screen">
 <button class="btn-blue" onclick="selectCat('math')">Math</button>
 <button class="btn-blue" onclick="selectCat('english')">English</button>
 <button class="btn-blue" onclick="selectCat('gk')">GK</button>
 </div>
 
+<!-- LEVEL -->
 <div id="level" class="screen">
-<button class="btn-pink" onclick="startGame('easy')">Easy</button>
-<button class="btn-pink" onclick="startGame('medium')">Medium</button>
-<button class="btn-pink" onclick="startGame('hard')">Hard</button>
+<button id="easyBtn" class="btn-pink" onclick="startGame('easy')">Easy</button>
+<button id="medBtn" class="btn-pink lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn-pink lock" onclick="startGame('hard')">🔒 Hard</button>
 <button class="btn-gray" onclick="back()">Back</button>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
 
 <div class="progress"><div class="bar" id="bar"></div></div>
 
-<div id="q"></div>
+<h3 id="q"></h3>
 <div id="opts"></div>
 
 <div class="nav">
@@ -170,7 +148,7 @@ button{
 let cat,diff,i=0;
 let stars=0,coins=0;
 let timer=10,interval;
-let audioCtx;
+let unlockedLevel="easy";
 
 /* VOICE */
 function speak(t){
@@ -178,37 +156,11 @@ function speak(t){
  speechSynthesis.speak(msg);
 }
 
-/* BG MUSIC */
-function bgMusic(){
- if(!audioCtx){
-  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
- }
- let o=audioCtx.createOscillator();
- let g=audioCtx.createGain();
- o.connect(g); g.connect(audioCtx.destination);
- o.frequency.value=200;
- g.gain.value=0.05;
- o.start();
+/* START */
+function startApp(){
+ speak("Welcome to Kids Quiz Pro");
+ show("category");
 }
-
-/* CONFETTI */
-function confetti(){
- for(let j=0;j<20;j++){
-  let c=document.createElement("div");
-  c.className="confetti";
-  c.style.left=Math.random()*100+"%";
-  c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-  document.querySelector(".card").appendChild(c);
-  setTimeout(()=>c.remove(),2000);
- }
-}
-
-/* DATA */
-const data={
- math:{easy:[{q:"2+2=?",o:["3","4","5","6"],a:1}]},
- english:{easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}]},
- gk:{easy:[{q:"Days?",o:["5","6","7","8"],a:2}]}
-};
 
 /* SCREEN */
 function show(id){
@@ -216,20 +168,74 @@ function show(id){
  document.getElementById(id).classList.add("active");
 }
 
-/* START */
-function startApp(){
- speak("Welcome to Kids Quiz Pro");
- bgMusic();
- show("category");
+/* CATEGORY */
+function selectCat(c){
+ cat=c;
+ updateLevelUI();
+ show("level");
 }
 
-function selectCat(c){cat=c;show("level");}
+/* LOCK SYSTEM */
+function updateLevelUI(){
+ let med=document.getElementById("medBtn");
+ let hard=document.getElementById("hardBtn");
 
+ if(unlockedLevel==="easy"){
+  med.classList.add("lock");
+  hard.classList.add("lock");
+ }
+
+ if(unlockedLevel==="medium"){
+  med.classList.remove("lock");
+  med.innerText="Medium";
+  hard.classList.add("lock");
+ }
+
+ if(unlockedLevel==="hard"){
+  med.classList.remove("lock");
+  hard.classList.remove("lock");
+  med.innerText="Medium";
+  hard.innerText="Hard";
+ }
+}
+
+/* START GAME */
 function startGame(d){
- diff=d;i=0;
+
+ if(d==="medium" && unlockedLevel==="easy"){
+  alert("Complete Easy first!");
+  return;
+ }
+
+ if(d==="hard" && unlockedLevel!=="hard"){
+  alert("Complete Medium first!");
+  return;
+ }
+
+ diff=d;
+ i=0;
  load();
  show("game");
 }
+
+/* DATA */
+const data={
+ math:{
+  easy:[{q:"2+2=?",o:["3","4","5"],a:1}],
+  medium:[{q:"10+5=?",o:["15","12","14"],a:0}],
+  hard:[{q:"12x12=?",o:["144","124","154"],a:0}]
+ },
+ english:{
+  easy:[{q:"A for?",o:["Apple","Ball","Cat"],a:0}],
+  medium:[{q:"Plural book?",o:["Books","Book","Booked"],a:0}],
+  hard:[{q:"Opposite happy?",o:["Sad","Joy","Fun"],a:0}]
+ },
+ gk:{
+  easy:[{q:"Days?",o:["5","6","7"],a:2}],
+  medium:[{q:"Capital India?",o:["Delhi","Mumbai","Chennai"],a:0}],
+  hard:[{q:"Largest ocean?",o:["Pacific","Atlantic","Arctic"],a:0}]
+ }
+};
 
 /* LOAD */
 function load(){
@@ -243,6 +249,7 @@ function load(){
  document.getElementById("opts").innerHTML=html;
 
  startTimer();
+ updateProgress();
 }
 
 /* TIMER */
@@ -261,6 +268,13 @@ function startTimer(){
  },1000);
 }
 
+/* PROGRESS */
+function updateProgress(){
+ let total=data[cat][diff].length;
+ let percent=((i+1)/total)*100;
+ document.getElementById("bar").style.width=percent+"%";
+}
+
 /* ANSWER */
 function check(ans,btn){
  clearInterval(interval);
@@ -268,10 +282,9 @@ function check(ans,btn){
  let q=data[cat][diff][i];
 
  if(ans===q.a){
-  btn.classList.add("correct","shake"); // 🎯 SHAKE HERE
+  btn.classList.add("correct","shake");
   stars++; coins+=10;
   speak("Correct Answer");
-  confetti();
  }else{
   btn.classList.add("wrong");
   speak("Wrong Answer");
@@ -283,12 +296,17 @@ function check(ans,btn){
  setTimeout(()=>next(),800);
 }
 
-/* NAV */
+/* NEXT */
 function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  alert("Game Finished!");
+
+  // 🔓 UNLOCK SYSTEM
+  if(diff==="easy") unlockedLevel="medium";
+  else if(diff==="medium") unlockedLevel="hard";
+
+  alert("Level Completed!");
   home();
  }
 }
