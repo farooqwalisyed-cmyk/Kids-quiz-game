@@ -7,7 +7,7 @@
 <style>
 body{
  margin:0;
- font-family: 'Segoe UI', sans-serif;
+ font-family:'Segoe UI',sans-serif;
  height:100vh;
  display:flex;
  justify-content:center;
@@ -33,15 +33,9 @@ body{
  margin-bottom:10px;
 }
 
-h1{
- font-size:26px;
- margin:10px 0;
-}
+h1{font-size:26px;}
 
-.emoji{
- font-size:50px;
- margin:10px 0;
-}
+.emoji{font-size:50px;}
 
 button{
  width:100%;
@@ -53,16 +47,9 @@ button{
  color:white;
 }
 
-.btn-blue{
- background: linear-gradient(90deg,#43cea2,#185a9d);
-}
-.btn-pink{
- background: linear-gradient(90deg,#ff758c,#ff7eb3);
-}
-.btn-gray{
- background:#ddd;
- color:black;
-}
+.btn-blue{background:linear-gradient(90deg,#43cea2,#185a9d);}
+.btn-pink{background:linear-gradient(90deg,#ff758c,#ff7eb3);}
+.btn-gray{background:#ddd;color:black;}
 
 .opt{border-radius:15px;}
 
@@ -72,19 +59,10 @@ button{
 .screen{display:none;}
 .active{display:block;}
 
-#q{
- font-size:22px;
- margin:15px 0;
-}
+#q{font-size:22px;margin:15px 0;}
 
-/* NAV BUTTON ROW */
-.nav{
- display:flex;
- gap:10px;
-}
-.nav button{
- flex:1;
-}
+.nav{display:flex;gap:10px;}
+.nav button{flex:1;}
 
 </style>
 </head>
@@ -127,7 +105,6 @@ button{
 <div id="q"></div>
 <div id="opts"></div>
 
-<!-- NAVIGATION -->
 <div class="nav">
  <button class="btn-gray" onclick="prev()">⬅ Prev</button>
  <button class="btn-gray" onclick="next()">Next ➡</button>
@@ -145,25 +122,19 @@ let cat, diff, i=0;
 let stars=0, coins=0;
 let soundOn=true;
 
-/* AUDIO */
-let audioCtx;
+/* 🎤 VOICE FUNCTION */
+function speak(text){
+ if(!soundOn) return;
 
-function toggleSound(){
- soundOn=!soundOn;
+ let msg = new SpeechSynthesisUtterance(text);
+ msg.lang = "en-US";
+ msg.rate = 1;
+ speechSynthesis.speak(msg);
 }
 
-function play(freq){
- if(!soundOn) return;
- if(!audioCtx){
-  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
- }
- let o=audioCtx.createOscillator();
- let g=audioCtx.createGain();
- o.connect(g); g.connect(audioCtx.destination);
- o.frequency.value=freq;
- g.gain.value=0.2;
- o.start();
- setTimeout(()=>o.stop(),200);
+/* SOUND TOGGLE */
+function toggleSound(){
+ soundOn=!soundOn;
 }
 
 /* DATA */
@@ -200,6 +171,9 @@ function selectCat(c){
 function startGame(d){
  diff=d;
  i=0;
+
+ speak("Welcome to Kids Quiz Pro");
+
  show("game");
  load();
 }
@@ -217,7 +191,6 @@ function load(){
  q.o.forEach((op,idx)=>{
   html+=`<button class="opt btn-blue" onclick="check(${idx},this)">${op}</button>`;
  });
-
  document.getElementById("opts").innerHTML=html;
 }
 
@@ -228,16 +201,16 @@ function check(ans,btn){
  if(ans===q.a){
   btn.classList.add("correct");
   stars++; coins+=10;
-  play(900);
+  speak("Correct Answer");
  }else{
   btn.classList.add("wrong");
-  play(200);
+  speak("Wrong Answer");
  }
 
  document.getElementById("stars").innerText=stars;
  document.getElementById("coins").innerText=coins;
 
- setTimeout(()=>next(),800);
+ setTimeout(()=>next(),1000);
 }
 
 /* NAV */
@@ -245,6 +218,7 @@ function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
+  speak("Game Finished");
   alert("Game Finished!");
   home();
  }
@@ -257,7 +231,6 @@ function prev(){
  }
 }
 
-/* HOME */
 function home(){
  show("category");
 }
