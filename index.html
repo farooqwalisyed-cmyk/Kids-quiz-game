@@ -2,98 +2,88 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Kids Quiz PRO</title>
+<title>Kids Quiz PRO MAX</title>
 
 <style>
 body{
  margin:0;
- font-family:Arial;
- background: linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcB77,#4d96ff);
+ font-family: 'Segoe UI', sans-serif;
  height:100vh;
  display:flex;
  justify-content:center;
  align-items:center;
+ background: linear-gradient(135deg,#9b8cff,#ffb3b3);
 }
 
-/* CENTERED GAME BOX */
+/* MAIN CARD */
 .card{
- width:100%;
- max-width:500px;
- height:95vh;
- background: rgba(0,0,0,0.4);
- color:white;
+ width:95%;
+ max-width:420px;
+ background:white;
+ border-radius:30px;
  padding:20px;
- box-sizing:border-box;
- border-radius:20px;
- display:flex;
- flex-direction:column;
+ box-shadow:0 10px 30px rgba(0,0,0,0.2);
+ text-align:center;
 }
 
 /* HEADER */
-.topbar{
+.top{
  display:flex;
- justify-content:space-between;
- font-size:22px;
+ justify-content:center;
+ gap:15px;
+ font-size:18px;
+ margin-bottom:10px;
 }
 
-/* TEXT */
-h2{
- text-align:center;
- font-size:34px;
- color:#fff700;
+h1{
+ font-size:26px;
+ margin:10px 0;
 }
-h3{
- text-align:center;
- font-size:28px;
+
+.emoji{
+ font-size:50px;
+ margin:10px 0;
 }
 
 /* BUTTONS */
 button{
- padding:18px;
+ width:100%;
+ padding:16px;
  margin:10px 0;
  border:none;
- border-radius:16px;
- font-size:20px;
- width:100%;
- font-weight:bold;
+ border-radius:25px;
+ font-size:18px;
+ color:white;
 }
 
-/* COLORS */
-.c1{background:#ff6b6b;}
-.c2{background:#4dabf7;}
-.c3{background:#51cf66;}
+/* GRADIENT BUTTONS */
+.btn-blue{
+ background: linear-gradient(90deg,#43cea2,#185a9d);
+}
+.btn-pink{
+ background: linear-gradient(90deg,#ff758c,#ff7eb3);
+}
+.btn-gray{
+ background:#ddd;
+ color:black;
+}
 
-.opt1{background:#ff6b6b;}
-.opt2{background:#4dabf7;}
-.opt3{background:#51cf66;}
-.opt4{background:#ffd43b;color:black;}
+/* OPTIONS */
+.opt{
+ border-radius:15px;
+}
+
+/* GAME */
+#q{
+ font-size:22px;
+ margin:15px 0;
+}
 
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
 .screen{display:none;}
 .active{display:block;}
-
-#q{
- font-size:26px;
- margin:20px 0;
- text-align:center;
-}
-
-/* RESULT TEXT */
-#result{
- text-align:center;
- font-size:22px;
- font-weight:bold;
- margin-top:10px;
-}
-
-/* NAV */
-.nav{
- display:flex;
- gap:10px;
-}
-.nav button{flex:1;}
 
 </style>
 </head>
@@ -102,49 +92,41 @@ button{
 
 <div class="card">
 
-<div class="topbar">
- <div>⭐ <span id="stars">0</span></div>
- <div>🪙 <span id="coins">0</span></div>
+<div class="top">
+ ⭐ <span id="stars">0</span>
+ 🪙 <span id="coins">0</span>
 </div>
 
-<h2>🎮 Kids Quiz PRO</h2>
+<h1>Kids Quiz PRO MAX 🎮</h1>
 
-<!-- HOME -->
-<div id="home" class="screen active">
- <button onclick="startGame()">Start Game</button>
-</div>
+<button onclick="toggleSound()">🔊 Sound</button>
+
+<div class="emoji">🙂</div>
 
 <!-- CATEGORY -->
-<div id="category" class="screen">
-<h3>Select Category</h3>
-<button class="c1" onclick="selectCat('math')">Math</button>
-<button class="c2" onclick="selectCat('english')">English</button>
-<button class="c3" onclick="selectCat('gk')">GK</button>
+<div id="category" class="screen active">
+<h2>Select Category</h2>
+<button class="btn-blue" onclick="selectCat('gk')">GK</button>
+<button class="btn-blue" onclick="selectCat('english')">English</button>
+<button class="btn-blue" onclick="selectCat('math')">Math</button>
 </div>
 
 <!-- LEVEL -->
 <div id="level" class="screen">
-<h3>Select Level</h3>
-<button class="c1" onclick="begin('easy')">Easy</button>
-<button class="c2" onclick="begin('medium')">Medium</button>
-<button class="c3" onclick="begin('hard')">Hard</button>
+<h2>Select Level</h2>
+<button class="btn-pink" onclick="startGame('easy')">Easy</button>
+<button class="btn-pink" onclick="startGame('medium')">Medium</button>
+<button class="btn-pink" onclick="startGame('hard')">Hard</button>
+<button class="btn-gray" onclick="back()">← Back</button>
 </div>
 
 <!-- GAME -->
 <div id="game" class="screen">
 
-<h3 id="q"></h3>
+<div id="q"></div>
 <div id="opts"></div>
 
-<div id="result"></div>
-
-<div class="nav">
- <button onclick="prev()">⬅ Prev</button>
- <button onclick="next()">Next ➡</button>
-</div>
-
-<button onclick="restart()">🔄 Restart</button>
-<button onclick="home()">🏠 Home</button>
+<button class="btn-gray" onclick="home()">🏠 Home</button>
 
 </div>
 
@@ -152,21 +134,22 @@ button{
 
 <script>
 
-/* STATE */
 let cat, diff, i=0;
 let stars=0, coins=0;
-let correctCount=0;
+let soundOn=true;
 
 /* AUDIO */
 let audioCtx;
-function unlockAudio(){
+
+function toggleSound(){
+ soundOn=!soundOn;
+}
+
+function play(freq){
+ if(!soundOn) return;
  if(!audioCtx){
   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
  }
- audioCtx.resume();
-}
-function sound(freq){
- if(!audioCtx) return;
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
  o.connect(g); g.connect(audioCtx.destination);
@@ -179,46 +162,19 @@ function sound(freq){
 /* DATA */
 const data={
  math:{
-  easy:[
-   {q:"2+2=?",o:["3","4","5","6"],a:1},
-   {q:"5+3=?",o:["7","8","9","6"],a:1}
-  ],
-  medium:[
-   {q:"12+8=?",o:["18","20","22","16"],a:1},
-   {q:"15-5=?",o:["5","10","8","12"],a:1}
-  ],
-  hard:[
-   {q:"12x12=?",o:["144","124","154","134"],a:0},
-   {q:"20/4=?",o:["4","5","6","3"],a:1}
-  ]
+  easy:[{q:"2+2=?",o:["3","4","5","6"],a:1}],
+  medium:[{q:"10+5=?",o:["15","12","14","11"],a:0}],
+  hard:[{q:"12x12=?",o:["144","124","154","134"],a:0}]
  },
  english:{
-  easy:[
-   {q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0},
-   {q:"B for?",o:["Ball","Apple","Cat","Dog"],a:0}
-  ],
-  medium:[
-   {q:"Plural of book?",o:["Books","Booked","Bookies","Book"],a:0},
-   {q:"Opposite big?",o:["Small","Tall","Wide","Long"],a:0}
-  ],
-  hard:[
-   {q:"Synonym of happy?",o:["Joyful","Sad","Angry","Tired"],a:0},
-   {q:"Opposite fast?",o:["Slow","Quick","Rapid","Speed"],a:0}
-  ]
+  easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}],
+  medium:[{q:"Plural of book?",o:["Books","Book","Booked","Bookies"],a:0}],
+  hard:[{q:"Opposite happy?",o:["Sad","Joy","Fun","Glad"],a:0}]
  },
  gk:{
-  easy:[
-   {q:"Days in week?",o:["5","6","7","8"],a:2},
-   {q:"Sun rises in?",o:["East","West","North","South"],a:0}
-  ],
-  medium:[
-   {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
-   {q:"National animal?",o:["Lion","Tiger","Elephant","Dog"],a:1}
-  ],
-  hard:[
-   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0},
-   {q:"Planet closest to Sun?",o:["Mercury","Earth","Mars","Venus"],a:0}
-  ]
+  easy:[{q:"Days in week?",o:["5","6","7","8"],a:2}],
+  medium:[{q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}],
+  hard:[{q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0}]
  }
 };
 
@@ -229,39 +185,32 @@ function show(id){
 }
 
 /* FLOW */
-function startGame(){
- unlockAudio();
- sound(600);
- show("category");
-}
-
 function selectCat(c){
  cat=c;
  show("level");
 }
 
-function begin(d){
+function startGame(d){
  diff=d;
  i=0;
- stars=0;
- coins=0;
- correctCount=0;
- updateHUD();
  show("game");
  load();
+}
+
+function back(){
+ show("category");
 }
 
 /* LOAD */
 function load(){
  let q=data[cat][diff][i];
  document.getElementById("q").innerText=q.q;
- document.getElementById("result").innerText="";
 
- let colors=["opt1","opt2","opt3","opt4"];
  let html="";
  q.o.forEach((op,idx)=>{
-  html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
+  html+=`<button class="opt btn-blue" onclick="check(${idx},this)">${op}</button>`;
  });
+
  document.getElementById("opts").innerHTML=html;
 }
 
@@ -269,63 +218,35 @@ function load(){
 function check(ans,btn){
  let q=data[cat][diff][i];
 
- document.querySelectorAll("#opts button").forEach(b=>b.disabled=true);
-
  if(ans===q.a){
   btn.classList.add("correct");
-  stars++;
-  coins+=10;
-  correctCount++;
-  document.getElementById("result").innerText="✅ Correct!";
-  sound(900);
+  stars++; coins+=10;
+  play(900);
  }else{
   btn.classList.add("wrong");
-  document.getElementById("result").innerText="❌ Wrong!";
-  sound(200);
+  play(200);
  }
 
- updateHUD();
-
- setTimeout(()=>next(),900);
-}
-
-/* NAV */
-function next(){
- if(i < data[cat][diff].length-1){
-  i++;
-  load();
- }else{
-   if(correctCount >= data[cat][diff].length/2){
-     alert("🎉 Level Completed!");
-   }else{
-     alert("❌ Try Again!");
-   }
-   home();
- }
-}
-
-function prev(){
- if(i>0){ i--; load(); }
-}
-
-/* HUD */
-function updateHUD(){
  document.getElementById("stars").innerText=stars;
  document.getElementById("coins").innerText=coins;
+
+ setTimeout(()=>{
+  next();
+ },800);
 }
 
-/* RESET */
-function restart(){
- i=0;
- stars=0;
- coins=0;
- correctCount=0;
- updateHUD();
- load();
+/* NEXT */
+function next(){
+ if(i < data[cat][diff].length-1){
+  i++; load();
+ }else{
+  alert("Game Finished!");
+  home();
+ }
 }
 
 function home(){
- show("home");
+ show("category");
 }
 
 </script>
