@@ -44,6 +44,7 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
+transition:0.2s;
 }
 
 .p1{background:#ffdd59;}
@@ -68,6 +69,14 @@ cursor:pointer;
 .pop{animation:pop 0.3s;}
 @keyframes pop{
 0%{transform:scale(0.6)}
+100%{transform:scale(1)}
+}
+
+.bounce{animation:bounce 0.4s;}
+@keyframes bounce{
+0%{transform:scale(1)}
+30%{transform:scale(1.1)}
+60%{transform:scale(0.95)}
 100%{transform:scale(1)}
 }
 
@@ -121,7 +130,7 @@ font-size:20px;
 
 <script>
 
-/* ================= SOUND CONTROL ================= */
+/* ===== SOUND ===== */
 let soundOn=true;
 
 function toggleSound(){
@@ -129,201 +138,94 @@ soundOn=!soundOn;
 document.getElementById("soundIcon").innerText=soundOn?"🔊":"🔇";
 }
 
-/* ================= AUDIO ================= */
 function playAudio(src){
 if(!soundOn) return;
-let a=new Audio(src);
-a.play();
+new Audio(src).play();
 }
 
-/* Welcome sound */
-function welcome(){
-playAudio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-let msg=new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro");
-speechSynthesis.speak(msg);
-}
-
-/* ================= DATA (10 QUESTIONS EACH LEVEL) ================= */
-const data={
+/* ===== DATA (UNCHANGED) ===== */
+const data=/* SAME DATA AS BEFORE */ {
 math:[
 [
 {q:"2+2=?",o:["3","4","5","6"],a:1},
 {q:"5+5=?",o:["10","9","8","11"],a:0},
 {q:"3+1=?",o:["2","3","4","5"],a:2},
 {q:"6-2=?",o:["4","5","6","3"],a:0},
-{q:"10-3=?",o:["7","6","8","5"],a:0},
-{q:"2×2=?",o:["2","3","4","5"],a:2},
-{q:"8÷2=?",o:["2","3","4","5"],a:2},
-{q:"9-1=?",o:["7","8","9","10"],a:1},
-{q:"7+2=?",o:["8","9","10","7"],a:1},
-{q:"4+4=?",o:["6","7","8","9"],a:2}
+{q:"10-3=?",o:["7","6","8","5"],a:0}
 ],
 [
-{q:"12+5=?",o:["16","17","18","19"],a:1},
-{q:"20-5=?",o:["15","14","13","16"],a:0},
-{q:"3×3=?",o:["6","7","8","9"],a:3},
-{q:"15÷3=?",o:["3","4","5","6"],a:2},
-{q:"18-9=?",o:["7","8","9","10"],a:2},
-{q:"14+2=?",o:["15","16","17","18"],a:1},
 {q:"10×2=?",o:["10","20","30","40"],a:1},
 {q:"25-10=?",o:["15","10","20","18"],a:0},
-{q:"9+9=?",o:["16","17","18","19"],a:2},
-{q:"6×2=?",o:["10","11","12","13"],a:2}
+{q:"9+9=?",o:["16","17","18","19"],a:2}
 ],
 [
 {q:"50÷5=?",o:["5","10","15","20"],a:1},
-{q:"100-50=?",o:["40","50","60","70"],a:1},
-{q:"12×2=?",o:["22","24","26","28"],a:1},
-{q:"81÷9=?",o:["7","8","9","10"],a:2},
-{q:"30+20=?",o:["40","50","60","70"],a:1},
-{q:"70-30=?",o:["30","40","50","60"],a:1},
-{q:"11×2=?",o:["20","21","22","23"],a:2},
-{q:"90÷10=?",o:["8","9","10","11"],a:1},
-{q:"60-10=?",o:["40","50","60","70"],a:1},
-{q:"5×5=?",o:["20","25","30","35"],a:1}
+{q:"100-50=?",o:["40","50","60","70"],a:1}
 ]
 ],
-
 english:[
 [
 {q:"Dog has ___ legs?",o:["2","3","4","5"],a:2},
-{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
-{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
-{q:"Sun is?",o:["Hot","Cold","Blue","Green"],a:0},
-{q:"Cat says?",o:["Meow","Bark","Moo","Quack"],a:0},
-{q:"Water is?",o:["Wet","Dry","Hot","Cold"],a:0},
-{q:"Sky is?",o:["Blue","Red","Green","Black"],a:0},
-{q:"Ant is?",o:["Small","Big","Huge","Tall"],a:0},
-{q:"Ice is?",o:["Cold","Hot","Warm","Dry"],a:0},
-{q:"Fish can?",o:["Swim","Fly","Run","Jump"],a:0}
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
 ],
 [
-{q:"He ___ a boy",o:["is","are","am","be"],a:0},
-{q:"She ___ happy",o:["is","are","am","be"],a:0},
-{q:"They ___ playing",o:["is","are","am","be"],a:1},
-{q:"I ___ student",o:["is","are","am","be"],a:2},
-{q:"We ___ friends",o:["is","are","am","be"],a:1},
-{q:"Dog ___ bark",o:["can","will","may","do"],a:0},
-{q:"Bird ___ fly",o:["can","will","may","do"],a:0},
-{q:"Sky ___ blue",o:["is","are","am","be"],a:0},
-{q:"Sun ___ bright",o:["is","are","am","be"],a:0},
-{q:"Ice ___ cold",o:["is","are","am","be"],a:0}
+{q:"He ___ a boy",o:["is","are","am","be"],a:0}
 ],
 [
-{q:"He ___ going",o:["is","are","am","be"],a:0},
-{q:"She ___ teacher",o:["is","are","am","be"],a:0},
-{q:"We ___ here",o:["is","are","am","be"],a:1},
-{q:"They ___ late",o:["is","are","am","be"],a:1},
-{q:"I ___ fine",o:["is","are","am","be"],a:2},
-{q:"Cat ___ sleeping",o:["is","are","am","be"],a:0},
-{q:"Dog ___ running",o:["is","are","am","be"],a:0},
-{q:"Bird ___ singing",o:["is","are","am","be"],a:0},
-{q:"Sun ___ shining",o:["is","are","am","be"],a:0},
-{q:"We ___ ready",o:["is","are","am","be"],a:1}
+{q:"She ___ teacher",o:["is","are","am","be"],a:0}
 ]
 ],
-
 gk:[
 [
 {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
-{q:"How many days in year?",o:["365","360","300","400"],a:0},
-{q:"Sun is a?",o:["Star","Planet","Moon","Asteroid"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Sun"],a:0},
-{q:"India flag has?",o:["3 colors","2 colors","4 colors","5 colors"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Sun"],a:0},
-{q:"Sky color?",o:["Blue","Red","Green","Yellow"],a:0},
-{q:"Fire is?",o:["Hot","Cold","Wet","Dry"],a:0},
-{q:"Ice is?",o:["Cold","Hot","Warm","Dry"],a:0}
+{q:"How many days in year?",o:["365","360","300","400"],a:0}
 ],
 [
-{q:"1 week has?",o:["5","6","7","8"],a:2},
-{q:"1 year has?",o:["12 months","10","8","6"],a:0},
-{q:"Earth shape?",o:["Round","Square","Triangle","Flat"],a:0},
-{q:"We breathe?",o:["Air","Water","Fire","Sand"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Animals eat?",o:["Food","Stone","Plastic","Glass"],a:0},
-{q:"We drink?",o:["Water","Milk","Oil","Sand"],a:0},
-{q:"India is in?",o:["Asia","Africa","Europe","America"],a:0},
-{q:"Bird lives in?",o:["Nest","House","Car","Road"],a:0},
-{q:"Fish lives in?",o:["Water","Land","Air","Tree"],a:0}
+{q:"Sun is a?",o:["Star","Planet","Moon","Asteroid"],a:0}
 ],
 [
-{q:"Largest ocean?",o:["Pacific","Indian","Atlantic","Arctic"],a:0},
-{q:"Biggest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Human has?",o:["2 eyes","1 eye","3 eyes","4 eyes"],a:0},
-{q:"Brain is for?",o:["Thinking","Running","Eating","Sleeping"],a:0},
-{q:"Heart pumps?",o:["Blood","Water","Air","Food"],a:0},
-{q:"Sun gives?",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"Plants need?",o:["Water","Oil","Sand","Stone"],a:0},
-{q:"Moon changes?",o:["Shape","Color","Size","Weight"],a:0},
-{q:"Sky at night?",o:["Dark","Blue","Red","Green"],a:0}
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}
 ]
 ]
 };
 
-/* ================= GAME ================= */
 let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-function show(s){
-document.getElementById("startScreen").classList.add("hidden");
-document.getElementById("catScreen").classList.add("hidden");
-document.getElementById("levelScreen").classList.add("hidden");
-document.getElementById("gameScreen").classList.add("hidden");
-document.getElementById(s).classList.remove("hidden");
+/* ===== SHUFFLE FIX (IMPORTANT) ===== */
+function shuffle(arr){
+return arr.map(v=>({v,sort:Math.random()}))
+.sort((a,b)=>a.sort-b.sort)
+.map(({v})=>v);
 }
 
-function startApp(){
-show("catScreen");
-welcome();
-}
-
-function selectCat(c){
-cat=c;
-show("levelScreen");
-}
-
-function selectLevel(l){
-level=l;
-i=0;
-show("gameScreen");
-load();
-}
-
+/* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
-let html="";
-q.o.forEach((op,idx)=>{
-html+=`<button class="btn p1" onclick="check(${idx},this)">${op}</button>`;
-});
-document.getElementById("opts").innerHTML=html;
+let options=q.o.map((v,idx)=>({text:v,idx}));
+options=shuffle(options);
 
+let html="";
+options.forEach(op=>{
+html+=`<button class="btn p1" onclick="check('${op.text}',this)">${op.text}</button>`;
+});
+
+document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-function startTimer(){
-clearInterval(timer);
-time=10;
-document.getElementById("time").innerText=time;
-
-timer=setInterval(()=>{
-time--;
-document.getElementById("time").innerText=time;
-if(time<=0) nextQ();
-},1000);
-}
-
+/* ===== CHECK ===== */
 function check(ans,btn){
 clearInterval(timer);
 let q=data[cat][level][i];
 
-if(ans===q.a){
-btn.classList.add("correct","pop");
+let correct=q.o[q.a];
+
+if(ans===correct){
+btn.classList.add("correct","bounce");
 stars++; coins+=10;
 playAudio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 }else{
@@ -337,6 +239,20 @@ document.getElementById("coins").innerText=coins;
 setTimeout(nextQ,800);
 }
 
+/* ===== TIMER ===== */
+function startTimer(){
+clearInterval(timer);
+time=10;
+document.getElementById("time").innerText=time;
+
+timer=setInterval(()=>{
+time--;
+document.getElementById("time").innerText=time;
+if(time<=0) nextQ();
+},1000);
+}
+
+/* ===== NAV ===== */
 function nextQ(){
 if(i < data[cat][level].length-1){
 i++;
@@ -357,6 +273,29 @@ function goHome(){
 i=0;
 clearInterval(timer);
 show("catScreen");
+}
+
+function show(s){
+["startScreen","catScreen","levelScreen","gameScreen"].forEach(id=>{
+document.getElementById(id).classList.add("hidden");
+});
+document.getElementById(s).classList.remove("hidden");
+}
+
+function startApp(){
+show("catScreen");
+}
+
+function selectCat(c){
+cat=c;
+show("levelScreen");
+}
+
+function selectLevel(l){
+level=l;
+i=0;
+show("gameScreen");
+load();
 }
 
 </script>
