@@ -8,30 +8,37 @@
 body{
  margin:0;
  font-family:Arial;
- background: linear-gradient(135deg,#6a11cb,#2575fc,#ff6b6b);
+ background: linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcB77,#4d96ff);
  height:100vh;
 }
 
-/* FULL SCREEN BIG UI */
+/* FULL SCREEN */
 .card{
  width:100%;
  height:100vh;
- background: rgba(0,0,0,0.4);
+ background: rgba(0,0,0,0.3);
  color:white;
  padding:20px;
  box-sizing:border-box;
 }
 
+/* HEADER */
+.topbar{
+ display:flex;
+ justify-content:space-between;
+ font-size:22px;
+ margin-bottom:10px;
+}
+
 /* TEXT */
 h2{
  text-align:center;
- color:#ffe600;
- font-size:32px;
+ font-size:36px;
+ color:#fff700;
 }
 h3{
  text-align:center;
- color:#00e5ff;
- font-size:26px;
+ font-size:30px;
 }
 
 /* BUTTONS */
@@ -40,45 +47,35 @@ button{
  margin:10px 0;
  border:none;
  border-radius:16px;
- font-size:20px;
+ font-size:22px;
  width:100%;
  font-weight:bold;
 }
 
-/* CATEGORY COLORS */
+/* COLORS */
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
-
-/* OPTIONS COLORS */
-.opt1{background:#ff6b6b;color:white;}
-.opt2{background:#4dabf7;color:white;}
-.opt3{background:#51cf66;color:white;}
+.opt1{background:#ff6b6b;}
+.opt2{background:#4dabf7;}
+.opt3{background:#51cf66;}
 .opt4{background:#ffd43b;color:black;}
 
-/* RESULT */
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
-/* NAV */
-.nav{
- display:flex;
- gap:10px;
-}
-.nav button{
- flex:1;
-}
-
-/* SCREENS */
 .screen{display:none;}
 .active{display:block;}
 
-/* QUESTION BIG */
 #q{
- font-size:28px;
+ font-size:32px;
  margin:25px 0;
  text-align:center;
 }
+
+/* NAV */
+.nav{display:flex;gap:10px;}
+.nav button{flex:1;}
 
 </style>
 </head>
@@ -87,11 +84,16 @@ button{
 
 <div class="card">
 
+<div class="topbar">
+ <div>⭐ <span id="stars">0</span></div>
+ <div>🪙 <span id="coins">0</span></div>
+</div>
+
 <h2>🎮 Kids Quiz PRO</h2>
 
 <!-- HOME -->
 <div id="home" class="screen active">
- <button onclick="showCategory()">Start Game</button>
+ <button onclick="startGame()">Start Game</button>
 </div>
 
 <!-- CATEGORY -->
@@ -104,10 +106,10 @@ button{
 
 <!-- LEVEL -->
 <div id="level" class="screen">
-<h3>Select Difficulty</h3>
-<button class="c1" onclick="startGame('easy')">Easy</button>
-<button class="c2" onclick="startGame('medium')">Medium</button>
-<button class="c3" onclick="startGame('hard')">Hard</button>
+<h3>Select Level</h3>
+<button class="c1" onclick="begin('easy')">Easy</button>
+<button class="c2" onclick="begin('medium')">Medium</button>
+<button class="c3" onclick="begin('hard')">Hard</button>
 </div>
 
 <!-- GAME -->
@@ -131,74 +133,35 @@ button{
 <script>
 
 /* STATE */
-let cat=null;
-let diff=null;
-let i=0;
+let cat, diff, i=0;
+let stars=0;
+let coins=0;
 
-/* AUDIO SYSTEM */
+/* AUDIO */
 let audioCtx;
 
 function unlockAudio(){
  if(!audioCtx){
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
  }
  audioCtx.resume();
 }
 
-function playSound(type){
- if(!audioCtx) return;
-
- let o = audioCtx.createOscillator();
- let g = audioCtx.createGain();
-
- o.connect(g);
- g.connect(audioCtx.destination);
-
- if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=200;
-
+function sound(freq){
+ let o=audioCtx.createOscillator();
+ let g=audioCtx.createGain();
+ o.connect(g); g.connect(audioCtx.destination);
+ o.frequency.value=freq;
  g.gain.value=0.2;
-
  o.start();
  setTimeout(()=>o.stop(),200);
 }
 
 /* DATA */
 const data={
- math:{
-  easy:[
-   {q:"2+2=?",o:["3","4","5","6"],a:1},
-   {q:"3+1=?",o:["4","5","6","7"],a:0}
-  ],
-  medium:[
-   {q:"10+5=?",o:["15","12","14","11"],a:0}
-  ],
-  hard:[
-   {q:"12x12=?",o:["144","124","154","134"],a:0}
-  ]
- },
- english:{
-  easy:[
-   {q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}
-  ],
-  medium:[
-   {q:"Plural of book?",o:["Books","Booked","Bookies","Book"],a:0}
-  ],
-  hard:[
-   {q:"Opposite happy?",o:["Sad","Joy","Glad","Fun"],a:0}
-  ]
- },
- gk:{
-  easy:[
-   {q:"Days in week?",o:["5","6","7","8"],a:2}
-  ],
-  medium:[
-   {q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
-  ],
-  hard:[
-   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0}
-  ]
- }
+ math:{easy:[{q:"2+2=?",o:["3","4","5","6"],a:1}]},
+ english:{easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}]},
+ gk:{easy:[{q:"Days?",o:["5","6","7","8"],a:2}]}
 };
 
 /* SCREEN */
@@ -208,8 +171,9 @@ function show(id){
 }
 
 /* FLOW */
-function showCategory(){
+function startGame(){
  unlockAudio();
+ sound(600);
  show("category");
 }
 
@@ -218,7 +182,7 @@ function selectCat(c){
  show("level");
 }
 
-function startGame(d){
+function begin(d){
  diff=d;
  i=0;
  show("game");
@@ -228,66 +192,50 @@ function startGame(d){
 /* LOAD */
 function load(){
  let q=data[cat][diff][i];
-
  document.getElementById("q").innerText=q.q;
 
  let colors=["opt1","opt2","opt3","opt4"];
  let html="";
-
  q.o.forEach((op,idx)=>{
   html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
-
  document.getElementById("opts").innerHTML=html;
 }
 
 /* ANSWER */
 function check(ans,btn){
-
  let q=data[cat][diff][i];
 
- document.querySelectorAll("#opts button").forEach(b=>b.disabled=true);
-
  if(ans===q.a){
-  playSound("correct");
   btn.classList.add("correct");
+  stars++;
+  coins+=10;
+  sound(900);
  }else{
-  playSound("wrong");
   btn.classList.add("wrong");
+  sound(200);
  }
 
- setTimeout(()=>{
-  next();
- },800);
+ document.getElementById("stars").innerText=stars;
+ document.getElementById("coins").innerText=coins;
+
+ setTimeout(()=>next(),800);
 }
 
 /* NAV */
 function next(){
  if(i < data[cat][diff].length-1){
-  i++;
-  load();
+  i++; load();
  }else{
-  alert("🎉 Level Completed!");
+  alert("🎉 Finished!");
   home();
  }
 }
-
-function prev(){
- if(i>0){
-  i--;
-  load();
- }
-}
+function prev(){ if(i>0){i--;load();}}
 
 /* RESET */
-function restart(){
- i=0;
- load();
-}
-
-function home(){
- show("home");
-}
+function restart(){i=0;stars=0;coins=0;load();}
+function home(){show("home");}
 
 </script>
 
