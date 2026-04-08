@@ -14,7 +14,7 @@ body{
  align-items:center;
  background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#a18cd1,#84fab0);
  background-size:400% 400%;
- animation: bg 8s infinite;
+ animation:bg 8s infinite;
 }
 @keyframes bg{
  0%{background-position:0%}
@@ -25,7 +25,7 @@ body{
 .card{
  width:95%;
  max-width:520px;
- background:#fff;
+ background:white;
  border-radius:25px;
  padding:20px;
  text-align:center;
@@ -34,7 +34,6 @@ body{
 .top{
  display:flex;
  justify-content:space-between;
- font-size:18px;
 }
 
 .timer{color:red;font-size:20px;font-weight:bold;}
@@ -66,6 +65,17 @@ button{
 
 .nav{display:flex;gap:8px;}
 .nav button{flex:1;}
+
+.lock{opacity:0.5;}
+
+.emoji{
+ font-size:40px;
+ animation:pop 0.5s;
+}
+@keyframes pop{
+ 0%{transform:scale(0)}
+ 100%{transform:scale(1)}
+}
 </style>
 </head>
 
@@ -76,7 +86,7 @@ button{
 <div class="top">
  ⭐ <span id="stars">0</span>
  🪙 <span id="coins">0</span>
- ⏱️ <span id="time" class="timer">10</span>
+ ⏱️ <span id="time">10</span>
 </div>
 
 <h2>🎮 Kids Quiz PRO</h2>
@@ -86,14 +96,22 @@ button{
 </div>
 
 <div id="category" class="screen">
-<button class="btn2" onclick="startGame('math')">Math</button>
-<button class="btn2" onclick="startGame('english')">English</button>
-<button class="btn2" onclick="startGame('gk')">GK</button>
+<button class="btn2" onclick="selectCat('math')">Math</button>
+<button class="btn2" onclick="selectCat('english')">English</button>
+<button class="btn2" onclick="selectCat('gk')">GK</button>
+</div>
+
+<div id="level" class="screen">
+<button class="btn1" onclick="startGame('easy')">Easy</button>
+<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
+<button class="navBtn1" onclick="show('category')">⬅ Back</button>
 </div>
 
 <div id="game" class="screen">
 <h3 id="q"></h3>
 <div id="opts"></div>
+<div id="emoji"></div>
 
 <div class="nav">
  <button class="navBtn1" onclick="prev()">⬅ Prev</button>
@@ -107,11 +125,12 @@ button{
 
 <script>
 
-let cat,i=0;
+let cat,diff="easy",i=0;
 let stars=0,coins=0;
 let timer,interval;
 
-/* SOUND */
+let unlock={math:"easy",english:"easy",gk:"easy"};
+
 function playSound(freq){
  let ctx=new (window.AudioContext||window.webkitAudioContext)();
  let o=ctx.createOscillator();
@@ -123,7 +142,6 @@ function playSound(freq){
  o.stop(ctx.currentTime+0.4);
 }
 
-/* START */
 function startApp(){
  speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
@@ -134,98 +152,155 @@ function show(id){
  document.getElementById(id).classList.add("active");
 }
 
-function startGame(c){
+function selectCat(c){
  cat=c;
+ updateUI();
+ show("level");
+}
+
+function updateUI(){
+ let m=document.getElementById("medBtn");
+ let h=document.getElementById("hardBtn");
+
+ m.classList.add("lock");
+ h.classList.add("lock");
+
+ if(unlock[cat]=="medium"){
+  m.classList.remove("lock");
+ }
+ if(unlock[cat]=="hard"){
+  m.classList.remove("lock");
+  h.classList.remove("lock");
+ }
+}
+
+function startGame(d){
+ if(d=="medium" && unlock[cat]=="easy"){alert("Finish Easy first");return;}
+ if(d=="hard" && unlock[cat]!="hard"){alert("Finish Medium first");return;}
+
+ diff=d;
  i=0;
  show("game");
  load();
 }
 
-/* SHUFFLE */
 function shuffle(q){
  let arr=q.o.map((t,i)=>({t,correct:i===q.a}));
  arr.sort(()=>Math.random()-0.5);
  return {q:q.q,o:arr.map(x=>x.t),a:arr.findIndex(x=>x.correct)};
 }
 
-/* ✅ 20 QUESTIONS EACH */
-const data={
+/* ===================== UPDATED DATA ONLY ===================== */
 
-math:[
-{q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5+3=?",o:["7","8","9","6"],a:1},
-{q:"10-5=?",o:["5","6","4","3"],a:0},
-{q:"6+2=?",o:["7","8","9","10"],a:1},
-{q:"9-3=?",o:["6","5","4","7"],a:0},
-{q:"4+4=?",o:["6","7","8","9"],a:2},
-{q:"3+6=?",o:["8","9","10","7"],a:1},
-{q:"8-2=?",o:["6","5","7","8"],a:0},
-{q:"1+7=?",o:["7","8","9","6"],a:1},
-{q:"2+6=?",o:["7","8","9","10"],a:1},
-{q:"7-1=?",o:["5","6","7","8"],a:1},
-{q:"3+3=?",o:["5","6","7","8"],a:1},
-{q:"5+2=?",o:["6","7","8","9"],a:1},
-{q:"9-2=?",o:["6","7","8","5"],a:1},
-{q:"6+1=?",o:["6","7","8","9"],a:1},
-{q:"4+3=?",o:["6","7","8","5"],a:1},
-{q:"8-4=?",o:["4","5","6","7"],a:0},
-{q:"7+2=?",o:["8","9","10","7"],a:1},
-{q:"5+5=?",o:["9","10","11","8"],a:1},
-{q:"10-3=?",o:["6","7","8","9"],a:1}
-],
+const data = {
 
-english:[
-{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
-{q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
-{q:"C is for?",o:["Cat","Dog","Elephant","Fan"],a:0},
-{q:"D is for?",o:["Dog","Apple","Ink","Hat"],a:0},
-{q:"E is for?",o:["Egg","Ball","Car","Dog"],a:0},
-{q:"F is for?",o:["Fan","Gun","Hat","Ink"],a:0},
-{q:"G is for?",o:["Goat","Hat","Ink","Jug"],a:0},
-{q:"H is for?",o:["Hat","Ink","Jug","Kite"],a:0},
-{q:"I is for?",o:["Ink","Jug","Kite","Lion"],a:0},
-{q:"J is for?",o:["Jug","Kite","Lion","Man"],a:0},
-{q:"K is for?",o:["Kite","Lion","Man","Nest"],a:0},
-{q:"L is for?",o:["Lion","Man","Nest","Orange"],a:0},
-{q:"M is for?",o:["Man","Nest","Orange","Pen"],a:0},
-{q:"N is for?",o:["Nest","Orange","Pen","Queen"],a:0},
-{q:"O is for?",o:["Orange","Pen","Queen","Rat"],a:0},
-{q:"P is for?",o:["Pen","Queen","Rat","Sun"],a:0},
-{q:"Q is for?",o:["Queen","Rat","Sun","Tiger"],a:0},
-{q:"R is for?",o:["Rat","Sun","Tiger","Umbrella"],a:0},
-{q:"S is for?",o:["Sun","Tiger","Umbrella","Van"],a:0},
-{q:"T is for?",o:["Tiger","Umbrella","Van","Watch"],a:0}
-],
+math:{
+ easy:[
+ {q:"2+2=?",o:["3","4","5","6"],a:1},
+ {q:"5+3=?",o:["7","8","9","6"],a:1},
+ {q:"10-4=?",o:["5","6","7","8"],a:1},
+ {q:"6+1=?",o:["6","7","8","9"],a:1},
+ {q:"9-3=?",o:["5","6","7","8"],a:1},
+ {q:"3x2=?",o:["5","6","7","8"],a:1},
+ {q:"4x4=?",o:["12","14","16","18"],a:2},
+ {q:"8/2=?",o:["2","3","4","5"],a:2},
+ {q:"7+2=?",o:["8","9","10","11"],a:1},
+ {q:"10+10=?",o:["15","18","20","22"],a:2},
+ {q:"12-2=?",o:["8","9","10","11"],a:2},
+ {q:"11+1=?",o:["10","11","12","13"],a:2},
+ {q:"5x5=?",o:["20","25","30","15"],a:1},
+ {q:"14-4=?",o:["10","11","12","13"],a:0},
+ {q:"6x3=?",o:["12","15","18","21"],a:2},
+ {q:"9+1=?",o:["9","10","11","12"],a:1},
+ {q:"20-5=?",o:["10","15","20","25"],a:1},
+ {q:"2x6=?",o:["10","11","12","13"],a:2},
+ {q:"18/2=?",o:["7","8","9","10"],a:2},
+ {q:"15+5=?",o:["18","19","20","21"],a:2}
+ ],
+ medium:[
+ {q:"12+8=?",o:["18","20","22","24"],a:1},
+ {q:"25-9=?",o:["15","16","17","18"],a:1}
+ ],
+ hard:[
+ {q:"12x12=?",o:["124","144","134","154"],a:1},
+ {q:"100/4=?",o:["20","25","30","40"],a:1}
+ ]
+},
 
-gk:[
-{q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
-{q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
-{q:"What color is the sky?",o:["Blue","Green","Red","Yellow"],a:0},
-{q:"How many legs does a dog have?",o:["2","4","6","8"],a:1},
-{q:"Which fruit is yellow?",o:["Apple","Banana","Grapes","Orange"],a:1},
-{q:"Which is the biggest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2},
-{q:"How many months in a year?",o:["10","11","12","13"],a:2},
-{q:"Which bird can fly?",o:["Dog","Cat","Sparrow","Fish"],a:2},
-{q:"How many hours in a day?",o:["12","24","36","48"],a:1},
-{q:"Which animal is king of jungle?",o:["Tiger","Lion","Dog","Cat"],a:1},
-{q:"Which is our national animal?",o:["Lion","Tiger","Elephant","Dog"],a:1},
-{q:"What do bees make?",o:["Milk","Honey","Juice","Water"],a:1},
-{q:"Which shape has 3 sides?",o:["Circle","Square","Triangle","Rectangle"],a:2},
-{q:"Which day comes after Monday?",o:["Sunday","Tuesday","Friday","Saturday"],a:1},
-{q:"Which animal is tall?",o:["Dog","Cat","Giraffe","Rat"],a:2},
-{q:"Which festival is of lights?",o:["Holi","Diwali","Eid","Christmas"],a:1},
-{q:"Which is nearest star?",o:["Moon","Sun","Mars","Earth"],a:1},
-{q:"Which is green?",o:["Sky","Grass","Sun","Cloud"],a:1},
-{q:"Which is used to write?",o:["Pen","Plate","Spoon","Cup"],a:0},
-{q:"Which animal barks?",o:["Cat","Dog","Cow","Lion"],a:1}
-]
+english:{
+ easy:[
+ {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
+ {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
+ {q:"C is for?",o:["Cat","Rat","Bat","Hat"],a:0},
+ {q:"D is for?",o:["Dog","Log","Fog","Jog"],a:0},
+ {q:"E is for?",o:["Elephant","Egg","Ear","Eye"],a:0},
+ {q:"F is for?",o:["Fish","Fan","Fog","Fig"],a:0},
+ {q:"G is for?",o:["Goat","Gate","Game","Gun"],a:0},
+ {q:"H is for?",o:["Hen","Hat","Hot","Hit"],a:0},
+ {q:"I is for?",o:["Ice","Ink","Iron","It"],a:0},
+ {q:"J is for?",o:["Jug","Jam","Jet","Job"],a:0},
+ {q:"K is for?",o:["Kite","Kit","Key","Kid"],a:0},
+ {q:"L is for?",o:["Lion","Lip","Lot","Lab"],a:0},
+ {q:"M is for?",o:["Man","Map","Moon","Mat"],a:0},
+ {q:"N is for?",o:["Nest","Net","Not","Nut"],a:0},
+ {q:"O is for?",o:["Orange","Ox","Oil","On"],a:0},
+ {q:"P is for?",o:["Parrot","Pen","Pin","Pan"],a:0},
+ {q:"Q is for?",o:["Queen","Quick","Quiz","Quit"],a:0},
+ {q:"R is for?",o:["Rat","Run","Red","Row"],a:0},
+ {q:"S is for?",o:["Sun","Sat","Sit","Sap"],a:0},
+ {q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
+ ],
+ medium:[
+ {q:"Plural of Book?",o:["Books","Bookes","Booked","Bookies"],a:0},
+ {q:"Opposite of Happy?",o:["Sad","Glad","Joy","Fun"],a:0}
+ ],
+ hard:[
+ {q:"Opposite of Ancient?",o:["Modern","Old","Past","History"],a:0},
+ {q:"She has ___ apple",o:["a","an","the","no"],a:1}
+ ]
+},
+
+gk:{
+ easy:[
+ {q:"How many days in a week?",o:["5","6","7","8"],a:2},
+ {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
+ {q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
+ {q:"Sun rises in?",o:["East","West","North","South"],a:0},
+ {q:"How many months in a year?",o:["10","11","12","13"],a:2},
+ {q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+ {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+ {q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
+ {q:"How many legs dog has?",o:["2","3","4","5"],a:2},
+ {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
+ {q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+ {q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
+ {q:"Human eyes?",o:["1","2","3","4"],a:1},
+ {q:"Human hands?",o:["1","2","3","4"],a:1},
+ {q:"Year days?",o:["365","360","400","300"],a:0},
+ {q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
+ {q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
+ {q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
+ {q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
+ {q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0}
+ ],
+ medium:[
+ {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+ {q:"Largest ocean?",o:["Atlantic","Pacific","Indian","Arctic"],a:1}
+ ],
+ hard:[
+ {q:"Fastest animal?",o:["Lion","Cheetah","Tiger","Horse"],a:1},
+ {q:"Smallest country?",o:["India","USA","Vatican City","Nepal"],a:2}
+ ]
+}
 
 };
+
+/* ============================================================= */
 
 let current;
 
 function load(){
- let q=data[cat][i];
+ let q=data[cat][diff][i];
  current=shuffle(q);
 
  document.getElementById("q").innerText=current.q;
@@ -256,26 +331,37 @@ function startTimer(){
 function check(ans,btn){
  clearInterval(interval);
 
+ let emoji=document.getElementById("emoji");
+
  if(ans===current.a){
   btn.classList.add("correct");
   stars++; coins+=10;
   playSound(900);
+  emoji.innerHTML='<div class="emoji">🎉</div>';
  }else{
   btn.classList.add("wrong");
   playSound(200);
+  emoji.innerHTML='<div class="emoji">😢</div>';
  }
 
  document.getElementById("stars").innerText=stars;
  document.getElementById("coins").innerText=coins;
 
- setTimeout(()=>next(),700);
+ setTimeout(()=>{
+  emoji.innerHTML="";
+  next();
+ },800);
 }
 
 function next(){
- if(i < data[cat].length-1){
+ if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  alert("Level Completed!");
+
+  if(diff=="easy") unlock[cat]="medium";
+  else if(diff=="medium") unlock[cat]="hard";
+
+  alert(diff+" Completed!");
   show("category");
  }
 }
