@@ -8,27 +8,36 @@
 body{
  margin:0;
  font-family:Arial;
- background:linear-gradient(135deg,#6a11cb,#2575fc);
  height:100vh;
  display:flex;
  justify-content:center;
  align-items:center;
+
+ background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#a18cd1,#84fab0);
+ background-size:400% 400%;
+ animation: gradientBG 8s ease infinite;
+}
+
+@keyframes gradientBG{
+ 0%{background-position:0% 50%;}
+ 50%{background-position:100% 50%;}
+ 100%{background-position:0% 50%;}
 }
 
 .card{
  width:95%;
  max-width:500px;
- background:#ffffff;
+ background:rgba(255,255,255,0.9);
  border-radius:25px;
  padding:20px;
  text-align:center;
+ backdrop-filter:blur(10px);
 }
 
 .top{
  display:flex;
  justify-content:space-between;
  font-size:18px;
- margin-bottom:10px;
 }
 
 .timer{color:red;font-weight:bold;}
@@ -59,8 +68,6 @@ button{
 
 .tap{animation:blink 1s infinite;}
 @keyframes blink{50%{opacity:0.3;}}
-
-.lock{opacity:0.5;}
 
 .progress{
  height:8px;
@@ -100,8 +107,8 @@ button{
 
 <div id="level" class="screen">
 <button class="btn1" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
+<button id="medBtn" class="btn1" onclick="startGame('medium')">Medium</button>
+<button id="hardBtn" class="btn1" onclick="startGame('hard')">Hard</button>
 </div>
 
 <div id="game" class="screen">
@@ -128,28 +135,36 @@ let cat,diff,i=0;
 let stars=0,coins=0;
 let timer=10,interval;
 
-let unlocked={math:"easy",english:"easy",gk:"easy"};
+let audioCtx=null;
 
-let audioCtx;
-
-/* 🔊 SOUND */
-function playSound(type){
+/* 🔊 FIXED AUDIO UNLOCK */
+function unlockAudio(){
  if(!audioCtx){
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
  }
+ audioCtx.resume();
+}
+
+/* SOUND */
+function playSound(type){
+ if(!audioCtx) return;
+
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
- o.connect(g); g.connect(audioCtx.destination);
+ o.connect(g);
+ g.connect(audioCtx.destination);
 
- o.frequency.value = (type==="correct") ? 800 : 200;
+ if(type==="correct") o.frequency.value=900;
+ else o.frequency.value=150;
 
  o.start();
- g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
- o.stop(audioCtx.currentTime+0.4);
+ g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);
+ o.stop(audioCtx.currentTime+0.5);
 }
 
 /* START */
 function startApp(){
+ unlockAudio(); // 🔥 IMPORTANT
  speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
 }
@@ -161,38 +176,10 @@ function show(id){
 
 function selectCat(c){
  cat=c;
- updateUI();
  show("level");
 }
 
-/* LOCK */
-function updateUI(){
- let med=document.getElementById("medBtn");
- let hard=document.getElementById("hardBtn");
-
- med.classList.add("lock");
- hard.classList.add("lock");
-
- med.innerText="🔒 Medium";
- hard.innerText="🔒 Hard";
-
- if(unlocked[cat]==="medium"){
-  med.classList.remove("lock");
-  med.innerText="Medium";
- }
-
- if(unlocked[cat]==="hard"){
-  med.classList.remove("lock");
-  hard.classList.remove("lock");
-  med.innerText="Medium";
-  hard.innerText="Hard";
- }
-}
-
 function startGame(d){
- if(d==="medium" && unlocked[cat]==="easy"){alert("Complete Easy first");return;}
- if(d==="hard" && unlocked[cat]!=="hard"){alert("Complete Medium first");return;}
-
  diff=d;
  i=0;
  show("game");
@@ -210,44 +197,16 @@ function shuffle(q){
  };
 }
 
-/* DATA (CLEAN + 4 OPTIONS) */
+/* DATA */
 const data={
 math:{
- easy:[
-  {q:"2 + 2 = ?",o:["3","4","5","6"],a:1},
-  {q:"5 + 3 = ?",o:["7","8","9","6"],a:1}
- ],
- medium:[
-  {q:"12 + 8 = ?",o:["18","20","22","24"],a:1}
- ],
- hard:[
-  {q:"12 × 12 = ?",o:["144","124","154","134"],a:0}
- ]
+ easy:[{q:"2 + 2 = ?",o:["3","4","5","6"],a:1}]
 },
-
 english:{
- easy:[
-  {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
- ],
- medium:[
-  {q:"Plural of book?",o:["Books","Book","Booked","Booking"],a:0}
- ],
- hard:[
-  {q:"Opposite of happy?",o:["Sad","Joy","Fun","Smile"],a:0}
- ]
+ easy:[{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}]
 },
-
 gk:{
- easy:[
-  {q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
-  {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1}
- ],
- medium:[
-  {q:"What is the capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
- ],
- hard:[
-  {q:"Who invented the light bulb?",o:["Newton","Edison","Tesla","Einstein"],a:1}
- ]
+ easy:[{q:"How many days are there in a week?",o:["5","6","7","8"],a:2}]
 }
 };
 
@@ -265,11 +224,9 @@ function load(){
  current.o.forEach((op,idx)=>{
   html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
-
  document.getElementById("opts").innerHTML=html;
 
  startTimer();
- updateProgress();
 }
 
 /* TIMER */
@@ -285,51 +242,32 @@ function startTimer(){
  },1000);
 }
 
-/* PROGRESS */
-function updateProgress(){
- let total=data[cat][diff].length;
- document.getElementById("bar").style.width=((i+1)/total*100)+"%";
-}
-
 /* CHECK */
 function check(ans,btn){
  clearInterval(interval);
 
  if(ans===current.a){
   btn.classList.add("correct");
-  stars++; coins+=10;
   playSound("correct");
  }else{
   btn.classList.add("wrong");
   playSound("wrong");
  }
 
- document.getElementById("stars").innerText=stars;
- document.getElementById("coins").innerText=coins;
-
  setTimeout(()=>next(),700);
 }
 
-/* NAV */
 function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  if(diff==="easy") unlocked[cat]="medium";
-  else if(diff==="medium") unlocked[cat]="hard";
-
   alert("Level Completed!");
   show("category");
  }
 }
 
-function prev(){
- if(i>0){i--;load();}
-}
-
-function home(){
- show("category");
-}
+function prev(){ if(i>0){i--;load();} }
+function home(){ show("category"); }
 
 </script>
 
