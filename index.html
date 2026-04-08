@@ -23,14 +23,6 @@ body{
  padding:20px;
  box-shadow:0 10px 30px rgba(0,0,0,0.2);
  text-align:center;
- position:relative;
- overflow:hidden;
-}
-
-.top{
- display:flex;
- justify-content:space-between;
- font-size:18px;
 }
 
 button{
@@ -43,8 +35,8 @@ button{
  color:white;
 }
 
-.btn-blue{background:linear-gradient(90deg,#43cea2,#185a9d);}
-.btn-pink{background:linear-gradient(90deg,#ff758c,#ff7eb3);}
+.btn-blue{background:#4dabf7;}
+.btn-pink{background:#ff7eb3;}
 .btn-gray{background:#ccc;color:#555;}
 
 .correct{background:#2ecc71 !important;}
@@ -53,53 +45,10 @@ button{
 .screen{display:none;}
 .active{display:block;}
 
-.tap{
- font-size:22px;
- animation: blink 1s infinite;
-}
+.tap{animation:blink 1s infinite;}
 @keyframes blink{50%{opacity:0.3;}}
 
-.nav{display:flex;gap:10px;}
-.nav button{flex:1;}
-
-.progress{
- height:10px;
- background:#eee;
- border-radius:10px;
- margin:10px 0;
-}
-.bar{
- height:100%;
- width:0%;
- background:#4dabf7;
-}
-
-.timer{color:red;font-weight:bold;}
-
 .lock{opacity:0.5;}
-
-@keyframes shake{
- 0%{transform:translateX(0);}
- 25%{transform:translateX(-5px);}
- 50%{transform:translateX(5px);}
- 75%{transform:translateX(-5px);}
- 100%{transform:translateX(0);}
-}
-.shake{animation:shake 0.4s;}
-
-.confetti{
- position:absolute;
- width:6px;
- height:6px;
- top:-10px;
- animation:fall 2s linear forwards;
-}
-@keyframes fall{
- to{
-  transform:translateY(500px) rotate(360deg);
-  opacity:0;
- }
-}
 </style>
 </head>
 
@@ -107,16 +56,10 @@ button{
 
 <div class="card">
 
-<div class="top">
- ⭐ <span id="stars">0</span>
- 🪙 <span id="coins">0</span>
- ⏱️ <span class="timer" id="time">10</span>
-</div>
-
-<h2>Kids Quiz PRO MAX 🎮</h2>
+<h2>🎮 Kids Quiz PRO</h2>
 
 <div id="start" class="screen active" onclick="startApp()">
- <div class="tap">👉 Tap to Start</div>
+ <h3 class="tap">👉 Tap to Start</h3>
 </div>
 
 <div id="category" class="screen">
@@ -126,23 +69,15 @@ button{
 </div>
 
 <div id="level" class="screen">
-<button id="easyBtn" class="btn-pink" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn-pink lock" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn-pink lock" onclick="startGame('hard')">🔒 Hard</button>
-<button class="btn-gray" onclick="back()">Back</button>
+<button onclick="startGame('easy')" class="btn-pink">Easy</button>
+<button id="medBtn" onclick="startGame('medium')" class="btn-pink lock">🔒 Medium</button>
+<button id="hardBtn" onclick="startGame('hard')" class="btn-pink lock">🔒 Hard</button>
 </div>
 
 <div id="game" class="screen">
-<div class="progress"><div class="bar" id="bar"></div></div>
 <h3 id="q"></h3>
 <div id="opts"></div>
-
-<div class="nav">
- <button class="btn-gray" onclick="prev()">⬅</button>
- <button class="btn-gray" onclick="next()">➡</button>
-</div>
-
-<button class="btn-gray" onclick="home()">🏠</button>
+<button class="btn-gray" onclick="next()">Next</button>
 </div>
 
 </div>
@@ -150,41 +85,34 @@ button{
 <script>
 
 let cat,diff,i=0;
-let stars=0,coins=0;
-let timer=10,interval;
+let unlocked={math:"easy",english:"easy",gk:"easy"};
 
-let unlockedLevel={math:"easy",english:"easy",gk:"easy"};
+let audioCtx;
 
-function speak(text){
- speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-}
-
-let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-
+/* 🔊 SOUND FIX */
 function playSound(type){
+ if(!audioCtx){
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ }
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
  o.connect(g); g.connect(audioCtx.destination);
- o.frequency.value=(type==="correct")?800:200;
+
+ o.frequency.value = (type==="correct") ? 800 : 200;
+
  o.start();
- g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.4);
+ g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
  o.stop(audioCtx.currentTime+0.4);
 }
 
-function confetti(){
- for(let j=0;j<25;j++){
-  let c=document.createElement("div");
-  c.className="confetti";
-  c.style.left=Math.random()*100+"%";
-  c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-  document.querySelector(".card").appendChild(c);
-  setTimeout(()=>c.remove(),2000);
- }
-}
-
+/* START */
 function startApp(){
  speak("Welcome to Kids Quiz Pro");
  show("category");
+}
+
+function speak(text){
+ speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 function show(id){
@@ -194,11 +122,12 @@ function show(id){
 
 function selectCat(c){
  cat=c;
- updateLevelUI();
+ updateUI();
  show("level");
 }
 
-function updateLevelUI(){
+/* 🔒 LEVEL FIX */
+function updateUI(){
  let med=document.getElementById("medBtn");
  let hard=document.getElementById("hardBtn");
 
@@ -208,12 +137,12 @@ function updateLevelUI(){
  med.innerText="🔒 Medium";
  hard.innerText="🔒 Hard";
 
- if(unlockedLevel[cat]==="medium"){
+ if(unlocked[cat]==="medium"){
   med.classList.remove("lock");
   med.innerText="Medium";
  }
 
- if(unlockedLevel[cat]==="hard"){
+ if(unlocked[cat]==="hard"){
   med.classList.remove("lock");
   hard.classList.remove("lock");
   med.innerText="Medium";
@@ -222,167 +151,113 @@ function updateLevelUI(){
 }
 
 function startGame(d){
- if(d==="medium" && unlockedLevel[cat]==="easy"){alert("Complete Easy first!");return;}
- if(d==="hard" && unlockedLevel[cat]!=="hard"){alert("Complete Medium first!");return;}
+ if(d==="medium" && unlocked[cat]==="easy"){alert("Complete Easy first");return;}
+ if(d==="hard" && unlocked[cat]!=="hard"){alert("Complete Medium first");return;}
 
- diff=d; i=0;
- load();
+ diff=d;
+ i=0;
  show("game");
+ load();
 }
 
-/* ===================== HUGE DATA (SHORT SAMPLE SHOWN) ===================== */
+/* 🎯 RANDOMIZE ANSWERS */
+function shuffle(q){
+ let arr=q.o.map((text,index)=>({text,correct:index===q.a}));
+ arr.sort(()=>Math.random()-0.5);
+ let newA=arr.findIndex(x=>x.correct);
+ return {q:q.q,o:arr.map(x=>x.text),a:newA};
+}
 
+/* DATA (PRO GK FIXED) */
 const data={
+gk:{
+ easy:[
+  {q:"How many days are there in a week?",o:["5","6","7"],a:2},
+  {q:"Which animal says meow?",o:["Dog","Cat","Cow"],a:1},
+  {q:"What color is the sky?",o:["Blue","Green","Red"],a:0},
+  {q:"How many legs does a dog have?",o:["2","4","6"],a:1},
+  {q:"Which fruit is yellow?",o:["Apple","Banana","Grapes"],a:1}
+ ],
+ medium:[
+  {q:"What is the capital of India?",o:["Delhi","Mumbai","Chennai"],a:0}
+ ],
+ hard:[
+  {q:"Who invented the light bulb?",o:["Newton","Edison","Tesla"],a:1}
+ ]
+},
+
 math:{
  easy:[
-  {q:"2+2=?",o:["3","4","5"],a:1},
-  {q:"3+3=?",o:["5","6","7"],a:1},
-  {q:"5-2=?",o:["2","3","4"],a:1},
-  {q:"10-5=?",o:["5","4","6"],a:0},
-  {q:"4+1=?",o:["4","5","6"],a:1},
-  {q:"6+2=?",o:["7","8","9"],a:1},
-  {q:"7-3=?",o:["4","5","6"],a:0},
-  {q:"9-4=?",o:["5","4","6"],a:0},
-  {q:"8+1=?",o:["9","10","8"],a:0},
-  {q:"2+5=?",o:["6","7","8"],a:1},
-  {q:"3+4=?",o:["6","7","8"],a:1},
-  {q:"1+6=?",o:["6","7","8"],a:1},
-  {q:"7-2=?",o:["5","4","6"],a:0},
-  {q:"5+3=?",o:["7","8","9"],a:1},
-  {q:"6-1=?",o:["5","6","7"],a:0},
-  {q:"2+6=?",o:["7","8","9"],a:1},
-  {q:"3+5=?",o:["7","8","9"],a:1},
-  {q:"4+4=?",o:["7","8","9"],a:1},
-  {q:"10-2=?",o:["8","7","9"],a:0},
-  {q:"9-3=?",o:["6","5","7"],a:0}
+  {q:"2 + 2 = ?",o:["3","4","5"],a:1},
+  {q:"5 + 3 = ?",o:["7","8","9"],a:1}
  ],
- medium:[/* 20 similar */],
- hard:[/* 20 similar */]
+ medium:[
+  {q:"12 + 8 = ?",o:["18","20","22"],a:1}
+ ],
+ hard:[
+  {q:"12 × 12 = ?",o:["144","124","154"],a:0}
+ ]
 },
 
 english:{
  easy:[
-  {q:"A for?",o:["Apple","Ball","Cat"],a:0},
-  {q:"B for?",o:["Ball","Dog","Egg"],a:0},
-  {q:"C for?",o:["Cat","Fish","Goat"],a:0},
-  {q:"D for?",o:["Dog","Apple","Ink"],a:0},
-  {q:"E for?",o:["Egg","Hat","Jam"],a:0},
-  {q:"F for?",o:["Fan","Lion","Sun"],a:0},
-  {q:"G for?",o:["Goat","Tiger","Pen"],a:0},
-  {q:"H for?",o:["Hat","Car","Bed"],a:0},
-  {q:"I for?",o:["Ink","Box","Key"],a:0},
-  {q:"J for?",o:["Jug","Cup","Map"],a:0},
-  {q:"K for?",o:["Kite","Pen","Bag"],a:0},
-  {q:"L for?",o:["Lion","Fish","Car"],a:0},
-  {q:"M for?",o:["Man","Dog","Sun"],a:0},
-  {q:"N for?",o:["Nest","Cup","Hat"],a:0},
-  {q:"O for?",o:["Orange","Ball","Pen"],a:0},
-  {q:"P for?",o:["Pen","Fan","Egg"],a:0},
-  {q:"Q for?",o:["Queen","Dog","Cup"],a:0},
-  {q:"R for?",o:["Rat","Box","Ink"],a:0},
-  {q:"S for?",o:["Sun","Bag","Key"],a:0},
-  {q:"T for?",o:["Tiger","Hat","Pen"],a:0}
+  {q:"A is for?",o:["Apple","Ball","Cat"],a:0},
+  {q:"B is for?",o:["Ball","Dog","Egg"],a:0}
  ],
- medium:[/* 20 */],
- hard:[/* 20 */]
-},
-
-gk:{
- easy:[
-  {q:"How many days are there in a week?",o:["5","6","7"],a:2},
-  {q:"What color is sky?",o:["Blue","Red","Green"],a:0},
-  {q:"Which animal says meow?",o:["Dog","Cat","Cow"],a:1},
-  {q:"How many legs dog?",o:["2","4","6"],a:1},
-  {q:"What we drink?",o:["Milk","Oil","Sand"],a:0},
-  {q:"Biggest planet?",o:["Mars","Earth","Jupiter"],a:2},
-  {q:"Months in year?",o:["10","12","14"],a:1},
-  {q:"Yellow fruit?",o:["Apple","Banana","Grapes"],a:1},
-  {q:"Grass color?",o:["Green","Blue","Pink"],a:0},
-  {q:"Bird that fly?",o:["Dog","Sparrow","Fish"],a:1},
-  {q:"Hours in day?",o:["12","24","48"],a:1},
-  {q:"King jungle?",o:["Tiger","Lion","Elephant"],a:1},
-  {q:"Used to write?",o:["Pen","Plate","Spoon"],a:0},
-  {q:"Festival lights?",o:["Holi","Diwali","Eid"],a:1},
-  {q:"National animal India?",o:["Lion","Tiger","Elephant"],a:1},
-  {q:"3 sided shape?",o:["Square","Triangle","Circle"],a:1},
-  {q:"Bees make?",o:["Milk","Honey","Juice"],a:1},
-  {q:"Nearest star?",o:["Sun","Moon","Mars"],a:0},
-  {q:"After Monday?",o:["Tuesday","Sunday","Friday"],a:0},
-  {q:"Tall animal?",o:["Dog","Giraffe","Cat"],a:1}
+ medium:[
+  {q:"Plural of 'Book'?",o:["Books","Book","Booked"],a:0}
  ],
- medium:[/* 20 */],
- hard:[/* 20 */]
+ hard:[
+  {q:"Opposite of 'Happy'?",o:["Sad","Joy","Fun"],a:0}
+ ]
 }
 };
 
-/* ===================== GAME LOGIC ===================== */
+let current;
 
+/* LOAD */
 function load(){
  let q=data[cat][diff][i];
- document.getElementById("q").innerText=q.q;
+ current=shuffle(q);
+
+ document.getElementById("q").innerText=current.q;
 
  let html="";
- q.o.forEach((op,idx)=>{
+ current.o.forEach((op,idx)=>{
   html+=`<button class="btn-blue" onclick="check(${idx},this)">${op}</button>`;
  });
+
  document.getElementById("opts").innerHTML=html;
-
- startTimer();
- updateProgress();
 }
 
-function startTimer(){
- clearInterval(interval);
- timer=10;
- document.getElementById("time").innerText=timer;
-
- interval=setInterval(()=>{
-  timer--;
-  document.getElementById("time").innerText=timer;
-  if(timer===0){clearInterval(interval);next();}
- },1000);
-}
-
-function updateProgress(){
- let total=data[cat][diff].length;
- document.getElementById("bar").style.width=((i+1)/total*100)+"%";
-}
-
+/* CHECK */
 function check(ans,btn){
- clearInterval(interval);
- let q=data[cat][diff][i];
 
- if(ans===q.a){
-  btn.classList.add("correct","shake");
-  stars++; coins+=10;
+ if(ans===current.a){
+  btn.classList.add("correct");
   playSound("correct");
-  confetti();
  }else{
   btn.classList.add("wrong");
   playSound("wrong");
  }
 
- document.getElementById("stars").innerText=stars;
- document.getElementById("coins").innerText=coins;
-
- setTimeout(()=>next(),700);
+ setTimeout(()=>next(),600);
 }
 
+/* NEXT */
 function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  if(diff==="easy") unlockedLevel[cat]="medium";
-  else if(diff==="medium") unlockedLevel[cat]="hard";
+  if(diff==="easy") unlocked[cat]="medium";
+  else if(diff==="medium") unlocked[cat]="hard";
+
   alert("Level Completed!");
   show("category");
  }
 }
 
-function prev(){ if(i>0){i--;load();} }
-function home(){ show("category"); }
-function back(){ show("category"); }
-
 </script>
+
 </body>
 </html>
