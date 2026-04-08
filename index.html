@@ -1,375 +1,242 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Kids Quiz PRO</title>
-
-<style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kids Quiz PRO</title><style>
 body{
  margin:0;
  font-family:Arial;
- height:100vh;
+ background:radial-gradient(circle at top,#6a11cb,#2575fc);
  display:flex;
  justify-content:center;
  align-items:center;
- background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#a18cd1,#84fab0);
- background-size:400% 400%;
- animation:bg 8s infinite;
-}
-@keyframes bg{
- 0%{background-position:0%}
- 50%{background-position:100%}
- 100%{background-position:0%}
+ height:100vh;
 }
 
-.card{
+.screen{
  width:95%;
- max-width:520px;
+ max-width:420px;
  background:white;
- border-radius:25px;
- padding:20px;
- text-align:center;
+ border-radius:20px;
+ padding:15px;
+ box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 .top{
  display:flex;
  justify-content:space-between;
+ font-size:14px;
+ font-weight:bold;
+ margin-bottom:10px;
 }
 
-.timer{color:red;font-size:20px;font-weight:bold;}
+.title{
+ text-align:center;
+ font-size:20px;
+ font-weight:bold;
+ margin-bottom:10px;
+}
 
-button{
+.btn{
+ display:block;
  width:100%;
- padding:14px;
- margin:6px 0;
+ padding:10px;
+ margin:5px 0;
  border:none;
- border-radius:15px;
- font-size:18px;
- color:white;
+ border-radius:10px;
+ font-size:16px;
+ background:#eee;
+ cursor:pointer;
 }
 
-.btn1{background:#ff6b6b;}
-.btn2{background:#4dabf7;}
-.btn3{background:#51cf66;}
-.btn4{background:#ffd43b;color:black;}
+.btn:hover{background:#ddd;}
 
-.navBtn1{background:#845ef7;}
-.navBtn2{background:#20c997;}
-.navBtn3{background:#ff922b;}
+.correct{
+ background:#2ecc71 !important;
+ animation:pop 0.4s ease;
+}
 
-.correct{background:#2ecc71 !important;}
-.wrong{background:#e74c3c !important;}
+.wrong{
+ background:#e74c3c !important;
+ animation:shake 0.4s ease;
+}
 
-.screen{display:none;}
-.active{display:block;}
+@keyframes pop{
+0%{transform:scale(0.7)}
+100%{transform:scale(1)}
+}
 
-.nav{display:flex;gap:8px;}
-.nav button{flex:1;}
-
-.lock{opacity:0.5;}
+@keyframes shake{
+0%{transform:translateX(0)}
+25%{transform:translateX(-5px)}
+50%{transform:translateX(5px)}
+75%{transform:translateX(-5px)}
+100%{transform:translateX(0)}
+}
 
 .emoji{
- font-size:40px;
- animation:pop 0.5s;
+ font-size:18px;
+ text-align:center;
+ margin-top:5px;
 }
-@keyframes pop{
- 0%{transform:scale(0)}
- 100%{transform:scale(1)}
-}
-</style>
-</head>
-
-<body>
-
-<div class="card">
-
-<div class="top">
- ⭐ <span id="stars">0</span>
- 🪙 <span id="coins">0</span>
- ⏱️ <span id="time">10</span>
-</div>
-
-<h2>🎮 Kids Quiz PRO</h2>
-
-<div id="start" class="screen active" onclick="startApp()">
- <h3>👉 Tap to Start</h3>
-</div>
-
-<div id="category" class="screen">
-<button class="btn2" onclick="selectCat('math')">Math</button>
-<button class="btn2" onclick="selectCat('english')">English</button>
-<button class="btn2" onclick="selectCat('gk')">GK</button>
-</div>
-
-<div id="level" class="screen">
-<button class="btn1" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
-<button class="navBtn1" onclick="show('category')">⬅ Back</button>
-</div>
-
-<div id="game" class="screen">
-<h3 id="q"></h3>
+</style></head><body><div class="screen"><div class="top">
+<div>⭐ <span id="stars">0</span></div>
+<div>🪙 <span id="coins">0</span></div>
+<div>⏱️ <span id="time">0</span></div>
+</div><div class="title">🎮 Kids Quiz PRO</div><div id="menu">
+<button class="btn" onclick="startGame('math')">Math</button>
+<button class="btn" onclick="startGame('english')">English</button>
+<button class="btn" onclick="startGame('gk')">GK</button>
+</div><div id="game" style="display:none">
+<div id="q"></div>
 <div id="opts"></div>
-<div id="emoji"></div>
-
-<div class="nav">
- <button class="navBtn1" onclick="prev()">⬅ Prev</button>
- <button class="navBtn2" onclick="next()">Next ➡</button>
-</div>
-
-<button class="navBtn3" onclick="home()">🏠 Home</button>
-</div>
-
-</div>
-
-<script>
-
-let cat,diff="easy",i=0;
-let stars=0,coins=0;
-let timer,interval;
-
-let unlock={math:"easy",english:"easy",gk:"easy"};
-
-function playSound(freq){
- let ctx=new (window.AudioContext||window.webkitAudioContext)();
- let o=ctx.createOscillator();
- let g=ctx.createGain();
- o.connect(g); g.connect(ctx.destination);
- o.frequency.value=freq;
- o.start();
- g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
- o.stop(ctx.currentTime+0.4);
-}
-
-function startApp(){
- speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
- show("category");
-}
-
-function show(id){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
-}
-
-function selectCat(c){
- cat=c;
- updateUI();
- show("level");
-}
-
-function updateUI(){
- let m=document.getElementById("medBtn");
- let h=document.getElementById("hardBtn");
-
- m.classList.add("lock");
- h.classList.add("lock");
-
- if(unlock[cat]=="medium"){
-  m.classList.remove("lock");
- }
- if(unlock[cat]=="hard"){
-  m.classList.remove("lock");
-  h.classList.remove("lock");
- }
-}
-
-function startGame(d){
- if(d=="medium" && unlock[cat]=="easy"){alert("Finish Easy first");return;}
- if(d=="hard" && unlock[cat]!="hard"){alert("Finish Medium first");return;}
-
- diff=d;
- i=0;
- show("game");
- load();
-}
-
-function shuffle(q){
- let arr=q.o.map((t,i)=>({t,correct:i===q.a}));
- arr.sort(()=>Math.random()-0.5);
- return {q:q.q,o:arr.map(x=>x.t),a:arr.findIndex(x=>x.correct)};
-}
-
-/* ===================== UPDATED DATA ONLY ===================== */
-
-const data = {
-
-math:{
- easy:[
- {q:"2+2=?",o:["3","4","5","6"],a:1},
- {q:"5+3=?",o:["7","8","9","6"],a:1},
- {q:"10-4=?",o:["5","6","7","8"],a:1},
- {q:"6+1=?",o:["6","7","8","9"],a:1},
- {q:"9-3=?",o:["5","6","7","8"],a:1},
- {q:"3x2=?",o:["5","6","7","8"],a:1},
- {q:"4x4=?",o:["12","14","16","18"],a:2},
- {q:"8/2=?",o:["2","3","4","5"],a:2},
- {q:"7+2=?",o:["8","9","10","11"],a:1},
- {q:"10+10=?",o:["15","18","20","22"],a:2},
- {q:"12-2=?",o:["8","9","10","11"],a:2},
- {q:"11+1=?",o:["10","11","12","13"],a:2},
- {q:"5x5=?",o:["20","25","30","15"],a:1},
- {q:"14-4=?",o:["10","11","12","13"],a:0},
- {q:"6x3=?",o:["12","15","18","21"],a:2},
- {q:"9+1=?",o:["9","10","11","12"],a:1},
- {q:"20-5=?",o:["10","15","20","25"],a:1},
- {q:"2x6=?",o:["10","11","12","13"],a:2},
- {q:"18/2=?",o:["7","8","9","10"],a:2},
- {q:"15+5=?",o:["18","19","20","21"],a:2}
- ],
- medium:[
- {q:"12+8=?",o:["18","20","22","24"],a:1},
- {q:"25-9=?",o:["15","16","17","18"],a:1}
- ],
- hard:[
- {q:"12x12=?",o:["124","144","134","154"],a:1},
- {q:"100/4=?",o:["20","25","30","40"],a:1}
- ]
-},
-
-english:{
- easy:[
- {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
- {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
- {q:"C is for?",o:["Cat","Rat","Bat","Hat"],a:0},
- {q:"D is for?",o:["Dog","Log","Fog","Jog"],a:0},
- {q:"E is for?",o:["Elephant","Egg","Ear","Eye"],a:0},
- {q:"F is for?",o:["Fish","Fan","Fog","Fig"],a:0},
- {q:"G is for?",o:["Goat","Gate","Game","Gun"],a:0},
- {q:"H is for?",o:["Hen","Hat","Hot","Hit"],a:0},
- {q:"I is for?",o:["Ice","Ink","Iron","It"],a:0},
- {q:"J is for?",o:["Jug","Jam","Jet","Job"],a:0},
- {q:"K is for?",o:["Kite","Kit","Key","Kid"],a:0},
- {q:"L is for?",o:["Lion","Lip","Lot","Lab"],a:0},
- {q:"M is for?",o:["Man","Map","Moon","Mat"],a:0},
- {q:"N is for?",o:["Nest","Net","Not","Nut"],a:0},
- {q:"O is for?",o:["Orange","Ox","Oil","On"],a:0},
- {q:"P is for?",o:["Parrot","Pen","Pin","Pan"],a:0},
- {q:"Q is for?",o:["Queen","Quick","Quiz","Quit"],a:0},
- {q:"R is for?",o:["Rat","Run","Red","Row"],a:0},
- {q:"S is for?",o:["Sun","Sat","Sit","Sap"],a:0},
- {q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
- ],
- medium:[
- {q:"Plural of Book?",o:["Books","Bookes","Booked","Bookies"],a:0},
- {q:"Opposite of Happy?",o:["Sad","Glad","Joy","Fun"],a:0}
- ],
- hard:[
- {q:"Opposite of Ancient?",o:["Modern","Old","Past","History"],a:0},
- {q:"She has ___ apple",o:["a","an","the","no"],a:1}
- ]
-},
-
-gk:{
- easy:[
- {q:"How many days in a week?",o:["5","6","7","8"],a:2},
- {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
- {q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
- {q:"Sun rises in?",o:["East","West","North","South"],a:0},
- {q:"How many months in a year?",o:["10","11","12","13"],a:2},
- {q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
- {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
- {q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
- {q:"How many legs dog has?",o:["2","3","4","5"],a:2},
- {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
- {q:"Rainbow colors?",o:["7","5","6","8"],a:0},
- {q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
- {q:"Human eyes?",o:["1","2","3","4"],a:1},
- {q:"Human hands?",o:["1","2","3","4"],a:1},
- {q:"Year days?",o:["365","360","400","300"],a:0},
- {q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
- {q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
- {q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
- {q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
- {q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0}
- ],
- medium:[
- {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
- {q:"Largest ocean?",o:["Atlantic","Pacific","Indian","Arctic"],a:1}
- ],
- hard:[
- {q:"Fastest animal?",o:["Lion","Cheetah","Tiger","Horse"],a:1},
- {q:"Smallest country?",o:["India","USA","Vatican City","Nepal"],a:2}
- ]
-}
-
+<div class="emoji" id="emoji"></div>
+<button class="btn" onclick="next()">Next ➡</button>
+<button class="btn" onclick="home()">🏠 Home</button>
+</div></div><script>
+let data = {
+math:{easy:[],medium:[],hard:[]},
+english:{easy:[],medium:[],hard:[]},
+gk:{easy:[],medium:[],hard:[]}
 };
 
-/* ============================================================= */
+// FULL DATA
 
+// MATH EASY (20)
+data.math.easy=[
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+3=?",o:["7","8","9","6"],a:1},
+{q:"10-4=?",o:["5","6","7","8"],a:1},
+{q:"6+1=?",o:["6","7","8","9"],a:1},
+{q:"9-3=?",o:["5","6","7","8"],a:1},
+{q:"3x2=?",o:["5","6","7","8"],a:1},
+{q:"4x4=?",o:["12","14","16","18"],a:2},
+{q:"8/2=?",o:["2","3","4","5"],a:2},
+{q:"7+2=?",o:["8","9","10","11"],a:1},
+{q:"10+10=?",o:["15","18","20","22"],a:2},
+{q:"12-2=?",o:["8","9","10","11"],a:2},
+{q:"11+1=?",o:["10","11","12","13"],a:2},
+{q:"5x5=?",o:["20","25","30","15"],a:1},
+{q:"14-4=?",o:["10","11","12","13"],a:0},
+{q:"6x3=?",o:["12","15","18","21"],a:2},
+{q:"9+1=?",o:["9","10","11","12"],a:1},
+{q:"20-5=?",o:["10","15","20","25"],a:1},
+{q:"2x6=?",o:["10","11","12","13"],a:2},
+{q:"18/2=?",o:["7","8","9","10"],a:2},
+{q:"15+5=?",o:["18","19","20","21"],a:2}
+];
+
+// ENGLISH EASY (20)
+data.english.easy=[
+{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
+{q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
+{q:"C is for?",o:["Cat","Rat","Bat","Hat"],a:0},
+{q:"D is for?",o:["Dog","Log","Fog","Jog"],a:0},
+{q:"E is for?",o:["Elephant","Egg","Ear","Eye"],a:0},
+{q:"F is for?",o:["Fish","Fan","Fog","Fig"],a:0},
+{q:"G is for?",o:["Goat","Gate","Game","Gun"],a:0},
+{q:"H is for?",o:["Hen","Hat","Hot","Hit"],a:0},
+{q:"I is for?",o:["Ice","Ink","Iron","It"],a:0},
+{q:"J is for?",o:["Jug","Jam","Jet","Job"],a:0},
+{q:"K is for?",o:["Kite","Kit","Key","Kid"],a:0},
+{q:"L is for?",o:["Lion","Lip","Lot","Lab"],a:0},
+{q:"M is for?",o:["Man","Map","Moon","Mat"],a:0},
+{q:"N is for?",o:["Nest","Net","Not","Nut"],a:0},
+{q:"O is for?",o:["Orange","Ox","Oil","On"],a:0},
+{q:"P is for?",o:["Parrot","Pen","Pin","Pan"],a:0},
+{q:"Q is for?",o:["Queen","Quick","Quiz","Quit"],a:0},
+{q:"R is for?",o:["Rat","Run","Red","Row"],a:0},
+{q:"S is for?",o:["Sun","Sat","Sit","Sap"],a:0},
+{q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
+];
+
+// GK EASY (20)
+data.gk.easy=[
+{q:"How many days in a week?",o:["5","6","7","8"],a:2},
+{q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
+{q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
+{q:"Sun rises in?",o:["East","West","North","South"],a:0},
+{q:"Months in year?",o:["10","11","12","13"],a:2},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+{q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
+{q:"Dog legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+{q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
+{q:"Human eyes?",o:["1","2","3","4"],a:1},
+{q:"Human hands?",o:["1","2","3","4"],a:1},
+{q:"Year days?",o:["365","360","400","300"],a:0},
+{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
+{q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
+{q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
+{q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
+{q:"India in?",o:["Asia","Europe","Africa","USA"],a:0}
+];
+
+let cat="",lvl="easy",i=0,stars=0,coins=0,timer;
 let current;
 
-function load(){
- let q=data[cat][diff][i];
- current=shuffle(q);
-
- document.getElementById("q").innerText=current.q;
-
- let colors=["btn1","btn2","btn3","btn4"];
- let html="";
- current.o.forEach((op,idx)=>{
-  html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
- });
-
- document.getElementById("opts").innerHTML=html;
-
- startTimer();
+function startGame(c){
+cat=c;i=0;
+document.getElementById("menu").style.display="none";
+document.getElementById("game").style.display="block";
+load();
 }
 
-function startTimer(){
- clearInterval(interval);
- timer=10;
- document.getElementById("time").innerText=timer;
-
- interval=setInterval(()=>{
-  timer--;
-  document.getElementById("time").innerText=timer;
-  if(timer==0){clearInterval(interval);next();}
- },1000);
+function load(){
+clearInterval(timer);
+current=data[cat][lvl][i];
+document.getElementById("q").innerText=current.q;
+let opt="";
+current.o.forEach((o,idx)=>{
+opt+=`<button class='btn' onclick='check(${idx},this)'>${o}</button>`;
+});
+document.getElementById("opts").innerHTML=opt;
+startTimer();
 }
 
 function check(ans,btn){
- clearInterval(interval);
+clearInterval(timer);
+let all=document.querySelectorAll("#opts button");
+all.forEach(b=>b.disabled=true);
 
- let emoji=document.getElementById("emoji");
+if(ans===current.a){
+btn.classList.add("correct");
+stars++;coins+=10;
+}else{
+btn.classList.add("wrong");
+all[current.a].classList.add("correct");
+}
 
- if(ans===current.a){
-  btn.classList.add("correct");
-  stars++; coins+=10;
-  playSound(900);
-  emoji.innerHTML='<div class="emoji">🎉</div>';
- }else{
-  btn.classList.add("wrong");
-  playSound(200);
-  emoji.innerHTML='<div class="emoji">😢</div>';
- }
+document.getElementById("stars").innerText=stars;
+document.getElementById("coins").innerText=coins;
 
- document.getElementById("stars").innerText=stars;
- document.getElementById("coins").innerText=coins;
-
- setTimeout(()=>{
-  emoji.innerHTML="";
-  next();
- },800);
+setTimeout(()=>next(),1000);
 }
 
 function next(){
- if(i < data[cat][diff].length-1){
-  i++; load();
- }else{
-
-  if(diff=="easy") unlock[cat]="medium";
-  else if(diff=="medium") unlock[cat]="hard";
-
-  alert(diff+" Completed!");
-  show("category");
- }
+i++;
+if(i>=data[cat][lvl].length){
+home();
+return;
+}
+load();
 }
 
-function prev(){ if(i>0){i--;load();} }
-function home(){ show("category"); }
+function home(){
+document.getElementById("menu").style.display="block";
+document.getElementById("game").style.display="none";
+}
 
-</script>
-
-</body>
+function startTimer(){
+let t=10;
+document.getElementById("time").innerText=t;
+timer=setInterval(()=>{
+t--;
+document.getElementById("time").innerText=t;
+if(t<=0){clearInterval(timer);next();}
+},1000);
+}
+</script></body>
 </html>
