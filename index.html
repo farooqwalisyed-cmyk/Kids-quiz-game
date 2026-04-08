@@ -76,9 +76,7 @@ button{
 
 .timer{color:red;font-weight:bold;}
 
-.lock{
- opacity:0.5;
-}
+.lock{opacity:0.5;}
 
 @keyframes shake{
  0%{transform:translateX(0);}
@@ -89,6 +87,19 @@ button{
 }
 .shake{animation:shake 0.4s;}
 
+.confetti{
+ position:absolute;
+ width:6px;
+ height:6px;
+ top:-10px;
+ animation:fall 2s linear forwards;
+}
+@keyframes fall{
+ to{
+  transform:translateY(400px) rotate(360deg);
+  opacity:0;
+ }
+}
 </style>
 </head>
 
@@ -104,7 +115,7 @@ button{
 
 <h2>Kids Quiz PRO MAX 🎮</h2>
 
-<!-- START -->
+<!-- TAP -->
 <div id="start" class="screen active" onclick="startApp()">
  <div class="tap">👉 Tap to Start</div>
 </div>
@@ -150,15 +161,35 @@ let stars=0,coins=0;
 let timer=10,interval;
 let unlockedLevel="easy";
 
-/* VOICE */
-function speak(t){
- let msg=new SpeechSynthesisUtterance(t);
- speechSynthesis.speak(msg);
+/* 🎧 AUDIO FILES */
+let correctSound = new Audio("correct.mp3");
+let wrongSound = new Audio("wrong.mp3");
+let welcomeSound = new Audio("welcome.mp3");
+
+/* 🔓 UNLOCK AUDIO (IMPORTANT FOR MOBILE) */
+function unlockAudio(){
+ correctSound.play().then(()=>correctSound.pause()).catch(()=>{});
+ wrongSound.play().then(()=>wrongSound.pause()).catch(()=>{});
+ welcomeSound.play().then(()=>welcomeSound.pause()).catch(()=>{});
+}
+
+/* 🎉 CONFETTI */
+function confetti(){
+ for(let j=0;j<20;j++){
+  let c=document.createElement("div");
+  c.className="confetti";
+  c.style.left=Math.random()*100+"%";
+  c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+  document.querySelector(".card").appendChild(c);
+  setTimeout(()=>c.remove(),2000);
+ }
 }
 
 /* START */
 function startApp(){
- speak("Welcome to Kids Quiz Pro");
+ unlockAudio();
+ welcomeSound.currentTime = 0;
+ welcomeSound.play();
  show("category");
 }
 
@@ -175,7 +206,7 @@ function selectCat(c){
  show("level");
 }
 
-/* LOCK SYSTEM */
+/* LEVEL LOCK */
 function updateLevelUI(){
  let med=document.getElementById("medBtn");
  let hard=document.getElementById("hardBtn");
@@ -188,7 +219,6 @@ function updateLevelUI(){
  if(unlockedLevel==="medium"){
   med.classList.remove("lock");
   med.innerText="Medium";
-  hard.classList.add("lock");
  }
 
  if(unlockedLevel==="hard"){
@@ -261,6 +291,7 @@ function startTimer(){
  interval=setInterval(()=>{
   timer--;
   document.getElementById("time").innerText=timer;
+
   if(timer===0){
    clearInterval(interval);
    next();
@@ -284,10 +315,16 @@ function check(ans,btn){
  if(ans===q.a){
   btn.classList.add("correct","shake");
   stars++; coins+=10;
-  speak("Correct Answer");
+
+  correctSound.currentTime = 0;
+  correctSound.play();
+
+  confetti();
  }else{
   btn.classList.add("wrong");
-  speak("Wrong Answer");
+
+  wrongSound.currentTime = 0;
+  wrongSound.play();
  }
 
  document.getElementById("stars").innerText=stars;
@@ -299,10 +336,10 @@ function check(ans,btn){
 /* NEXT */
 function next(){
  if(i < data[cat][diff].length-1){
-  i++; load();
+  i++;
+  load();
  }else{
 
-  // 🔓 UNLOCK SYSTEM
   if(diff==="easy") unlockedLevel="medium";
   else if(diff==="medium") unlockedLevel="hard";
 
