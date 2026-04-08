@@ -31,6 +31,7 @@ justify-content:space-between;
 font-size:14px;
 font-weight:bold;
 margin-bottom:10px;
+color:#333;
 }
 
 .title{
@@ -44,22 +45,29 @@ margin-bottom:10px;
 display:block;
 width:100%;
 padding:10px;
-margin:5px 0;
+margin:6px 0;
 border:none;
 border-radius:10px;
 font-size:16px;
-background:#eee;
+background:#f1f1f1;
 cursor:pointer;
+transition:0.2s;
+}
+
+.btn:hover{
+background:#ddd;
 }
 
 .correct{
 background:#2ecc71 !important;
 animation:pop 0.3s ease;
+color:white;
 }
 
 .wrong{
 background:#e74c3c !important;
 animation:shake 0.4s ease;
+color:white;
 }
 
 @keyframes pop{
@@ -114,7 +122,7 @@ english:{easy:[],medium:[],hard:[]},
 gk:{easy:[],medium:[],hard:[]}
 };
 
-// ================= MATH EASY (20) =================
+// ================= EASY =================
 data.math.easy=[
 {q:"2+2=?",o:["3","4","5","6"],a:1},
 {q:"5+3=?",o:["7","8","9","10"],a:1},
@@ -138,7 +146,6 @@ data.math.easy=[
 {q:"15+5=?",o:["18","19","20","21"],a:2}
 ];
 
-// ================= ENGLISH EASY (20) =================
 data.english.easy=[
 {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
 {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
@@ -162,38 +169,27 @@ data.english.easy=[
 {q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
 ];
 
-// ================= GK EASY (20 FIXED) =================
 data.gk.easy=[
 {q:"How many days in a week?",o:["5","6","7","8"],a:2},
-{q:"Animal that says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
-{q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
+{q:"Cat says?",o:["Woof","Meow","Moo","Bark"],a:1},
+{q:"Sky color?",o:["Blue","Red","Green","Black"],a:0},
 {q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Months in year?",o:["10","11","12","13"],a:2},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
-{q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
-{q:"Dog has how many legs?",o:["2","3","4","5"],a:2},
-{q:"Bird can do?",o:["Fly","Swim","Run","Walk"],a:0},
-{q:"Days in a year?",o:["365","360","400","300"],a:0},
-{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
+{q:"Days in year?",o:["365","360","400","300"],a:0},
+{q:"Dog legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
+{q:"Moon is a?",o:["Star","Planet","Satellite","Sun"],a:2},
 {q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
-{q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
-{q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0},
-{q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
-{q:"Human eyes?",o:["1","2","3","4"],a:1},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Opposite of hot?",o:["Cold","Warm","Boil","Heat"],a:0}
+{q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1}
 ];
 
-// ================= MEDIUM (MIN 2 EACH) =================
+// MEDIUM
 data.math.medium=[
-{q:"12×3=?",o:["36","32","34","30"],a:0},
-{q:"100-45=?",o:["55","65","75","85"],a:0}
+{q:"12×3=?",o:["36","32","30","40"],a:0},
+{q:"100-50=?",o:["40","50","60","70"],a:1}
 ];
 
 data.english.medium=[
-{q:"Opposite of Big?",o:["Large","Small","Huge","Tall"],a:1},
+{q:"Opposite of Big?",o:["Small","Large","Huge","Tall"],a:0},
 {q:"Plural of Cat?",o:["Cats","Caties","Catt","Cates"],a:0}
 ];
 
@@ -202,7 +198,7 @@ data.gk.medium=[
 {q:"Fastest animal?",o:["Tiger","Cheetah","Lion","Horse"],a:1}
 ];
 
-// ================= HARD (MIN 2 EACH) =================
+// HARD
 data.math.hard=[
 {q:"25×4=?",o:["100","90","110","120"],a:0},
 {q:"144÷12=?",o:["10","11","12","13"],a:2}
@@ -214,28 +210,24 @@ data.english.hard=[
 ];
 
 data.gk.hard=[
-{q:"Bones in human body?",o:["206","150","300","250"],a:0},
-{q:"Galaxy name?",o:["Milky Way","Andromeda","Sun","Moon"],a:0}
+{q:"Bones in body?",o:["206","150","300","250"],a:0},
+{q:"Galaxy?",o:["Milky Way","Sun","Moon","Earth"],a:0}
 ];
 
+// GAME ENGINE
 let cat="gk",lvl="easy",i=0,stars=0,coins=0,timer;
 let current;
 
-// ================= START =================
 function startGame(c){
 cat=c;i=0;
 document.getElementById("menu").style.display="none";
 document.getElementById("game").style.display="block";
-
 document.getElementById("welcomeSound").play();
-
 load();
 }
 
-// ================= LOAD =================
 function load(){
 current=data[cat][lvl][i];
-
 document.getElementById("q").innerText=current.q;
 
 let opt="";
@@ -247,7 +239,6 @@ document.getElementById("opts").innerHTML=opt;
 startTimer();
 }
 
-// ================= CHECK =================
 function check(ans,btn){
 
 clearInterval(timer);
@@ -270,16 +261,9 @@ wrongSound.currentTime=0;
 wrongSound.play();
 }
 
-document.getElementById("stars").innerText=stars;
-document.getElementById("coins").innerText=coins;
-
-// animation re-trigger fix
-setTimeout(()=>btn.classList.remove("correct","wrong"),500);
-
 setTimeout(()=>next(),1000);
 }
 
-// ================= NEXT =================
 function next(){
 i++;
 if(i>=data[cat][lvl].length){
@@ -289,13 +273,11 @@ return;
 load();
 }
 
-// ================= HOME =================
 function home(){
 document.getElementById("menu").style.display="block";
 document.getElementById("game").style.display="none";
 }
 
-// ================= TIMER =================
 function startTimer(){
 let t=10;
 document.getElementById("time").innerText=t;
@@ -303,10 +285,7 @@ document.getElementById("time").innerText=t;
 timer=setInterval(()=>{
 t--;
 document.getElementById("time").innerText=t;
-if(t<=0){
-clearInterval(timer);
-next();
-}
+if(t<=0){clearInterval(timer);next();}
 },1000);
 }
 
