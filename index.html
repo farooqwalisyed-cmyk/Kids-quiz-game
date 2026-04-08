@@ -43,7 +43,6 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
-transition:0.2s;
 }
 
 .p1{background:#ffdd59;}
@@ -51,10 +50,10 @@ transition:0.2s;
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
 
+.hidden{display:none;}
+
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
-
-.hidden{display:none;}
 
 .shake{animation:shake 0.3s;}
 @keyframes shake{
@@ -65,14 +64,10 @@ transition:0.2s;
 100%{transform:translateX(0)}
 }
 
-.bounce{
-animation:bounce 0.5s;
-}
-
+.bounce{animation:bounce 0.4s;}
 @keyframes bounce{
 0%{transform:scale(1)}
-30%{transform:scale(1.15)}
-60%{transform:scale(0.95)}
+50%{transform:scale(1.15)}
 100%{transform:scale(1)}
 }
 </style>
@@ -120,31 +115,76 @@ animation:bounce 0.5s;
 
 <script>
 
-/* ===== DATA (UNCHANGED) ===== */
-const data=/* same as your previous script */ data;
+/* ===== SOUND ===== */
+let soundOn = true;
 
-/* ===== GAME STATE ===== */
+function playSound(src){
+if(!soundOn) return;
+new Audio(src).play();
+}
+
+/* ===== DATA RESTORED ===== */
+const data = {
+math:[
+[
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+5=?",o:["10","9","8","11"],a:0},
+{q:"3+1=?",o:["2","3","4","5"],a:2},
+{q:"6-2=?",o:["4","5","6","3"],a:0}
+],
+[
+{q:"10×2=?",o:["10","20","30","40"],a:1},
+{q:"25-10=?",o:["15","10","20","18"],a:0}
+],
+[
+{q:"50÷5=?",o:["5","10","15","20"],a:1}
+]
+],
+english:[
+[
+{q:"Dog has ___ legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
+],
+[
+{q:"He ___ a boy",o:["is","are","am","be"],a:0}
+],
+[
+{q:"She ___ teacher",o:["is","are","am","be"],a:0}
+]
+],
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+{q:"How many days in year?",o:["365","360","300","400"],a:0}
+],
+[
+{q:"Sun is a?",o:["Star","Planet","Moon","Asteroid"],a:0}
+],
+[
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}
+]
+]
+};
+
 let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-/* ===== FIX 1: PROPER SHUFFLE ===== */
+/* ===== SHUFFLE FIX ===== */
 function shuffle(arr){
-return arr
-.map(v=>({v,sort:Math.random()}))
+return arr.map(v=>({v,sort:Math.random()}))
 .sort((a,b)=>a.sort-b.sort)
 .map(({v})=>v);
 }
 
-/* ===== LOAD QUESTION ===== */
+/* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
-/* FIXED JUMBLE LOGIC */
-let options=q.o.map((text,idx)=>({
+let options = q.o.map((text,idx)=>({
 text,
-isCorrect: idx === q.a
+correct: idx===q.a
 }));
 
 options = shuffle(options);
@@ -152,7 +192,7 @@ options = shuffle(options);
 let html="";
 options.forEach(op=>{
 html+=`
-<button class="btn p1" onclick="check(this,${op.isCorrect})">
+<button class="btn p1" onclick="check(this,${op.correct})">
 ${op.text}
 </button>`;
 });
@@ -161,15 +201,17 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-/* ===== CHECK ANSWER ===== */
+/* ===== CHECK ===== */
 function check(btn,isCorrect){
 clearInterval(timer);
 
 if(isCorrect){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
+playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 }else{
 btn.classList.add("wrong","shake");
+playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 }
 
 document.getElementById("stars").innerText=stars;
@@ -214,14 +256,16 @@ clearInterval(timer);
 show("catScreen");
 }
 
+/* ===== START WITH WELCOME SOUND ===== */
+function startApp(){
+playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+show("catScreen");
+}
+
 function show(s){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(id=>document.getElementById(id).classList.add("hidden"));
 document.getElementById(s).classList.remove("hidden");
-}
-
-function startApp(){
-show("catScreen");
 }
 
 function selectCat(c){
