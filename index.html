@@ -10,10 +10,9 @@ body{
  font-family:Arial;
  background: linear-gradient(135deg,#6a11cb,#2575fc,#ff6b6b);
  height:100vh;
- overflow:hidden;
 }
 
-/* FULL SCREEN CARD */
+/* FULL SCREEN */
 .card{
  width:100%;
  height:100vh;
@@ -25,12 +24,8 @@ body{
  flex-direction:column;
 }
 
-/* SCREENS */
-.screen{display:none;}
-.active{display:block;}
-
 /* TITLE */
-h2{text-align:center;color:#ffe600;margin:10px 0;}
+h2{text-align:center;color:#ffe600;}
 h3{text-align:center;color:#00e5ff;}
 
 /* BUTTONS */
@@ -51,7 +46,7 @@ button{
 .c3{background:#51cf66;}
 .c4{background:#ffd43b;color:black;}
 
-.opt{color:white;font-weight:bold;}
+.opt{color:white;}
 
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
@@ -60,13 +55,14 @@ button{
 .nav{
  display:flex;
  gap:10px;
- margin-top:10px;
 }
-.nav button{
- flex:1;
-}
+.nav button{flex:1;}
 
-/* GAME AREA BIG */
+/* SCREENS */
+.screen{display:none;}
+.active{display:block;}
+
+/* QUESTION */
 #q{
  font-size:24px;
  margin:20px 0;
@@ -133,7 +129,7 @@ let i=0;
 let sound=true;
 
 /* AUDIO */
-let audioCtx;
+let audioCtx=null;
 
 function unlockAudio(){
  if(!audioCtx){
@@ -161,7 +157,7 @@ function playSound(type){
  setTimeout(()=>o.stop(),200);
 }
 
-/* DATA */
+/* QUESTIONS */
 const data={
  math:{
   easy:[
@@ -199,9 +195,12 @@ const data={
 };
 
 /* SCREEN CONTROL */
-function show(screen){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
- document.getElementById(screen).classList.add("active");
+function show(id){
+ document.getElementById("home").classList.remove("active");
+ document.getElementById("menu").classList.remove("active");
+ document.getElementById("game").classList.remove("active");
+
+ document.getElementById(id).classList.add("active");
 }
 
 /* FLOW */
@@ -215,6 +214,7 @@ function setCat(c){cat=c;}
 function setDiff(d){diff=d;}
 
 function startQuiz(){
+
  unlockAudio();
 
  if(!cat || !diff){
@@ -259,9 +259,7 @@ function check(ans,btn){
   btn.classList.add("wrong");
  }
 
- setTimeout(()=>{
-  next();
- },700);
+ setTimeout(()=>next(),700);
 }
 
 /* NAV */
