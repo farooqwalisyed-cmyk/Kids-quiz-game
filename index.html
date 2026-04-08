@@ -14,7 +14,6 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:linear-gradient(135deg,#6a11cb,#2575fc);
-overflow:hidden;
 }
 
 .card{
@@ -70,15 +69,6 @@ cursor:pointer;
 0%{transform:scale(0.6)}
 100%{transform:scale(1)}
 }
-
-#confetti{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-pointer-events:none;
-}
 </style>
 </head>
 
@@ -102,7 +92,8 @@ pointer-events:none;
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
-<button class="btn p1" onclick="goHome()">⬅ Back</button>
+
+<button class="btn p1" onclick="goHome()">🔄 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
@@ -128,35 +119,36 @@ pointer-events:none;
 const data={
 math:[
 [
-{q:"2+2=?",o:["3","4","5","6"],a:1}
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+3=?",o:["6","7","8","9"],a:2}
 ],
 [
-{q:"25×2=?",o:["40","50","60","70"],a:1}
+{q:"10×2=?",o:["10","20","30","40"],a:1}
 ],
 [
-{q:"144÷12=?",o:["10","11","12","13"],a:2}
+{q:"100÷10=?",o:["5","10","15","20"],a:1}
 ]
 ],
 english:[
-[
-{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
-],
 [
 {q:"Dog has ___ legs?",o:["2","3","4","5"],a:2}
 ],
 [
 {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
+],
+[
+{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
 ]
 ],
 gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
-],
 [
 {q:"How many days in a year?",o:["365","360","300","400"],a:0}
 ],
 [
 {q:"Sun is a?",o:["Planet","Star","Moon","Asteroid"],a:1}
+],
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
 ]
 ]
 };
@@ -165,39 +157,59 @@ let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-/* ===== RESET FIX ===== */
-function resetGame(){
-i=0;
-clearInterval(timer);
-document.getElementById("time").innerText="10";
+/* ===== AUDIO FIX (IMPORTANT) ===== */
+let audioUnlocked=false;
+
+function unlockAudio(){
+let ctx=new (window.AudioContext || window.webkitAudioContext)();
+let osc=ctx.createOscillator();
+osc.connect(ctx.destination);
+osc.start();
+osc.stop(0.01);
+audioUnlocked=true;
 }
 
 /* ===== SOUND ===== */
 function sound(type){
-try{
+if(!audioUnlocked) return;
+
 let audio=new Audio();
+
 if(type==="correct"){
 audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
-}else{
+}else if(type==="wrong"){
 audio.src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
 }
+
 audio.play();
-}catch(e){}
 }
 
-/* ===== NAV ===== */
+/* ===== WELCOME SOUND ===== */
+function welcomeSound(){
+if(!audioUnlocked) return;
+
+let audio=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+audio.play();
+}
+
+/* ===== START ===== */
 function startApp(){
+unlockAudio();
+welcomeSound();
 show("catScreen");
 }
 
+/* ===== SHOW ===== */
 function show(s){
-startScreen.classList.add("hidden");
-catScreen.classList.add("hidden");
-levelScreen.classList.add("hidden");
-gameScreen.classList.add("hidden");
+document.getElementById("startScreen").classList.add("hidden");
+document.getElementById("catScreen").classList.add("hidden");
+document.getElementById("levelScreen").classList.add("hidden");
+document.getElementById("gameScreen").classList.add("hidden");
+
 document.getElementById(s).classList.remove("hidden");
 }
 
+/* ===== NAV ===== */
 function selectCat(c){
 cat=c;
 show("levelScreen");
@@ -223,6 +235,7 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
+/* ===== TIMER ===== */
 function startTimer(){
 clearInterval(timer);
 time=10;
@@ -235,7 +248,7 @@ if(time<=0) nextQ();
 },1000);
 }
 
-/* ===== ANSWER CHECK ===== */
+/* ===== ANSWER ===== */
 function check(ans,btn){
 clearInterval(timer);
 let q=data[cat][level][i];
@@ -255,14 +268,13 @@ document.getElementById("coins").innerText=coins;
 setTimeout(nextQ,800);
 }
 
-/* ===== NAV FIXED ===== */
+/* ===== NAV ===== */
 function nextQ(){
 if(i < data[cat][level].length-1){
 i++;
 load();
 }else{
-resetGame();   // 🔥 FIX
-show("catScreen");
+goHome();
 }
 }
 
@@ -273,8 +285,10 @@ load();
 }
 }
 
+/* ===== REFRESH FIX ===== */
 function goHome(){
-resetGame();   // 🔥 FIX
+i=0;
+clearInterval(timer);
 show("catScreen");
 }
 
