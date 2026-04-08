@@ -1,71 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kids Quiz PRO</title>
 
 <style>
 body{
- margin:0;
- font-family:Arial;
- background:radial-gradient(circle at top,#6a11cb,#2575fc);
- display:flex;
- justify-content:center;
- align-items:center;
- height:100vh;
+margin:0;
+font-family:Arial;
+background:radial-gradient(circle at top,#6a11cb,#2575fc);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
 .screen{
- width:95%;
- max-width:420px;
- background:white;
- border-radius:20px;
- padding:15px;
- box-shadow:0 10px 25px rgba(0,0,0,0.3);
+width:95%;
+max-width:420px;
+background:white;
+border-radius:20px;
+padding:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 .top{
- display:flex;
- justify-content:space-between;
- font-size:14px;
- font-weight:bold;
- margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+font-size:14px;
+font-weight:bold;
+margin-bottom:10px;
 }
 
 .title{
- text-align:center;
- font-size:20px;
- font-weight:bold;
- margin-bottom:10px;
+text-align:center;
+font-size:20px;
+font-weight:bold;
+margin-bottom:10px;
 }
 
 .btn{
- display:block;
- width:100%;
- padding:10px;
- margin:5px 0;
- border:none;
- border-radius:10px;
- font-size:16px;
- background:#eee;
- cursor:pointer;
+display:block;
+width:100%;
+padding:10px;
+margin:5px 0;
+border:none;
+border-radius:10px;
+font-size:16px;
+background:#eee;
+cursor:pointer;
 }
 
-.btn:hover{background:#ddd;}
-
 .correct{
- background:#2ecc71 !important;
- animation:pop 0.4s ease;
+background:#2ecc71 !important;
+animation:pop 0.3s ease;
 }
 
 .wrong{
- background:#e74c3c !important;
- animation:shake 0.4s ease;
-}
-
-.shake{
- animation:shake 0.4s ease;
+background:#e74c3c !important;
+animation:shake 0.4s ease;
 }
 
 @keyframes pop{
@@ -87,6 +81,7 @@ body{
 
 <audio id="correctSound" src="correct.mp3"></audio>
 <audio id="wrongSound" src="wrong.mp3"></audio>
+<audio id="welcomeSound" src="welcome.mp3"></audio>
 
 <div class="screen">
 
@@ -107,15 +102,13 @@ body{
 <div id="game" style="display:none">
 <div id="q"></div>
 <div id="opts"></div>
-<button class="btn" onclick="next()">Next ➡</button>
-<button class="btn" onclick="home()">🏠 Home</button>
 </div>
 
 </div>
 
 <script>
 
-let data = {
+let data={
 math:{easy:[],medium:[],hard:[]},
 english:{easy:[],medium:[],hard:[]},
 gk:{easy:[],medium:[],hard:[]}
@@ -124,7 +117,7 @@ gk:{easy:[],medium:[],hard:[]}
 // ================= MATH EASY (20) =================
 data.math.easy=[
 {q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5+3=?",o:["7","8","9","6"],a:1},
+{q:"5+3=?",o:["7","8","9","10"],a:1},
 {q:"10-4=?",o:["5","6","7","8"],a:1},
 {q:"6+1=?",o:["6","7","8","9"],a:1},
 {q:"9-3=?",o:["5","6","7","8"],a:1},
@@ -143,18 +136,6 @@ data.math.easy=[
 {q:"2×6=?",o:["10","11","12","13"],a:2},
 {q:"18÷2=?",o:["7","8","9","10"],a:2},
 {q:"15+5=?",o:["18","19","20","21"],a:2}
-];
-
-data.math.medium=[
-{q:"25+25=?",o:["40","50","60","70"],a:1},
-{q:"100-30=?",o:["60","70","80","90"],a:1},
-{q:"12×2=?",o:["22","24","26","28"],a:1}
-];
-
-data.math.hard=[
-{q:"15×3=?",o:["30","40","45","50"],a:2},
-{q:"144÷12=?",o:["10","11","12","13"],a:2},
-{q:"50×2=?",o:["90","100","110","120"],a:1}
 ];
 
 // ================= ENGLISH EASY (20) =================
@@ -181,66 +162,78 @@ data.english.easy=[
 {q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
 ];
 
-data.english.medium=[
-{q:"Choose correct word: _pple",o:["A","E","I","O"],a:0},
-{q:"Opposite of hot?",o:["Cold","Warm","Dry","Soft"],a:0},
-{q:"Plural of cat?",o:["Cats","Cat's","Cates","Catt"],a:0}
-];
-
-data.english.hard=[
-{q:"He ___ playing football",o:["is","are","am","be"],a:0},
-{q:"She ___ a doctor",o:["is","are","am","be"],a:0},
-{q:"They ___ happy",o:["is","are","am","be"],a:1}
-];
-
 // ================= GK EASY (20 FIXED) =================
 data.gk.easy=[
 {q:"How many days in a week?",o:["5","6","7","8"],a:2},
-{q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
+{q:"Animal that says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
 {q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
 {q:"Sun rises in?",o:["East","West","North","South"],a:0},
 {q:"Months in year?",o:["10","11","12","13"],a:2},
 {q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
 {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
 {q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
-{q:"How many legs does a dog have?",o:["2","3","4","5"],a:2},
-{q:"What can a bird do?",o:["Fly","Swim","Run","Walk"],a:0},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
-{q:"Human eyes?",o:["1","2","3","4"],a:1},
-{q:"Human hands?",o:["1","2","3","4"],a:1},
-{q:"How many days in a year?",o:["365","360","400","300"],a:0},
+{q:"Dog has how many legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can do?",o:["Fly","Swim","Run","Walk"],a:0},
+{q:"Days in a year?",o:["365","360","400","300"],a:0},
 {q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
 {q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
 {q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
 {q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
-{q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0}
+{q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0},
+{q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
+{q:"Human eyes?",o:["1","2","3","4"],a:1},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+{q:"Opposite of hot?",o:["Cold","Warm","Boil","Heat"],a:0}
+];
+
+// ================= MEDIUM (MIN 2 EACH) =================
+data.math.medium=[
+{q:"12×3=?",o:["36","32","34","30"],a:0},
+{q:"100-45=?",o:["55","65","75","85"],a:0}
+];
+
+data.english.medium=[
+{q:"Opposite of Big?",o:["Large","Small","Huge","Tall"],a:1},
+{q:"Plural of Cat?",o:["Cats","Caties","Catt","Cates"],a:0}
 ];
 
 data.gk.medium=[
-{q:"India capital?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0},
-{q:"1 hour = ?",o:["30 min","60 min","90 min","100 min"],a:1},
-{q:"Largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2}
+{q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2},
+{q:"Fastest animal?",o:["Tiger","Cheetah","Lion","Horse"],a:1}
+];
+
+// ================= HARD (MIN 2 EACH) =================
+data.math.hard=[
+{q:"25×4=?",o:["100","90","110","120"],a:0},
+{q:"144÷12=?",o:["10","11","12","13"],a:2}
+];
+
+data.english.hard=[
+{q:"Correct spelling?",o:["Beautifull","Beautiful","Beutiful","Beautifal"],a:1},
+{q:"Past of Go?",o:["Goed","Went","Gone","Going"],a:1}
 ];
 
 data.gk.hard=[
-{q:"1 km = ?",o:["100 m","1000 m","10 m","500 m"],a:1},
-{q:"Light speed is?",o:["Fast","Slow","Zero","Medium"],a:0},
-{q:"Earth shape?",o:["Round","Flat","Cube","Triangle"],a:0}
+{q:"Bones in human body?",o:["206","150","300","250"],a:0},
+{q:"Galaxy name?",o:["Milky Way","Andromeda","Sun","Moon"],a:0}
 ];
 
-// ================= GAME LOGIC =================
-let cat="",lvl="easy",i=0,stars=0,coins=0,timer,current;
+let cat="gk",lvl="easy",i=0,stars=0,coins=0,timer;
+let current;
 
+// ================= START =================
 function startGame(c){
 cat=c;i=0;
 document.getElementById("menu").style.display="none";
 document.getElementById("game").style.display="block";
+
+document.getElementById("welcomeSound").play();
+
 load();
 }
 
+// ================= LOAD =================
 function load(){
-clearInterval(timer);
 current=data[cat][lvl][i];
 
 document.getElementById("q").innerText=current.q;
@@ -254,6 +247,7 @@ document.getElementById("opts").innerHTML=opt;
 startTimer();
 }
 
+// ================= CHECK =================
 function check(ans,btn){
 
 clearInterval(timer);
@@ -265,16 +259,13 @@ let all=document.querySelectorAll("#opts button");
 all.forEach(b=>b.disabled=true);
 
 if(ans===current.a){
-btn.classList.add("correct","shake");
-
+btn.classList.add("correct");
 correctSound.currentTime=0;
 correctSound.play();
-
 stars++;coins+=10;
 }else{
 btn.classList.add("wrong");
 all[current.a].classList.add("correct");
-
 wrongSound.currentTime=0;
 wrongSound.play();
 }
@@ -282,9 +273,13 @@ wrongSound.play();
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
+// animation re-trigger fix
+setTimeout(()=>btn.classList.remove("correct","wrong"),500);
+
 setTimeout(()=>next(),1000);
 }
 
+// ================= NEXT =================
 function next(){
 i++;
 if(i>=data[cat][lvl].length){
@@ -294,11 +289,13 @@ return;
 load();
 }
 
+// ================= HOME =================
 function home(){
 document.getElementById("menu").style.display="block";
 document.getElementById("game").style.display="none";
 }
 
+// ================= TIMER =================
 function startTimer(){
 let t=10;
 document.getElementById("time").innerText=t;
@@ -306,7 +303,10 @@ document.getElementById("time").innerText=t;
 timer=setInterval(()=>{
 t--;
 document.getElementById("time").innerText=t;
-if(t<=0){clearInterval(timer);next();}
+if(t<=0){
+clearInterval(timer);
+next();
+}
 },1000);
 }
 
