@@ -49,8 +49,6 @@ button{
 .btn-pink{background:linear-gradient(90deg,#ff758c,#ff7eb3);}
 .btn-gray{background:#ddd;color:black;}
 
-.opt{border-radius:15px;}
-
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
@@ -68,7 +66,20 @@ button{
 }
 @keyframes blink{50%{opacity:0.3;}}
 
-/* PROGRESS BAR */
+/* SHAKE ANIMATION */
+@keyframes shake{
+ 0%{transform:translateX(0);}
+ 25%{transform:translateX(-5px);}
+ 50%{transform:translateX(5px);}
+ 75%{transform:translateX(-5px);}
+ 100%{transform:translateX(0);}
+}
+
+.shake{
+ animation:shake 0.4s;
+}
+
+/* PROGRESS */
 .progress{
  height:8px;
  background:#eee;
@@ -119,19 +130,16 @@ button{
 
 <h1>Kids Quiz PRO MAX 🎮</h1>
 
-<!-- TAP -->
 <div id="start" class="screen active" onclick="startApp()">
  <div class="tap">👉 Tap to Start</div>
 </div>
 
-<!-- CATEGORY -->
 <div id="category" class="screen">
 <button class="btn-blue" onclick="selectCat('math')">Math</button>
 <button class="btn-blue" onclick="selectCat('english')">English</button>
 <button class="btn-blue" onclick="selectCat('gk')">GK</button>
 </div>
 
-<!-- LEVEL -->
 <div id="level" class="screen">
 <button class="btn-pink" onclick="startGame('easy')">Easy</button>
 <button class="btn-pink" onclick="startGame('medium')">Medium</button>
@@ -139,7 +147,6 @@ button{
 <button class="btn-gray" onclick="back()">Back</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
 
 <div class="progress"><div class="bar" id="bar"></div></div>
@@ -163,17 +170,15 @@ button{
 let cat,diff,i=0;
 let stars=0,coins=0;
 let timer=10,interval;
-let soundOn=true;
 let audioCtx;
 
-/* 🎤 VOICE */
+/* VOICE */
 function speak(t){
- if(!soundOn) return;
  let msg=new SpeechSynthesisUtterance(t);
  speechSynthesis.speak(msg);
 }
 
-/* 🎵 BG MUSIC */
+/* BG MUSIC */
 function bgMusic(){
  if(!audioCtx){
   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -186,7 +191,7 @@ function bgMusic(){
  o.start();
 }
 
-/* 🎉 CONFETTI */
+/* CONFETTI */
 function confetti(){
  for(let j=0;j<20;j++){
   let c=document.createElement("div");
@@ -198,46 +203,11 @@ function confetti(){
  }
 }
 
-/* DATA (expanded sample) */
+/* DATA */
 const data={
- math:{
-  easy:[
-   {q:"2+2=?",o:["3","4","5","6"],a:1},
-   {q:"5+5=?",o:["10","11","9","8"],a:0},
-   {q:"3+7=?",o:["10","9","8","11"],a:0}
-  ],
-  medium:[
-   {q:"12+8=?",o:["20","18","22","16"],a:0},
-   {q:"15-5=?",o:["10","5","8","12"],a:0}
-  ],
-  hard:[
-   {q:"12x12=?",o:["144","124","154","134"],a:0}
-  ]
- },
- english:{
-  easy:[
-   {q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0},
-   {q:"B for?",o:["Ball","Apple","Cat","Dog"],a:0}
-  ],
-  medium:[
-   {q:"Plural of book?",o:["Books","Book","Booked","Bookies"],a:0}
-  ],
-  hard:[
-   {q:"Opposite happy?",o:["Sad","Joy","Fun","Glad"],a:0}
-  ]
- },
- gk:{
-  easy:[
-   {q:"Days in week?",o:["5","6","7","8"],a:2},
-   {q:"Sun rises in?",o:["East","West","North","South"],a:0}
-  ],
-  medium:[
-   {q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
-  ],
-  hard:[
-   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0}
-  ]
- }
+ math:{easy:[{q:"2+2=?",o:["3","4","5","6"],a:1}]},
+ english:{easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}]},
+ gk:{easy:[{q:"Days?",o:["5","6","7","8"],a:2}]}
 };
 
 /* SCREEN */
@@ -257,7 +227,6 @@ function selectCat(c){cat=c;show("level");}
 
 function startGame(d){
  diff=d;i=0;
- stars=0;coins=0;
  load();
  show("game");
 }
@@ -273,7 +242,6 @@ function load(){
  });
  document.getElementById("opts").innerHTML=html;
 
- updateProgress();
  startTimer();
 }
 
@@ -286,19 +254,11 @@ function startTimer(){
  interval=setInterval(()=>{
   timer--;
   document.getElementById("time").innerText=timer;
-
   if(timer===0){
    clearInterval(interval);
    next();
   }
  },1000);
-}
-
-/* PROGRESS */
-function updateProgress(){
- let total=data[cat][diff].length;
- let percent=((i+1)/total)*100;
- document.getElementById("bar").style.width=percent+"%";
 }
 
 /* ANSWER */
@@ -308,7 +268,7 @@ function check(ans,btn){
  let q=data[cat][diff][i];
 
  if(ans===q.a){
-  btn.classList.add("correct");
+  btn.classList.add("correct","shake"); // 🎯 SHAKE HERE
   stars++; coins+=10;
   speak("Correct Answer");
   confetti();
