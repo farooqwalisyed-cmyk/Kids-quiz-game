@@ -12,7 +12,6 @@ body{
  height:100vh;
 }
 
-/* FULL SCREEN */
 .card{
  width:100%;
  height:100vh;
@@ -20,15 +19,11 @@ body{
  color:white;
  padding:15px;
  box-sizing:border-box;
- display:flex;
- flex-direction:column;
 }
 
-/* TITLE */
 h2{text-align:center;color:#ffe600;}
 h3{text-align:center;color:#00e5ff;}
 
-/* BUTTONS */
 button{
  padding:14px;
  margin:6px 0;
@@ -51,24 +46,13 @@ button{
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
-/* NAV */
-.nav{
- display:flex;
- gap:10px;
-}
+.nav{display:flex;gap:10px;}
 .nav button{flex:1;}
 
-/* SCREENS */
 .screen{display:none;}
 .active{display:block;}
 
-/* QUESTION */
-#q{
- font-size:24px;
- margin:20px 0;
- text-align:center;
-}
-
+#q{font-size:24px;margin:20px 0;text-align:center;}
 </style>
 </head>
 
@@ -78,43 +62,40 @@ button{
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<button class="btn" onclick="toggleSound()">🔊 Sound: <span id="s">ON</span></button>
+<button id="soundBtn" class="btn">🔊 Sound: ON</button>
 
-<!-- HOME -->
 <div id="home" class="screen active">
- <button class="btn" onclick="goMenu()">Start Game</button>
+ <button id="startBtn" class="btn">Start Game</button>
 </div>
 
-<!-- MENU -->
 <div id="menu" class="screen">
 
 <h3>Select Category</h3>
-<button class="c1" onclick="setCat('math')">Math</button>
-<button class="c2" onclick="setCat('english')">English</button>
-<button class="c3" onclick="setCat('gk')">GK</button>
+<button class="c1 cat" data-cat="math">Math</button>
+<button class="c2 cat" data-cat="english">English</button>
+<button class="c3 cat" data-cat="gk">GK</button>
 
 <h3>Select Difficulty</h3>
-<button class="c1" onclick="setDiff('easy')">Easy</button>
-<button class="c2" onclick="setDiff('medium')">Medium</button>
-<button class="c3" onclick="setDiff('hard')">Hard</button>
+<button class="c1 diff" data-diff="easy">Easy</button>
+<button class="c2 diff" data-diff="medium">Medium</button>
+<button class="c3 diff" data-diff="hard">Hard</button>
 
-<button class="btn" onclick="startQuiz()">▶ Play Quiz</button>
+<button id="playBtn" class="btn">▶ Play Quiz</button>
 
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
 
 <h3 id="q"></h3>
 <div id="opts"></div>
 
 <div class="nav">
- <button class="btn" onclick="prev()">⬅ Prev</button>
- <button class="btn" onclick="next()">Next ➡</button>
+ <button id="prevBtn" class="btn">⬅ Prev</button>
+ <button id="nextBtn" class="btn">Next ➡</button>
 </div>
 
-<button class="btn" onclick="restart()">🔄 Restart</button>
-<button class="btn" onclick="home()">🏠 Home</button>
+<button id="restartBtn" class="btn">🔄 Restart</button>
+<button id="homeBtn" class="btn">🏠 Home</button>
 
 </div>
 
@@ -122,14 +103,16 @@ button{
 
 <script>
 
-/* STATE */
+/* WAIT UNTIL PAGE LOADS */
+window.onload = function(){
+
 let cat=null;
 let diff=null;
 let i=0;
 let sound=true;
 
 /* AUDIO */
-let audioCtx=null;
+let audioCtx;
 
 function unlockAudio(){
  if(!audioCtx){
@@ -157,65 +140,35 @@ function playSound(type){
  setTimeout(()=>o.stop(),200);
 }
 
-/* QUESTIONS */
+/* DATA */
 const data={
- math:{
-  easy:[
-   {q:"2 + 2 = ?", o:["3","4","5"], a:1},
-   {q:"5 + 5 = ?", o:["10","11","9"], a:0}
-  ],
-  medium:[
-   {q:"12 + 8 = ?", o:["18","20","22"], a:1}
-  ],
-  hard:[
-   {q:"12 x 12 = ?", o:["144","124","154"], a:0}
-  ]
- },
- english:{
-  easy:[
-   {q:"A for ?", o:["Apple","Ball","Cat"], a:0}
-  ],
-  medium:[
-   {q:"Plural of Book?", o:["Books","Bookies","Booked"], a:0}
-  ],
-  hard:[
-   {q:"Opposite Happy?", o:["Sad","Joy","Glad"], a:0}
-  ]
- },
- gk:{
-  easy:[
-   {q:"Days in week?", o:["5","6","7"], a:2}
-  ],
-  medium:[
-   {q:"Capital India?", o:["Delhi","Mumbai","Chennai"], a:0}
-  ],
-  hard:[
-   {q:"Largest ocean?", o:["Atlantic","Pacific","Arctic"], a:1}
-  ]
+ math:{easy:[{q:"2+2=?",o:["3","4","5"],a:1}]},
+ english:{easy:[{q:"A for?",o:["Apple","Ball","Cat"],a:0}]},
+ gk:{easy:[{q:"Days in week?",o:["5","6","7"],a:2}]}
 };
 
-/* SCREEN CONTROL */
+/* SCREEN */
 function show(id){
- document.getElementById("home").classList.remove("active");
- document.getElementById("menu").classList.remove("active");
- document.getElementById("game").classList.remove("active");
-
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
  document.getElementById(id).classList.add("active");
 }
 
-/* FLOW */
-function goMenu(){
+/* BUTTONS */
+document.getElementById("startBtn").onclick = function(){
+ alert("Button Click Working ✅"); // DEBUG
  unlockAudio();
  show("menu");
- playSound("welcome");
-}
+};
 
-function setCat(c){cat=c;}
-function setDiff(d){diff=d;}
+document.querySelectorAll(".cat").forEach(btn=>{
+ btn.onclick=()=>cat=btn.dataset.cat;
+});
 
-function startQuiz(){
+document.querySelectorAll(".diff").forEach(btn=>{
+ btn.onclick=()=>diff=btn.dataset.diff;
+});
 
- unlockAudio();
+document.getElementById("playBtn").onclick = function(){
 
  if(!cat || !diff){
   alert("Select category + difficulty");
@@ -225,80 +178,33 @@ function startQuiz(){
  i=0;
  show("game");
  load();
- playSound("welcome");
-}
+};
 
 /* LOAD */
 function load(){
  let q=data[cat][diff][i];
-
  document.getElementById("q").innerText=q.q;
 
- let colors=["c1","c2","c3","c4"];
  let html="";
-
  q.o.forEach((op,idx)=>{
-  html+=`<button class="opt ${colors[idx%4]}" onclick="check(${idx},this)">${op}</button>`;
+  html+=`<button class="opt" onclick="check(${idx},this)">${op}</button>`;
  });
-
  document.getElementById("opts").innerHTML=html;
 }
 
-/* ANSWER */
-function check(ans,btn){
-
+window.check=function(ans,btn){
  let q=data[cat][diff][i];
-
- document.querySelectorAll(".opt").forEach(b=>b.disabled=true);
 
  if(ans===q.a){
   playSound("correct");
   btn.classList.add("correct");
- } else {
+ }else{
   playSound("wrong");
   btn.classList.add("wrong");
  }
+};
 
- setTimeout(()=>next(),700);
-}
-
-/* NAV */
-function next(){
- if(i < data[cat][diff].length-1){
-  i++;
-  load();
- } else {
-  alert("🎉 Level Completed!");
-  home();
- }
-}
-
-function prev(){
- if(i>0){
-  i--;
-  load();
- }
-}
-
-/* RESET */
-function restart(){
- i=0;
- load();
-}
-
-/* HOME */
-function home(){
- cat=null;
- diff=null;
- i=0;
- show("home");
-}
-
-/* SOUND */
-function toggleSound(){
- sound=!sound;
- document.getElementById("s").innerText=sound?"ON":"OFF";
-}
+};
 
 </script>
 
