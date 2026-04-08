@@ -78,11 +78,11 @@ button{
 
 <h1>Kids Quiz PRO MAX 🎮</h1>
 
-<button onclick="toggleSound()">🔊 Sound</button>
+<button onclick="playWelcome()">🔊 Sound</button>
 
 <div class="emoji">🙂</div>
 
-<!-- CATEGORY -->
+<!-- CATEGORY (HOME SCREEN) -->
 <div id="category" class="screen active">
 <h2>Select Category</h2>
 <button class="btn-blue" onclick="selectCat('gk')">GK</button>
@@ -122,19 +122,17 @@ let cat, diff, i=0;
 let stars=0, coins=0;
 let soundOn=true;
 
-/* 🎤 VOICE FUNCTION */
+/* 🎤 VOICE */
 function speak(text){
  if(!soundOn) return;
-
- let msg = new SpeechSynthesisUtterance(text);
- msg.lang = "en-US";
- msg.rate = 1;
+ let msg=new SpeechSynthesisUtterance(text);
+ msg.lang="en-US";
  speechSynthesis.speak(msg);
 }
 
-/* SOUND TOGGLE */
-function toggleSound(){
- soundOn=!soundOn;
+/* PLAY WELCOME */
+function playWelcome(){
+ speak("Welcome to Kids Quiz Pro");
 }
 
 /* DATA */
@@ -171,9 +169,6 @@ function selectCat(c){
 function startGame(d){
  diff=d;
  i=0;
-
- speak("Welcome to Kids Quiz Pro");
-
  show("game");
  load();
 }
@@ -218,7 +213,6 @@ function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  speak("Game Finished");
   alert("Game Finished!");
   home();
  }
