@@ -12,35 +12,29 @@ body{
  display:flex;
  justify-content:center;
  align-items:center;
-
  background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#a18cd1,#84fab0);
  background-size:400% 400%;
- animation: gradientBG 8s ease infinite;
+ animation: bg 8s infinite;
 }
-
-@keyframes gradientBG{
- 0%{background-position:0% 50%;}
- 50%{background-position:100% 50%;}
- 100%{background-position:0% 50%;}
+@keyframes bg{
+ 0%{background-position:0%}
+ 50%{background-position:100%}
+ 100%{background-position:0%}
 }
 
 .card{
  width:95%;
  max-width:500px;
- background:rgba(255,255,255,0.9);
+ background:#fff;
  border-radius:25px;
  padding:20px;
  text-align:center;
- backdrop-filter:blur(10px);
 }
 
 .top{
  display:flex;
  justify-content:space-between;
- font-size:18px;
 }
-
-.timer{color:red;font-weight:bold;}
 
 button{
  width:100%;
@@ -66,20 +60,9 @@ button{
 .nav{display:flex;gap:8px;}
 .nav button{flex:1;}
 
-.tap{animation:blink 1s infinite;}
-@keyframes blink{50%{opacity:0.3;}}
+.lock{opacity:0.5;}
 
-.progress{
- height:8px;
- background:#eee;
- border-radius:10px;
- margin:10px 0;
-}
-.bar{
- height:100%;
- width:0%;
- background:#4dabf7;
-}
+.timer{color:red;font-weight:bold;}
 </style>
 </head>
 
@@ -96,7 +79,7 @@ button{
 <h2>🎮 Kids Quiz PRO</h2>
 
 <div id="start" class="screen active" onclick="startApp()">
- <h3 class="tap">👉 Tap to Start</h3>
+ <h3>👉 Tap to Start</h3>
 </div>
 
 <div id="category" class="screen">
@@ -107,20 +90,18 @@ button{
 
 <div id="level" class="screen">
 <button class="btn1" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn1" onclick="startGame('medium')">Medium</button>
-<button id="hardBtn" class="btn1" onclick="startGame('hard')">Hard</button>
+<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
 </div>
 
 <div id="game" class="screen">
-
-<div class="progress"><div id="bar" class="bar"></div></div>
 
 <h3 id="q"></h3>
 <div id="opts"></div>
 
 <div class="nav">
- <button onclick="prev()">⬅ Prev</button>
- <button onclick="next()">Next ➡</button>
+ <button onclick="prev()">⬅</button>
+ <button onclick="next()">➡</button>
 </div>
 
 <button onclick="home()">🏠 Home</button>
@@ -133,38 +114,36 @@ button{
 
 let cat,diff,i=0;
 let stars=0,coins=0;
-let timer=10,interval;
+let timer,interval;
 
-let audioCtx=null;
+let unlockLevels={
+ math:"easy",
+ english:"easy",
+ gk:"easy"
+};
 
-/* 🔊 FIXED AUDIO UNLOCK */
+/* SOUND FIX */
+let audioCtx;
 function unlockAudio(){
  if(!audioCtx){
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
  }
  audioCtx.resume();
 }
-
-/* SOUND */
 function playSound(type){
  if(!audioCtx) return;
-
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
- o.connect(g);
- g.connect(audioCtx.destination);
-
- if(type==="correct") o.frequency.value=900;
- else o.frequency.value=150;
-
+ o.connect(g); g.connect(audioCtx.destination);
+ o.frequency.value = (type==="correct")?900:200;
  o.start();
- g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);
- o.stop(audioCtx.currentTime+0.5);
+ g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);
+ o.stop(audioCtx.currentTime+0.4);
 }
 
 /* START */
 function startApp(){
- unlockAudio(); // 🔥 IMPORTANT
+ unlockAudio();
  speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
 }
@@ -176,10 +155,42 @@ function show(id){
 
 function selectCat(c){
  cat=c;
+ updateLockUI();
  show("level");
 }
 
+/* LOCK SYSTEM */
+function updateLockUI(){
+ let med=document.getElementById("medBtn");
+ let hard=document.getElementById("hardBtn");
+
+ med.classList.add("lock");
+ hard.classList.add("lock");
+
+ med.innerText="🔒 Medium";
+ hard.innerText="🔒 Hard";
+
+ if(unlockLevels[cat]==="medium"){
+  med.classList.remove("lock");
+  med.innerText="Medium";
+ }
+
+ if(unlockLevels[cat]==="hard"){
+  med.classList.remove("lock");
+  hard.classList.remove("lock");
+  med.innerText="Medium";
+  hard.innerText="Hard";
+ }
+}
+
 function startGame(d){
+ if(d==="medium" && unlockLevels[cat]==="easy"){
+  alert("Complete Easy first"); return;
+ }
+ if(d==="hard" && unlockLevels[cat]!=="hard"){
+  alert("Complete Medium first"); return;
+ }
+
  diff=d;
  i=0;
  show("game");
@@ -197,16 +208,44 @@ function shuffle(q){
  };
 }
 
-/* DATA */
+/* CLEAN DATA */
 const data={
 math:{
- easy:[{q:"2 + 2 = ?",o:["3","4","5","6"],a:1}]
+ easy:[
+  {q:"2 + 2 = ?",o:["3","4","5","6"],a:1},
+  {q:"5 + 3 = ?",o:["7","8","9","6"],a:1}
+ ],
+ medium:[
+  {q:"12 + 8 = ?",o:["18","20","22","24"],a:1}
+ ],
+ hard:[
+  {q:"12 × 12 = ?",o:["144","124","154","134"],a:0}
+ ]
 },
+
 english:{
- easy:[{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}]
+ easy:[
+  {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
+ ],
+ medium:[
+  {q:"Plural of 'Book'?",o:["Books","Book","Booked","Booking"],a:0}
+ ],
+ hard:[
+  {q:"Opposite of 'Happy'?",o:["Sad","Joy","Fun","Smile"],a:0}
+ ]
 },
+
 gk:{
- easy:[{q:"How many days are there in a week?",o:["5","6","7","8"],a:2}]
+ easy:[
+  {q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
+  {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1}
+ ],
+ medium:[
+  {q:"What is the capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
+ ],
+ hard:[
+  {q:"Who invented the light bulb?",o:["Newton","Edison","Tesla","Einstein"],a:1}
+ ]
 }
 };
 
@@ -224,6 +263,7 @@ function load(){
  current.o.forEach((op,idx)=>{
   html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
+
  document.getElementById("opts").innerHTML=html;
 
  startTimer();
@@ -248,19 +288,27 @@ function check(ans,btn){
 
  if(ans===current.a){
   btn.classList.add("correct");
+  stars++; coins+=10;
   playSound("correct");
  }else{
   btn.classList.add("wrong");
   playSound("wrong");
  }
 
+ document.getElementById("stars").innerText=stars;
+ document.getElementById("coins").innerText=coins;
+
  setTimeout(()=>next(),700);
 }
 
+/* NAV */
 function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
+  if(diff==="easy") unlockLevels[cat]="medium";
+  else if(diff==="medium") unlockLevels[cat]="hard";
+
   alert("Level Completed!");
   show("category");
  }
