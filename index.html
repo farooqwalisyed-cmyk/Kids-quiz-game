@@ -161,16 +161,26 @@ let stars=0,coins=0;
 let timer=10,interval;
 let unlockedLevel="easy";
 
+/* 🎤 AI VOICE (WELCOME) */
+function speak(text){
+ let msg=new SpeechSynthesisUtterance(text);
+ speechSynthesis.speak(msg);
+}
+
 /* 🎧 AUDIO FILES */
 let correctSound = new Audio("correct.mp3");
 let wrongSound = new Audio("wrong.mp3");
-let welcomeSound = new Audio("welcome.mp3");
 
-/* 🔓 UNLOCK AUDIO (IMPORTANT FOR MOBILE) */
+/* 🔓 MOBILE AUDIO FIX */
 function unlockAudio(){
- correctSound.play().then(()=>correctSound.pause()).catch(()=>{});
- wrongSound.play().then(()=>wrongSound.pause()).catch(()=>{});
- welcomeSound.play().then(()=>welcomeSound.pause()).catch(()=>{});
+ [correctSound, wrongSound].forEach(s=>{
+  s.volume = 0;
+  s.play().then(()=>{
+   s.pause();
+   s.currentTime = 0;
+   s.volume = 1;
+  }).catch(()=>{});
+ });
 }
 
 /* 🎉 CONFETTI */
@@ -188,8 +198,11 @@ function confetti(){
 /* START */
 function startApp(){
  unlockAudio();
- welcomeSound.currentTime = 0;
- welcomeSound.play();
+
+ setTimeout(()=>{
+  speak("Welcome to Kids Quiz Pro");
+ },200);
+
  show("category");
 }
 
@@ -317,14 +330,14 @@ function check(ans,btn){
   stars++; coins+=10;
 
   correctSound.currentTime = 0;
-  correctSound.play();
+  correctSound.play().catch(()=>{});
 
   confetti();
  }else{
   btn.classList.add("wrong");
 
   wrongSound.currentTime = 0;
-  wrongSound.play();
+  wrongSound.play().catch(()=>{});
  }
 
  document.getElementById("stars").innerText=stars;
