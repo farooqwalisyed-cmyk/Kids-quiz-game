@@ -24,7 +24,7 @@ body{
 
 .card{
  width:95%;
- max-width:500px;
+ max-width:520px;
  background:#fff;
  border-radius:25px;
  padding:20px;
@@ -37,11 +37,7 @@ body{
  font-size:18px;
 }
 
-.timer{
- color:red;
- font-weight:bold;
- font-size:20px;
-}
+.timer{color:red;font-size:20px;font-weight:bold;}
 
 button{
  width:100%;
@@ -70,8 +66,6 @@ button{
 
 .nav{display:flex;gap:8px;}
 .nav button{flex:1;}
-
-.lock{opacity:0.5;}
 </style>
 </head>
 
@@ -92,20 +86,12 @@ button{
 </div>
 
 <div id="category" class="screen">
-<button class="btn2" onclick="selectCat('math')">Math</button>
-<button class="btn2" onclick="selectCat('english')">English</button>
-<button class="btn2" onclick="selectCat('gk')">GK</button>
-</div>
-
-<div id="level" class="screen">
-<button class="btn1" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
-<button class="navBtn1" onclick="show('category')">⬅ Back</button>
+<button class="btn2" onclick="startGame('math')">Math</button>
+<button class="btn2" onclick="startGame('english')">English</button>
+<button class="btn2" onclick="startGame('gk')">GK</button>
 </div>
 
 <div id="game" class="screen">
-
 <h3 id="q"></h3>
 <div id="opts"></div>
 
@@ -115,23 +101,17 @@ button{
 </div>
 
 <button class="navBtn3" onclick="home()">🏠 Home</button>
-
 </div>
 
 </div>
 
 <script>
 
-let cat,diff="easy",i=0;
+let cat,i=0;
 let stars=0,coins=0;
 let timer,interval;
 
-let unlock={
- math:"easy",
- english:"easy",
- gk:"easy"
-};
-
+/* SOUND */
 function playSound(freq){
  let ctx=new (window.AudioContext||window.webkitAudioContext)();
  let o=ctx.createOscillator();
@@ -139,10 +119,11 @@ function playSound(freq){
  o.connect(g); g.connect(ctx.destination);
  o.frequency.value=freq;
  o.start();
- g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
- o.stop(ctx.currentTime+0.5);
+ g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+ o.stop(ctx.currentTime+0.4);
 }
 
+/* START */
 function startApp(){
  speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
@@ -153,59 +134,47 @@ function show(id){
  document.getElementById(id).classList.add("active");
 }
 
-function selectCat(c){
+function startGame(c){
  cat=c;
- updateLevelUI();
- show("level");
-}
-
-function updateLevelUI(){
- let med=document.getElementById("medBtn");
- let hard=document.getElementById("hardBtn");
-
- med.classList.add("lock");
- hard.classList.add("lock");
-
- med.innerText="🔒 Medium";
- hard.innerText="🔒 Hard";
-
- if(unlock[cat]==="medium"){
-  med.classList.remove("lock");
-  med.innerText="Medium";
- }
-
- if(unlock[cat]==="hard"){
-  med.classList.remove("lock");
-  hard.classList.remove("lock");
-  med.innerText="Medium";
-  hard.innerText="Hard";
- }
-}
-
-function startGame(d){
- if(d==="medium" && unlock[cat]==="easy"){alert("Complete Easy first");return;}
- if(d==="hard" && unlock[cat]!=="hard"){alert("Complete Medium first");return;}
-
- diff=d;
  i=0;
  show("game");
  load();
 }
 
+/* SHUFFLE */
 function shuffle(q){
  let arr=q.o.map((t,i)=>({t,correct:i===q.a}));
  arr.sort(()=>Math.random()-0.5);
- return {
-  q:q.q,
-  o:arr.map(x=>x.t),
-  a:arr.findIndex(x=>x.correct)
- };
+ return {q:q.q,o:arr.map(x=>x.t),a:arr.findIndex(x=>x.correct)};
 }
 
-/* ✅ ALL 20 QUESTIONS (FIXED) */
-const data = {
-math:{easy:[/* same as before 20 math */]},
-english:{easy:[
+/* ✅ 20 QUESTIONS EACH */
+const data={
+
+math:[
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+3=?",o:["7","8","9","6"],a:1},
+{q:"10-5=?",o:["5","6","4","3"],a:0},
+{q:"6+2=?",o:["7","8","9","10"],a:1},
+{q:"9-3=?",o:["6","5","4","7"],a:0},
+{q:"4+4=?",o:["6","7","8","9"],a:2},
+{q:"3+6=?",o:["8","9","10","7"],a:1},
+{q:"8-2=?",o:["6","5","7","8"],a:0},
+{q:"1+7=?",o:["7","8","9","6"],a:1},
+{q:"2+6=?",o:["7","8","9","10"],a:1},
+{q:"7-1=?",o:["5","6","7","8"],a:1},
+{q:"3+3=?",o:["5","6","7","8"],a:1},
+{q:"5+2=?",o:["6","7","8","9"],a:1},
+{q:"9-2=?",o:["6","7","8","5"],a:1},
+{q:"6+1=?",o:["6","7","8","9"],a:1},
+{q:"4+3=?",o:["6","7","8","5"],a:1},
+{q:"8-4=?",o:["4","5","6","7"],a:0},
+{q:"7+2=?",o:["8","9","10","7"],a:1},
+{q:"5+5=?",o:["9","10","11","8"],a:1},
+{q:"10-3=?",o:["6","7","8","9"],a:1}
+],
+
+english:[
 {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
 {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
 {q:"C is for?",o:["Cat","Dog","Elephant","Fan"],a:0},
@@ -226,8 +195,9 @@ english:{easy:[
 {q:"R is for?",o:["Rat","Sun","Tiger","Umbrella"],a:0},
 {q:"S is for?",o:["Sun","Tiger","Umbrella","Van"],a:0},
 {q:"T is for?",o:["Tiger","Umbrella","Van","Watch"],a:0}
-]},
-gk:{easy:[
+],
+
+gk:[
 {q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
 {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
 {q:"What color is the sky?",o:["Blue","Green","Red","Yellow"],a:0},
@@ -248,13 +218,14 @@ gk:{easy:[
 {q:"Which is green?",o:["Sky","Grass","Sun","Cloud"],a:1},
 {q:"Which is used to write?",o:["Pen","Plate","Spoon","Cup"],a:0},
 {q:"Which animal barks?",o:["Cat","Dog","Cow","Lion"],a:1}
-]}
+]
+
 };
 
 let current;
 
 function load(){
- let q=data[cat].easy[i];
+ let q=data[cat][i];
  current=shuffle(q);
 
  document.getElementById("q").innerText=current.q;
@@ -278,7 +249,7 @@ function startTimer(){
  interval=setInterval(()=>{
   timer--;
   document.getElementById("time").innerText=timer;
-  if(timer===0){clearInterval(interval);next();}
+  if(timer==0){clearInterval(interval);next();}
  },1000);
 }
 
@@ -301,11 +272,10 @@ function check(ans,btn){
 }
 
 function next(){
- if(i < data[cat].easy.length-1){
+ if(i < data[cat].length-1){
   i++; load();
  }else{
-  unlock[cat]="medium";
-  alert("Easy Completed!");
+  alert("Level Completed!");
   show("category");
  }
 }
