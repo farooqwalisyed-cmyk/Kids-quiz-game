@@ -21,9 +21,10 @@ width:90%;
 max-width:420px;
 background:white;
 border-radius:20px;
-padding:20px;
+padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
+position:relative;
 }
 
 .btn{
@@ -34,6 +35,7 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
+transition:0.2s;
 }
 
 .p1{background:#ffdd59;}
@@ -46,110 +48,162 @@ cursor:pointer;
 .title{
 font-size:22px;
 font-weight:bold;
-margin-bottom:15px;
-animation:blink 1s infinite;
+margin-bottom:10px;
 }
 
-@keyframes blink{
-50%{opacity:0.4;}
+.topbar{
+display:flex;
+justify-content:space-between;
+font-size:14px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+/* ANIMATION */
+.pop{
+animation:pop 0.4s;
+}
+
+@keyframes pop{
+0%{transform:scale(0.5);}
+100%{transform:scale(1);}
+}
+
+.shake{
+animation:shake 0.3s;
+}
+
+@keyframes shake{
+0%{transform:translateX(0);}
+25%{transform:translateX(-5px);}
+50%{transform:translateX(5px);}
+75%{transform:translateX(-5px);}
+100%{transform:translateX(0);}
+}
+
+/* CONFETTI */
+.confetti{
+position:absolute;
+width:8px;
+height:8px;
+background:red;
+animation:fall 1s linear forwards;
+}
+
+@keyframes fall{
+to{
+transform:translateY(300px) rotate(360deg);
+opacity:0;
+}
 }
 </style>
 </head>
 
 <body>
 
-<!-- SCREEN 1 -->
+<audio id="welcomeSound" src="welcome.mp3"></audio>
+
 <div id="screen1" class="card">
 <div class="title">🎮 Tap to Play</div>
-<button class="btn p1" onclick="goCategory()">START GAME</button>
+<button class="btn p1" onclick="startApp()">START GAME</button>
 </div>
 
-<!-- SCREEN 2 -->
 <div id="screen2" class="card hidden">
-<div class="title">Select Category</div>
-<button class="btn p2" onclick="setCat('math')">Math</button>
-<button class="btn p3" onclick="setCat('english')">English</button>
-<button class="btn p4" onclick="setCat('gk')">GK</button>
-<button class="btn p1" onclick="goLevel()">NEXT ➡</button>
+<div class="topbar">
+<div>⭐ <span id="stars">0</span></div>
+<div>🪙 <span id="coins">0</span></div>
+<div>⏱️ <span id="time">0</span></div>
 </div>
 
-<!-- SCREEN 3 -->
+<div class="title">Select Category</div>
+
+<button class="btn p2" onclick="setCat('math'); goLevel()">Math</button>
+<button class="btn p3" onclick="setCat('english'); goLevel()">English</button>
+<button class="btn p4" onclick="setCat('gk'); goLevel()">GK</button>
+</div>
+
 <div id="screen3" class="card hidden">
 <div class="title">Select Level</div>
+
 <button class="btn p1" onclick="setLevel(0)">Easy</button>
-<button class="btn p2" onclick="setLevel(1)">Medium</button>
-<button class="btn p3" onclick="setLevel(2)">Hard</button>
+<button class="btn p2" onclick="setLevel(1)" id="med">Medium 🔒</button>
+<button class="btn p3" onclick="setLevel(2)" id="hard">Hard 🔒</button>
+
 <button class="btn p4" onclick="startGame()">START QUIZ</button>
 </div>
 
-<!-- SCREEN 4 GAME -->
 <div id="game" class="card hidden">
-<div id="q" style="font-size:18px;font-weight:bold;"></div>
+<div id="q" style="font-weight:bold;font-size:18px;"></div>
 <div id="options"></div>
 <button class="btn p1" onclick="next()">Next</button>
 </div>
-
-<audio id="welcomeSound" src="welcome.mp3"></audio>
 
 <script>
 
 let cat="math";
 let level=0;
 let i=0;
+let stars=0;
+let coins=0;
+let timer;
+let timeLeft=10;
+let levelUnlocked=1;
 
 /* QUESTIONS */
 const data={
-math:[
-[
-{q:"2+2=?",o:["3","4","5","6"],a:1}
-],
-[
-{q:"10×2=?",o:["20","18","22","24"],a:0}
-],
-[
-{q:"50÷5=?",o:["5","10","15","20"],a:1}
-]
+math:[ 
+[{q:"2+2=?",o:["3","4","5","6"],a:1}],
+[{q:"10×2=?",o:["20","18","22","24"],a:0}],
+[{q:"50÷5=?",o:["5","10","15","20"],a:1}]
 ],
 english:[
-[
-{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
-],
-[
-{q:"Opposite of Big?",o:["Small","Tall","Huge","Large"],a:0}
-],
-[
-{q:"Correct spelling?",o:["Beautiful","Beautifull","Bautiful","Beautifal"],a:0}
-]
+[{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}],
+[{q:"Opposite Big?",o:["Small","Tall","Huge","Large"],a:0}],
+[{q:"Correct spelling?",o:["Beautiful","Beautifull","Bautiful","Beautifal"],a:0}]
 ],
 gk:[
-[
-{q:"Dog legs?",o:["2","3","4","5"],a:2}
-],
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
-],
-[
-{q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2}
-]
+[{q:"Dog legs?",o:["2","3","4","5"],a:2}],
+[{q:"Capital India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}],
+[{q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2}]
 ]
 };
 
-/* SCREEN FLOW */
-function goCategory(){
+/* SOUND */
+function playSound(type){
+let ctx=new (window.AudioContext||window.webkitAudioContext)();
+let o=ctx.createOscillator();
+o.connect(ctx.destination);
+
+if(type=="correct") o.frequency.value=700;
+else if(type=="wrong") o.frequency.value=200;
+else o.frequency.value=500;
+
+o.start();
+setTimeout(()=>o.stop(),150);
+}
+
+/* START */
+function startApp(){
 document.getElementById("screen1").classList.add("hidden");
 document.getElementById("screen2").classList.remove("hidden");
-
-/* welcome sound FIX */
 document.getElementById("welcomeSound").play().catch(()=>{});
 }
 
+/* LEVEL SCREEN */
 function goLevel(){
 document.getElementById("screen2").classList.add("hidden");
 document.getElementById("screen3").classList.remove("hidden");
+updateLocks();
 }
 
 function setCat(c){cat=c;}
 function setLevel(l){level=l;}
+
+/* LOCK SYSTEM */
+function updateLocks(){
+document.getElementById("med").disabled = levelUnlocked<2;
+document.getElementById("hard").disabled = levelUnlocked<3;
+}
 
 /* START GAME */
 function startGame(){
@@ -157,10 +211,15 @@ document.getElementById("screen3").classList.add("hidden");
 document.getElementById("game").classList.remove("hidden");
 i=0;
 load();
+startTimer();
 }
 
-/* LOAD Q */
+/* LOAD */
 function load(){
+clearInterval(timer);
+timeLeft=10;
+startTimer();
+
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
@@ -172,18 +231,58 @@ html+=`<button class='btn p1' onclick='check(${idx},this)'>${opt}</button>`;
 document.getElementById("options").innerHTML=html;
 }
 
+/* TIMER */
+function startTimer(){
+document.getElementById("time").innerText=timeLeft;
+timer=setInterval(()=>{
+timeLeft--;
+document.getElementById("time").innerText=timeLeft;
+if(timeLeft<=0){
+clearInterval(timer);
+next();
+}
+},1000);
+}
+
 /* CHECK */
 function check(ans,btn){
-let q=data[cat][level][i];
+clearInterval(timer);
 
+let q=data[cat][level][i];
 let all=document.querySelectorAll("#options button");
 all.forEach(b=>b.disabled=true);
 
 if(ans===q.a){
+btn.classList.add("pop");
 btn.style.background="green";
+playSound("correct");
+stars++;
+coins+=10;
+createConfetti();
+
+if(levelUnlocked<3) levelUnlocked++;
 }else{
+btn.classList.add("shake");
 btn.style.background="red";
 all[q.a].style.background="green";
+playSound("wrong");
+}
+
+document.getElementById("stars").innerText=stars;
+document.getElementById("coins").innerText=coins;
+
+setTimeout(next,800);
+}
+
+/* CONFETTI */
+function createConfetti(){
+for(let i=0;i<20;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*300+"px";
+c.style.background=["red","blue","yellow","green"][Math.floor(Math.random()*4)];
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),1000);
 }
 }
 
