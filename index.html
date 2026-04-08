@@ -35,14 +35,12 @@ button{
 }
 
 .btn{background:white;}
-
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
 .c4{background:#ffd43b;color:black;}
 
 .opt{color:white;}
-
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
@@ -102,9 +100,7 @@ button{
 </div>
 
 <script>
-
-/* WAIT UNTIL PAGE LOADS */
-window.onload = function(){
+window.onload=function(){
 
 let cat=null;
 let diff=null;
@@ -113,7 +109,6 @@ let sound=true;
 
 /* AUDIO */
 let audioCtx;
-
 function unlockAudio(){
  if(!audioCtx){
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -130,9 +125,8 @@ function playSound(type){
  o.connect(g);
  g.connect(audioCtx.destination);
 
- if(type==="welcome") o.frequency.value=600;
  if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=180;
+ if(type==="wrong") o.frequency.value=200;
 
  g.gain.value=0.2;
 
@@ -140,11 +134,42 @@ function playSound(type){
  setTimeout(()=>o.stop(),200);
 }
 
-/* DATA */
+/* FULL DATA (NO CRASH) */
 const data={
- math:{easy:[{q:"2+2=?",o:["3","4","5"],a:1}]},
- english:{easy:[{q:"A for?",o:["Apple","Ball","Cat"],a:0}]},
- gk:{easy:[{q:"Days in week?",o:["5","6","7"],a:2}]}
+ math:{
+  easy:[
+   {q:"2+2=?",o:["3","4","5"],a:1},
+   {q:"3+1=?",o:["4","5","6"],a:0}
+  ],
+  medium:[
+   {q:"10+5=?",o:["15","12","14"],a:0}
+  ],
+  hard:[
+   {q:"12x12=?",o:["144","124","154"],a:0}
+  ]
+ },
+ english:{
+  easy:[
+   {q:"A for?",o:["Apple","Ball","Cat"],a:0}
+  ],
+  medium:[
+   {q:"Plural of book?",o:["Books","Booked","Bookies"],a:0}
+  ],
+  hard:[
+   {q:"Opposite happy?",o:["Sad","Joy","Glad"],a:0}
+  ]
+ },
+ gk:{
+  easy:[
+   {q:"Days in week?",o:["5","6","7"],a:2}
+  ],
+  medium:[
+   {q:"Capital India?",o:["Delhi","Mumbai","Chennai"],a:0}
+  ],
+  hard:[
+   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic"],a:0}
+  ]
+ }
 };
 
 /* SCREEN */
@@ -153,22 +178,22 @@ function show(id){
  document.getElementById(id).classList.add("active");
 }
 
-/* BUTTONS */
-document.getElementById("startBtn").onclick = function(){
- alert("Button Click Working ✅"); // DEBUG
+/* START */
+document.getElementById("startBtn").onclick=function(){
  unlockAudio();
  show("menu");
 };
 
+/* SELECT */
 document.querySelectorAll(".cat").forEach(btn=>{
  btn.onclick=()=>cat=btn.dataset.cat;
 });
-
 document.querySelectorAll(".diff").forEach(btn=>{
  btn.onclick=()=>diff=btn.dataset.diff;
 });
 
-document.getElementById("playBtn").onclick = function(){
+/* PLAY */
+document.getElementById("playBtn").onclick=function(){
 
  if(!cat || !diff){
   alert("Select category + difficulty");
@@ -183,15 +208,18 @@ document.getElementById("playBtn").onclick = function(){
 /* LOAD */
 function load(){
  let q=data[cat][diff][i];
+
  document.getElementById("q").innerText=q.q;
 
  let html="";
  q.o.forEach((op,idx)=>{
   html+=`<button class="opt" onclick="check(${idx},this)">${op}</button>`;
  });
+
  document.getElementById("opts").innerHTML=html;
 }
 
+/* ANSWER */
 window.check=function(ans,btn){
  let q=data[cat][diff][i];
 
@@ -204,8 +232,31 @@ window.check=function(ans,btn){
  }
 };
 
+/* NAV */
+document.getElementById("nextBtn").onclick=function(){
+ if(i < data[cat][diff].length-1){
+  i++;
+  load();
+ }
 };
 
+document.getElementById("prevBtn").onclick=function(){
+ if(i>0){
+  i--;
+  load();
+ }
+};
+
+document.getElementById("restartBtn").onclick=function(){
+ i=0;
+ load();
+};
+
+document.getElementById("homeBtn").onclick=function(){
+ show("home");
+};
+
+};
 </script>
 
 </body>
