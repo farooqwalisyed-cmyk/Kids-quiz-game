@@ -14,6 +14,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:linear-gradient(135deg,#6a11cb,#2575fc);
+overflow:hidden;
 }
 
 .card{
@@ -24,6 +25,8 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
+position:relative;
+z-index:2;
 }
 
 .topbar{
@@ -39,6 +42,7 @@ font-weight:bold;
 margin:10px 0;
 }
 
+/* BUTTONS + GLOW */
 .btn{
 width:100%;
 padding:12px;
@@ -47,6 +51,12 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
+transition:0.2s;
+}
+
+.btn:hover{
+transform:scale(1.03);
+box-shadow:0 0 12px rgba(255,255,255,0.6);
 }
 
 .p1{background:#ffdd59;}
@@ -54,10 +64,10 @@ cursor:pointer;
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
 
-.hidden{display:none;}
-
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
+
+.hidden{display:none;}
 
 .shake{animation:shake 0.3s;}
 @keyframes shake{
@@ -73,10 +83,23 @@ cursor:pointer;
 0%{transform:scale(0.6)}
 100%{transform:scale(1)}
 }
+
+/* CONFETTI CANVAS */
+#confetti{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+z-index:999;
+}
 </style>
 </head>
 
 <body>
+
+<canvas id="confetti"></canvas>
 
 <div class="card">
 
@@ -88,31 +111,23 @@ cursor:pointer;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
-<!-- START -->
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">Tap to Play</button>
 </div>
 
-<!-- CATEGORY (FIXED BACK POSITION) -->
 <div id="catScreen" class="hidden">
-
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
-
-<!-- FIXED: back button moved BELOW -->
 <button class="btn p1" onclick="goHome()">⬅ Back</button>
-
 </div>
 
-<!-- LEVEL -->
 <div id="levelScreen" class="hidden">
-<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
-<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+<button class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
 </div>
 
-<!-- GAME -->
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
 <div id="opts"></div>
@@ -126,71 +141,7 @@ cursor:pointer;
 
 <script>
 
-let cat="";
-let level=0;
-let i=0;
-let stars=0;
-let coins=0;
-let timer;
-let time=10;
-
-/* SOUND FIX (CORRECT WORKING VERSION) */
-function beep(type){
-try{
-let ctx=new (window.AudioContext || window.webkitAudioContext)();
-let o=ctx.createOscillator();
-o.connect(ctx.destination);
-
-if(type==="correct") o.frequency.value=900;
-else if(type==="wrong") o.frequency.value=200;
-else o.frequency.value=500;
-
-o.start();
-setTimeout(()=>o.stop(),120);
-}catch(e){}
-}
-
-/* START */
-function startApp(){
-show("catScreen");
-}
-
-/* SCREEN SWITCH */
-function show(screen){
-startScreen.classList.add("hidden");
-catScreen.classList.add("hidden");
-levelScreen.classList.add("hidden");
-gameScreen.classList.add("hidden");
-
-document.getElementById(screen).classList.remove("hidden");
-}
-
-/* CATEGORY */
-function selectCat(c){
-cat=c;
-show("levelScreen");
-}
-
-/* LEVEL LOCK SYSTEM */
-function selectLevel(l){
-
-if(l===1 && localStorage.getItem("easyDone")!=="yes"){
-alert("Complete Easy Level first 🔒");
-return;
-}
-
-if(l===2 && localStorage.getItem("easyDone")!=="yes"){
-alert("Complete Easy Level first 🔒");
-return;
-}
-
-level=l;
-i=0;
-show("gameScreen");
-load();
-}
-
-/* QUESTIONS */
+/* ===== DATA ===== */
 const data={
 math:[
 [
@@ -206,42 +157,133 @@ math:[
 english:[
 [
 {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
-],
-[
-{q:"He ___ playing",o:["is","are","am","be"],a:0}
-],
-[
-{q:"Past of Go?",o:["Went","Goes","Going","Gone"],a:0}
 ]
 ],
 gk:[
 [
-{q:"How many days in a year?",o:["365","360","400","300"],a:0}
-],
-[
 {q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
-],
-[
-{q:"Sun is a?",o:["Star","Planet","Moon","Comet"],a:0}
 ]
 ]
 };
 
-/* LOAD */
+let cat="",level=0,i=0;
+let stars=0,coins=0;
+let timer,time=10;
+
+/* ===== SOUND SYSTEM ===== */
+function sound(type){
+try{
+let audio=new Audio();
+
+if(type==="correct"){
+audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+playConfetti();
+}else if(type==="wrong"){
+audio.src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
+}
+
+audio.play();
+}catch(e){
+beep(type);
+}
+}
+
+/* fallback beep */
+function beep(type){
+try{
+let ctx=new AudioContext();
+let o=ctx.createOscillator();
+o.connect(ctx.destination);
+o.frequency.value = type==="correct"?800:200;
+o.start();
+setTimeout(()=>o.stop(),120);
+}catch(e){}
+}
+
+/* ===== CONFETTI ===== */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let pieces=[];
+
+function playConfetti(){
+for(let i=0;i<80;i++){
+pieces.push({
+x:Math.random()*canvas.width,
+y:0,
+r:Math.random()*6+2,
+d:Math.random()*80,
+color:`hsl(${Math.random()*360},100%,50%)`
+});
+}
+}
+
+function drawConfetti(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+pieces.forEach(p=>{
+ctx.fillStyle=p.color;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.y+=2+p.d/50;
+});
+pieces=pieces.filter(p=>p.y<canvas.height);
+requestAnimationFrame(drawConfetti);
+}
+drawConfetti();
+
+/* ===== VOICE ===== */
+function speak(text){
+try{
+speechSynthesis.cancel();
+let msg=new SpeechSynthesisUtterance(text);
+msg.rate=0.9;
+msg.pitch=1;
+speechSynthesis.speak(msg);
+}catch(e){}
+}
+
+/* ===== GAME FLOW ===== */
+function startApp(){
+show("catScreen");
+}
+
+function show(s){
+startScreen.classList.add("hidden");
+catScreen.classList.add("hidden");
+levelScreen.classList.add("hidden");
+gameScreen.classList.add("hidden");
+document.getElementById(s).classList.remove("hidden");
+}
+
+function selectCat(c){
+cat=c;
+show("levelScreen");
+}
+
+function selectLevel(l){
+level=l;
+i=0;
+show("gameScreen");
+load();
+}
+
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
+speak(q.q);
 
 let html="";
 q.o.forEach((op,idx)=>{
 html+=`<button class="btn p1" onclick="check(${idx},this)">${op}</button>`;
 });
-
 document.getElementById("opts").innerHTML=html;
+
 startTimer();
 }
 
-/* TIMER */
 function startTimer(){
 clearInterval(timer);
 time=10;
@@ -250,57 +292,38 @@ document.getElementById("time").innerText=time;
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
-
-if(time<=0){
-clearInterval(timer);
-nextQ();
-}
+if(time<=0) nextQ();
 },1000);
 }
 
-/* CHECK ANSWER (FIXED SOUND) */
+/* ===== CHECK ANSWER ===== */
 function check(ans,btn){
 clearInterval(timer);
-
 let q=data[cat][level][i];
 
 if(ans===q.a){
 btn.classList.add("correct","pop");
-stars++;
-coins+=10;
-beep("correct");
+stars++; coins+=10;
+sound("correct");
 }else{
 btn.classList.add("wrong","shake");
-beep("wrong");
+sound("wrong");
 }
 
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
-setTimeout(nextQ,700);
+setTimeout(nextQ,800);
 }
 
-/* NEXT */
+/* ===== NAV ===== */
 function nextQ(){
 if(i < data[cat][level].length-1){
 i++;
 load();
 }else{
-
-/* SAVE EASY COMPLETION */
-if(level===0){
-localStorage.setItem("easyDone","yes");
-unlockLevels();
-}
-
 show("catScreen");
 }
-}
-
-/* UNLOCK UI */
-function unlockLevels(){
-document.getElementById("medBtn").innerText="Medium";
-document.getElementById("hardBtn").innerText="Hard";
 }
 
 function prevQ(){
