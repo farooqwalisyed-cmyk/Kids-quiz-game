@@ -84,7 +84,7 @@ box-shadow:0 0 12px rgba(255,255,255,0.6);
 100%{transform:scale(1)}
 }
 
-/* CONFETTI CANVAS */
+/* CONFETTI */
 #confetti{
 position:fixed;
 top:0;
@@ -111,10 +111,12 @@ z-index:999;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
+<!-- START -->
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">Tap to Play</button>
 </div>
 
+<!-- CATEGORY -->
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
@@ -122,12 +124,16 @@ z-index:999;
 <button class="btn p1" onclick="goHome()">⬅ Back</button>
 </div>
 
+<!-- LEVEL SCREEN (YOUR BUTTONS ADDED HERE) -->
 <div id="levelScreen" class="hidden">
-<button class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
-<button class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+
+<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+
 </div>
 
+<!-- GAME -->
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
 <div id="opts"></div>
@@ -145,10 +151,13 @@ z-index:999;
 const data={
 math:[
 [
-{q:"2+2=?",o:["3","4","5","6"],a:1}
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"10-3=?",o:["5","6","7","8"],a:2},
+{q:"5×2=?",o:["10","12","8","6"],a:0}
 ],
 [
-{q:"25×2=?",o:["40","50","60","70"],a:1}
+{q:"20+15=?",o:["35","30","25","40"],a:0},
+{q:"9×3=?",o:["27","24","21","30"],a:0}
 ],
 [
 {q:"144÷12=?",o:["10","11","12","13"],a:2}
@@ -156,12 +165,26 @@ math:[
 ],
 english:[
 [
-{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
+{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
+{q:"B is for?",o:["Bat","Ball","Car","Dog"],a:0}
+],
+[
+{q:"He ___ playing",o:["is","are","am","be"],a:0}
+],
+[
+{q:"Past of Go?",o:["Went","Goes","Going","Gone"],a:0}
 ]
 ],
 gk:[
 [
-{q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
+{q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0},
+{q:"Sun is a?",o:["Star","Planet","Moon","Comet"],a:0}
+],
+[
+{q:"Earth has how many continents?",o:["5","6","7","8"],a:2}
+],
+[
+{q:"Speed of light?",o:["3 lakh km/s","1 lakh","5 lakh","10 lakh"],a:0}
 ]
 ]
 };
@@ -170,82 +193,18 @@ let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-/* ===== SOUND SYSTEM ===== */
+/* ===== SOUND ===== */
 function sound(type){
 try{
 let audio=new Audio();
-
-if(type==="correct"){
-audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
-playConfetti();
-}else if(type==="wrong"){
-audio.src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
-}
-
+audio.src = type==="correct"
+? "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
+: "https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
 audio.play();
-}catch(e){
-beep(type);
-}
-}
-
-/* fallback beep */
-function beep(type){
-try{
-let ctx=new AudioContext();
-let o=ctx.createOscillator();
-o.connect(ctx.destination);
-o.frequency.value = type==="correct"?800:200;
-o.start();
-setTimeout(()=>o.stop(),120);
 }catch(e){}
 }
 
-/* ===== CONFETTI ===== */
-const canvas=document.getElementById("confetti");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
-let pieces=[];
-
-function playConfetti(){
-for(let i=0;i<80;i++){
-pieces.push({
-x:Math.random()*canvas.width,
-y:0,
-r:Math.random()*6+2,
-d:Math.random()*80,
-color:`hsl(${Math.random()*360},100%,50%)`
-});
-}
-}
-
-function drawConfetti(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-pieces.forEach(p=>{
-ctx.fillStyle=p.color;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=2+p.d/50;
-});
-pieces=pieces.filter(p=>p.y<canvas.height);
-requestAnimationFrame(drawConfetti);
-}
-drawConfetti();
-
-/* ===== VOICE ===== */
-function speak(text){
-try{
-speechSynthesis.cancel();
-let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.9;
-msg.pitch=1;
-speechSynthesis.speak(msg);
-}catch(e){}
-}
-
-/* ===== GAME FLOW ===== */
+/* ===== NAV ===== */
 function startApp(){
 show("catScreen");
 }
@@ -270,10 +229,10 @@ show("gameScreen");
 load();
 }
 
+/* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
-speak(q.q);
 
 let html="";
 q.o.forEach((op,idx)=>{
@@ -284,6 +243,7 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
+/* ===== TIMER ===== */
 function startTimer(){
 clearInterval(timer);
 time=10;
@@ -296,7 +256,7 @@ if(time<=0) nextQ();
 },1000);
 }
 
-/* ===== CHECK ANSWER ===== */
+/* ===== CHECK ===== */
 function check(ans,btn){
 clearInterval(timer);
 let q=data[cat][level][i];
@@ -313,7 +273,7 @@ sound("wrong");
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
-setTimeout(nextQ,800);
+setTimeout(nextQ,700);
 }
 
 /* ===== NAV ===== */
