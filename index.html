@@ -115,19 +115,16 @@ button{
 
 <h2>Kids Quiz PRO MAX 🎮</h2>
 
-<!-- TAP -->
 <div id="start" class="screen active" onclick="startApp()">
  <div class="tap">👉 Tap to Start</div>
 </div>
 
-<!-- CATEGORY -->
 <div id="category" class="screen">
 <button class="btn-blue" onclick="selectCat('math')">Math</button>
 <button class="btn-blue" onclick="selectCat('english')">English</button>
 <button class="btn-blue" onclick="selectCat('gk')">GK</button>
 </div>
 
-<!-- LEVEL -->
 <div id="level" class="screen">
 <button id="easyBtn" class="btn-pink" onclick="startGame('easy')">Easy</button>
 <button id="medBtn" class="btn-pink lock" onclick="startGame('medium')">🔒 Medium</button>
@@ -135,7 +132,6 @@ button{
 <button class="btn-gray" onclick="back()">Back</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
 
 <div class="progress"><div class="bar" id="bar"></div></div>
@@ -159,31 +155,43 @@ button{
 let cat,diff,i=0;
 let stars=0,coins=0;
 let timer=10,interval;
-let unlockedLevel="easy";
 
-/* 🎤 AI VOICE (WELCOME) */
+// 🔒 LOCK SYSTEM FIX
+let unlockedLevel = {
+ math: "easy",
+ english: "easy",
+ gk: "easy"
+};
+
+/* 🎤 AI VOICE */
 function speak(text){
  let msg=new SpeechSynthesisUtterance(text);
  speechSynthesis.speak(msg);
 }
 
-/* 🎧 AUDIO FILES */
-let correctSound = new Audio("correct.mp3");
-let wrongSound = new Audio("wrong.mp3");
+/* 🔊 SOUND (NO FILES) */
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-/* 🔓 MOBILE AUDIO FIX */
-function unlockAudio(){
- [correctSound, wrongSound].forEach(s=>{
-  s.volume = 0;
-  s.play().then(()=>{
-   s.pause();
-   s.currentTime = 0;
-   s.volume = 1;
-  }).catch(()=>{});
- });
+function playSound(type){
+ let o = audioCtx.createOscillator();
+ let g = audioCtx.createGain();
+
+ o.connect(g);
+ g.connect(audioCtx.destination);
+
+ if(type==="correct"){
+  o.frequency.value = 800;
+ }
+ else if(type==="wrong"){
+  o.frequency.value = 200;
+ }
+
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+ o.stop(audioCtx.currentTime + 0.4);
 }
 
-/* 🎉 CONFETTI */
+/* CONFETTI */
 function confetti(){
  for(let j=0;j<20;j++){
   let c=document.createElement("div");
@@ -197,12 +205,7 @@ function confetti(){
 
 /* START */
 function startApp(){
- unlockAudio();
-
- setTimeout(()=>{
-  speak("Welcome to Kids Quiz Pro");
- },200);
-
+ speak("Welcome to Kids Quiz Pro");
  show("category");
 }
 
@@ -219,22 +222,24 @@ function selectCat(c){
  show("level");
 }
 
-/* LEVEL LOCK */
+/* 🔒 LEVEL FIX PER CATEGORY */
 function updateLevelUI(){
+
  let med=document.getElementById("medBtn");
  let hard=document.getElementById("hardBtn");
 
- if(unlockedLevel==="easy"){
-  med.classList.add("lock");
-  hard.classList.add("lock");
- }
+ med.classList.add("lock");
+ hard.classList.add("lock");
 
- if(unlockedLevel==="medium"){
+ med.innerText="🔒 Medium";
+ hard.innerText="🔒 Hard";
+
+ if(unlockedLevel[cat]==="medium"){
   med.classList.remove("lock");
   med.innerText="Medium";
  }
 
- if(unlockedLevel==="hard"){
+ if(unlockedLevel[cat]==="hard"){
   med.classList.remove("lock");
   hard.classList.remove("lock");
   med.innerText="Medium";
@@ -245,12 +250,12 @@ function updateLevelUI(){
 /* START GAME */
 function startGame(d){
 
- if(d==="medium" && unlockedLevel==="easy"){
+ if(d==="medium" && unlockedLevel[cat]==="easy"){
   alert("Complete Easy first!");
   return;
  }
 
- if(d==="hard" && unlockedLevel!=="hard"){
+ if(d==="hard" && unlockedLevel[cat]!=="hard"){
   alert("Complete Medium first!");
   return;
  }
@@ -328,16 +333,11 @@ function check(ans,btn){
  if(ans===q.a){
   btn.classList.add("correct","shake");
   stars++; coins+=10;
-
-  correctSound.currentTime = 0;
-  correctSound.play().catch(()=>{});
-
+  playSound("correct");
   confetti();
  }else{
   btn.classList.add("wrong");
-
-  wrongSound.currentTime = 0;
-  wrongSound.play().catch(()=>{});
+  playSound("wrong");
  }
 
  document.getElementById("stars").innerText=stars;
@@ -353,8 +353,8 @@ function next(){
   load();
  }else{
 
-  if(diff==="easy") unlockedLevel="medium";
-  else if(diff==="medium") unlockedLevel="hard";
+  if(diff==="easy") unlockedLevel[cat]="medium";
+  else if(diff==="medium") unlockedLevel[cat]="hard";
 
   alert("Level Completed!");
   home();
