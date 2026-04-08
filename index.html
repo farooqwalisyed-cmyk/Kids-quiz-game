@@ -15,7 +15,6 @@ body{
  background: linear-gradient(135deg,#9b8cff,#ffb3b3);
 }
 
-/* MAIN CARD */
 .card{
  width:95%;
  max-width:420px;
@@ -26,7 +25,6 @@ body{
  text-align:center;
 }
 
-/* HEADER */
 .top{
  display:flex;
  justify-content:center;
@@ -45,7 +43,6 @@ h1{
  margin:10px 0;
 }
 
-/* BUTTONS */
 button{
  width:100%;
  padding:16px;
@@ -56,7 +53,6 @@ button{
  color:white;
 }
 
-/* GRADIENT BUTTONS */
 .btn-blue{
  background: linear-gradient(90deg,#43cea2,#185a9d);
 }
@@ -68,22 +64,27 @@ button{
  color:black;
 }
 
-/* OPTIONS */
-.opt{
- border-radius:15px;
-}
-
-/* GAME */
-#q{
- font-size:22px;
- margin:15px 0;
-}
+.opt{border-radius:15px;}
 
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
 .screen{display:none;}
 .active{display:block;}
+
+#q{
+ font-size:22px;
+ margin:15px 0;
+}
+
+/* NAV BUTTON ROW */
+.nav{
+ display:flex;
+ gap:10px;
+}
+.nav button{
+ flex:1;
+}
 
 </style>
 </head>
@@ -125,6 +126,12 @@ button{
 
 <div id="q"></div>
 <div id="opts"></div>
+
+<!-- NAVIGATION -->
+<div class="nav">
+ <button class="btn-gray" onclick="prev()">⬅ Prev</button>
+ <button class="btn-gray" onclick="next()">Next ➡</button>
+</div>
 
 <button class="btn-gray" onclick="home()">🏠 Home</button>
 
@@ -230,12 +237,10 @@ function check(ans,btn){
  document.getElementById("stars").innerText=stars;
  document.getElementById("coins").innerText=coins;
 
- setTimeout(()=>{
-  next();
- },800);
+ setTimeout(()=>next(),800);
 }
 
-/* NEXT */
+/* NAV */
 function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
@@ -245,6 +250,14 @@ function next(){
  }
 }
 
+function prev(){
+ if(i>0){
+  i--;
+  load();
+ }
+}
+
+/* HOME */
 function home(){
  show("category");
 }
