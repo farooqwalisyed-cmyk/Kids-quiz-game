@@ -25,7 +25,6 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
-position:relative;
 }
 
 .topbar{
@@ -35,11 +34,7 @@ font-weight:bold;
 margin-bottom:10px;
 }
 
-.title{
-font-size:22px;
-font-weight:bold;
-margin:10px 0;
-}
+.title{font-size:22px;font-weight:bold;margin:10px 0;}
 
 .btn{
 width:100%;
@@ -55,6 +50,9 @@ cursor:pointer;
 .p2{background:#1dd1a1;}
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
+
+.correct{background:#2ecc71 !important;}
+.wrong{background:#e74c3c !important;}
 
 .hidden{display:none;}
 
@@ -72,6 +70,15 @@ cursor:pointer;
 0%{transform:scale(0.6)}
 100%{transform:scale(1)}
 }
+
+#confetti{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+}
 </style>
 </head>
 
@@ -87,7 +94,6 @@ cursor:pointer;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
-<!-- SCREENS -->
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">Tap to Play</button>
 </div>
@@ -118,49 +124,78 @@ cursor:pointer;
 
 <script>
 
+/* ===== DATA ===== */
+const data={
+math:[
+[
+{q:"2+2=?",o:["3","4","5","6"],a:1}
+],
+[
+{q:"25×2=?",o:["40","50","60","70"],a:1}
+],
+[
+{q:"144÷12=?",o:["10","11","12","13"],a:2}
+]
+],
+english:[
+[
+{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
+],
+[
+{q:"Dog has ___ legs?",o:["2","3","4","5"],a:2}
+],
+[
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
+]
+],
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
+],
+[
+{q:"How many days in a year?",o:["365","360","300","400"],a:0}
+],
+[
+{q:"Sun is a?",o:["Planet","Star","Moon","Asteroid"],a:1}
+]
+]
+};
+
 let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-/* ===== SOUND FIX (IMPORTANT) ===== */
-let audioUnlocked=false;
-
-function unlockAudio(){
-if(audioUnlocked) return;
-audioUnlocked=true;
-let ctx = new (window.AudioContext || window.webkitAudioContext)();
-ctx.resume();
+/* ===== RESET FIX ===== */
+function resetGame(){
+i=0;
+clearInterval(timer);
+document.getElementById("time").innerText="10";
 }
 
+/* ===== SOUND ===== */
 function sound(type){
 try{
-unlockAudio();
-
-let audio = new Audio();
-
-audio.src = type==="correct"
-? "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
-: "https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
-
-audio.volume=1;
-audio.play().catch(()=>{});
+let audio=new Audio();
+if(type==="correct"){
+audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+}else{
+audio.src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg";
+}
+audio.play();
 }catch(e){}
 }
 
-/* ===== SCREEN FIX ===== */
-function show(id){
-document.getElementById("startScreen").classList.add("hidden");
-document.getElementById("catScreen").classList.add("hidden");
-document.getElementById("levelScreen").classList.add("hidden");
-document.getElementById("gameScreen").classList.add("hidden");
-
-document.getElementById(id).classList.remove("hidden");
+/* ===== NAV ===== */
+function startApp(){
+show("catScreen");
 }
 
-/* ===== FLOW ===== */
-function startApp(){
-unlockAudio();
-show("catScreen");
+function show(s){
+startScreen.classList.add("hidden");
+catScreen.classList.add("hidden");
+levelScreen.classList.add("hidden");
+gameScreen.classList.add("hidden");
+document.getElementById(s).classList.remove("hidden");
 }
 
 function selectCat(c){
@@ -175,22 +210,6 @@ show("gameScreen");
 load();
 }
 
-/* ===== QUESTIONS ===== */
-const data={
-math:[
-[
-{q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5×2=?",o:["10","12","8","6"],a:0}
-],
-[
-{q:"20+15=?",o:["35","30","25","40"],a:0}
-],
-[
-{q:"144÷12=?",o:["10","11","12","13"],a:2}
-]
-]
-};
-
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
@@ -199,12 +218,11 @@ let html="";
 q.o.forEach((op,idx)=>{
 html+=`<button class="btn p1" onclick="check(${idx},this)">${op}</button>`;
 });
-
 document.getElementById("opts").innerHTML=html;
+
 startTimer();
 }
 
-/* ===== TIMER ===== */
 function startTimer(){
 clearInterval(timer);
 time=10;
@@ -217,10 +235,9 @@ if(time<=0) nextQ();
 },1000);
 }
 
-/* ===== ANSWER ===== */
+/* ===== ANSWER CHECK ===== */
 function check(ans,btn){
 clearInterval(timer);
-
 let q=data[cat][level][i];
 
 if(ans===q.a){
@@ -235,15 +252,16 @@ sound("wrong");
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
-setTimeout(nextQ,600);
+setTimeout(nextQ,800);
 }
 
-/* ===== NAV ===== */
+/* ===== NAV FIXED ===== */
 function nextQ(){
 if(i < data[cat][level].length-1){
 i++;
 load();
 }else{
+resetGame();   // 🔥 FIX
 show("catScreen");
 }
 }
@@ -256,6 +274,7 @@ load();
 }
 
 function goHome(){
+resetGame();   // 🔥 FIX
 show("catScreen");
 }
 
