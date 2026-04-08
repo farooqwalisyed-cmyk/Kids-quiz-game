@@ -2,249 +2,295 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kids Quiz PRO</title>
 
 <style>
 body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#6a11cb,#2575fc);
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+ margin:0;
+ font-family:Arial;
+ height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#a18cd1,#84fab0);
+ background-size:400% 400%;
+ animation:bg 8s infinite;
+}
+
+@keyframes bg{
+ 0%{background-position:0%}
+ 50%{background-position:100%}
+ 100%{background-position:0%}
 }
 
 .card{
-width:90%;
-max-width:420px;
-background:white;
-border-radius:20px;
-padding:18px;
-text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,0.3);
-position:relative;
+ width:95%;
+ max-width:520px;
+ background:white;
+ border-radius:25px;
+ padding:20px;
+ text-align:center;
 }
 
-.btn{
-width:100%;
-padding:12px;
-margin:8px 0;
-border:none;
-border-radius:12px;
-font-size:16px;
-cursor:pointer;
+.top{
+ display:flex;
+ justify-content:space-between;
 }
 
-.p1{background:#ffdd59;}
-.p2{background:#1dd1a1;}
-.p3{background:#54a0ff;}
-.p4{background:#ff6b6b;}
+.timer{color:red;font-size:20px;font-weight:bold;}
 
-.hidden{display:none;}
-
-.title{
-font-size:22px;
-font-weight:bold;
-margin-bottom:10px;
+button{
+ width:100%;
+ padding:14px;
+ margin:6px 0;
+ border:none;
+ border-radius:15px;
+ font-size:18px;
+ color:white;
+ transition:0.2s;
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-font-size:14px;
-font-weight:bold;
-margin-bottom:10px;
+/* COLORS */
+.btn1{background:#ff6b6b;}
+.btn2{background:#4dabf7;}
+.btn3{background:#51cf66;}
+.btn4{background:#ffd43b;color:black;}
+
+.navBtn1{background:#845ef7;}
+.navBtn2{background:#20c997;}
+.navBtn3{background:#ff922b;}
+
+.correct{background:#2ecc71 !important;}
+.wrong{background:#e74c3c !important;}
+
+/* ✅ NEW CLICK ANIMATION */
+.clicked{
+ transform:scale(0.92);
 }
 
-.pop{animation:pop 0.3s;}
-.shake{animation:shake 0.3s;}
+/* SCREEN */
+.screen{display:none;}
+.active{display:block;}
+
+.nav{display:flex;gap:8px;}
+.nav button{flex:1;}
+
+.lock{opacity:0.5;}
+
+.emoji{
+ font-size:40px;
+ animation:pop 0.5s;
+}
 
 @keyframes pop{
-0%{transform:scale(0.5);}
-100%{transform:scale(1);}
-}
-
-@keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-5px);}
-50%{transform:translateX(5px);}
-75%{transform:translateX(-5px);}
-100%{transform:translateX(0);}
-}
-
-.confetti{
-position:absolute;
-width:6px;
-height:6px;
-animation:fall 1s linear forwards;
-}
-
-@keyframes fall{
-to{transform:translateY(300px);opacity:0;}
+ 0%{transform:scale(0)}
+ 100%{transform:scale(1)}
 }
 </style>
 </head>
 
 <body>
 
-<audio id="welcomeSound" src="welcome.mp3"></audio>
+<div class="card">
 
-<!-- HOME -->
-<div id="home" class="card">
-<div class="title">🎮 Tap to Play</div>
-
-<button class="btn p1" onclick="goCategory()">START</button>
+<div class="top">
+ ⭐ <span id="stars">0</span>
+ 🪙 <span id="coins">0</span>
+ ⏱️ <span id="time">10</span>
 </div>
 
-<!-- CATEGORY -->
-<div id="catScreen" class="card hidden">
-<div class="title">Select Category</div>
+<h2>🎮 Kids Quiz PRO</h2>
 
-<button class="btn p2" onclick="setCat('math'); goLevel()">Math</button>
-<button class="btn p3" onclick="setCat('english'); goLevel()">English</button>
-<button class="btn p4" onclick="setCat('gk'); goLevel()">GK</button>
+<div id="start" class="screen active" onclick="startApp()">
+ <h3>👉 Tap to Start</h3>
 </div>
 
-<!-- LEVELS -->
-<div id="levelScreen" class="card hidden">
-<div class="title">Select Level</div>
-
-<button class="btn p1" onclick="setLevel(0); startGame()">Easy</button>
-<button class="btn p2" onclick="setLevel(1); startGame()">Medium 🔒</button>
-<button class="btn p3" onclick="setLevel(2); startGame()">Hard 🔒</button>
+<div id="category" class="screen">
+<button class="btn2" onclick="selectCat('math')">Math</button>
+<button class="btn2" onclick="selectCat('english')">English</button>
+<button class="btn2" onclick="selectCat('gk')">GK</button>
 </div>
 
-<!-- GAME -->
-<div id="game" class="card hidden">
-
-<div class="topbar">
-<div>⭐ <span id="stars">0</span></div>
-<div>🪙 <span id="coins">0</span></div>
-<div>⏱️ <span id="time">10</span></div>
+<div id="level" class="screen">
+<button class="btn1" onclick="startGame('easy')">Easy</button>
+<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
+<button class="navBtn1" onclick="show('category')">⬅ Back</button>
 </div>
 
-<div id="q" style="font-weight:bold;font-size:18px;"></div>
-<div id="options"></div>
+<div id="game" class="screen">
+<h3 id="q"></h3>
+<div id="opts"></div>
+<div id="emoji"></div>
+
+<div class="nav">
+ <button class="navBtn1" onclick="prev()">⬅ Prev</button>
+ <button class="navBtn2" onclick="next()">Next ➡</button>
+</div>
+
+<button class="navBtn3" onclick="home()">🏠 Home</button>
+</div>
 
 </div>
 
 <script>
 
-let cat="math";
-let level=0;
-let i=0;
-let stars=0;
-let coins=0;
-let timer;
-let time=10;
+let cat,diff="easy",i=0;
+let stars=0,coins=0;
+let timer,interval;
 
-/* QUESTIONS */
-const data={
-math:[
-[{q:"2+2=?",o:["3","4","5","6"],a:1}],
-[{q:"10×2=?",o:["20","18","22","24"],a:0}],
-[{q:"50÷5=?",o:["5","10","15","20"],a:1}]
-],
-english:[
-[{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}],
-[{q:"Opposite Big?",o:["Small","Tall","Huge","Large"],a:0}],
-[{q:"Correct spelling?",o:["Beautiful","Beautifull","Bautiful","Beautifal"],a:0}]
-],
-gk:[
-[{q:"Dog legs?",o:["2","3","4","5"],a:2}],
-[{q:"Capital India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}],
-[{q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2}]
-]
+let unlock={math:"easy",english:"easy",gk:"easy"};
+
+function playSound(freq){
+ let ctx=new (window.AudioContext||window.webkitAudioContext)();
+ let o=new OscillatorNode(ctx);
+ let g=ctx.createGain();
+ o.connect(g); g.connect(ctx.destination);
+ o.frequency.value=freq;
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+ o.stop(ctx.currentTime+0.4);
+}
+
+function startApp(){
+ speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
+ show("category");
+}
+
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+
+function selectCat(c){
+ cat=c;
+ updateUI();
+ show("level");
+}
+
+function updateUI(){
+ let m=document.getElementById("medBtn");
+ let h=document.getElementById("hardBtn");
+
+ m.classList.add("lock");
+ h.classList.add("lock");
+
+ if(unlock[cat]=="medium") m.classList.remove("lock");
+ if(unlock[cat]=="hard"){
+  m.classList.remove("lock");
+  h.classList.remove("lock");
+ }
+}
+
+function startGame(d){
+ if(d=="medium" && unlock[cat]=="easy"){alert("Finish Easy first");return;}
+ if(d=="hard" && unlock[cat]!="hard"){alert("Finish Medium first");return;}
+
+ diff=d;
+ i=0;
+ show("game");
+ load();
+}
+
+function shuffle(q){
+ let arr=q.o.map((t,i)=>({t,correct:i===q.a}));
+ arr.sort(()=>Math.random()-0.5);
+ return {q:q.q,o:arr.map(x=>x.t),a:arr.findIndex(x=>x.correct)};
+}
+
+/* DATA (ONLY ONE FIXED QUESTION HERE) */
+const data = {
+
+gk:{
+ easy:[
+ {q:"How many days in a year?",o:["365","360","400","300"],a:0},
+ {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
+ {q:"Color of sky?",o:["Blue","Red","Green","Black"],a:0},
+ {q:"Sun rises in?",o:["East","West","North","South"],a:0},
+ {q:"How many months in a year?",o:["10","11","12","13"],a:2},
+ {q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+ {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+ {q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
+ {q:"How many legs dog has?",o:["2","3","4","5"],a:2},
+ {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
+ ]
+}
+
 };
 
-/* FLOW FIXED */
-function goCategory(){
-document.getElementById("home").classList.add("hidden");
-document.getElementById("catScreen").classList.remove("hidden");
-document.getElementById("welcomeSound").play().catch(()=>{});
-}
+/* GAME LOGIC */
+let current;
 
-function goLevel(){
-document.getElementById("catScreen").classList.add("hidden");
-document.getElementById("levelScreen").classList.remove("hidden");
-}
-
-function setCat(c){cat=c;}
-function setLevel(l){level=l;}
-
-/* START GAME (ONLY FROM HOME FLOW NOW FIXED) */
-function startGame(){
-document.getElementById("levelScreen").classList.add("hidden");
-document.getElementById("game").classList.remove("hidden");
-i=0;
-load();
-startTimer();
-}
-
-/* LOAD */
 function load(){
-clearInterval(timer);
-time=10;
+ let q=data[cat][diff][i];
+ current=shuffle(q);
 
-let q=data[cat][level][i];
-document.getElementById("q").innerText=q.q;
+ document.getElementById("q").innerText=current.q;
 
-let html="";
-q.o.forEach((opt,idx)=>{
-html+=`<button class='btn p1' onclick='check(${idx},this)'>${opt}</button>`;
-});
+ let colors=["btn1","btn2","btn3","btn4"];
+ let html="";
 
-document.getElementById("options").innerHTML=html;
+ current.o.forEach((op,idx)=>{
+  html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
+ });
+
+ document.getElementById("opts").innerHTML=html;
+ startTimer();
 }
 
-/* TIMER */
 function startTimer(){
-document.getElementById("time").innerText=time;
+ clearInterval(interval);
+ timer=10;
+ document.getElementById("time").innerText=timer;
 
-timer=setInterval(()=>{
-time--;
-document.getElementById("time").innerText=time;
-if(time<=0){
-next();
-}
-},1000);
+ interval=setInterval(()=>{
+  timer--;
+  document.getElementById("time").innerText=timer;
+  if(timer==0){clearInterval(interval);next();}
+ },1000);
 }
 
-/* CHECK */
 function check(ans,btn){
-clearInterval(timer);
 
-let q=data[cat][level][i];
-let all=document.querySelectorAll("#options button");
-all.forEach(b=>b.disabled=true);
+ // ✅ NEW ANIMATION ON CLICK
+ btn.classList.add("clicked");
+ setTimeout(()=>btn.classList.remove("clicked"),200);
 
-if(ans===q.a){
-btn.classList.add("pop");
-btn.style.background="green";
-stars++; coins+=10;
-}else{
-btn.classList.add("shake");
-btn.style.background="red";
-all[q.a].style.background="green";
+ clearInterval(interval);
+
+ let emoji=document.getElementById("emoji");
+
+ if(ans===current.a){
+  btn.classList.add("correct");
+  stars++; coins+=10;
+  playSound(900);
+  emoji.innerHTML='<div class="emoji">🎉</div>';
+ }else{
+  btn.classList.add("wrong");
+  playSound(200);
+  emoji.innerHTML='<div class="emoji">😢</div>';
+ }
+
+ document.getElementById("stars").innerText=stars;
+ document.getElementById("coins").innerText=coins;
+
+ setTimeout(()=>{
+  emoji.innerHTML="";
+  next();
+ },800);
 }
 
-document.getElementById("stars").innerText=stars;
-document.getElementById("coins").innerText=coins;
-
-setTimeout(next,800);
-}
-
-/* NEXT */
 function next(){
-i++;
-if(i>=data[cat][level].length){
-location.reload();
-return;
+ if(i < data[cat][diff].length-1){
+  i++; load();
+ }else{
+  alert(diff+" Completed!");
+  show("category");
+ }
 }
-load();
-}
+
+function prev(){ if(i>0){i--;load();} }
+function home(){ show("category"); }
 
 </script>
 
