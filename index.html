@@ -60,10 +60,7 @@ transition:0.2s;
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
-.shake{
-animation:shake 0.3s;
-}
-
+.shake{animation:shake 0.3s;}
 @keyframes shake{
 0%{transform:translateX(0)}
 25%{transform:translateX(-6px)}
@@ -72,29 +69,15 @@ animation:shake 0.3s;
 100%{transform:translateX(0)}
 }
 
-.pop{
-animation:pop 0.3s;
-}
-
+.pop{animation:pop 0.3s;}
 @keyframes pop{
 0%{transform:scale(0.6)}
 100%{transform:scale(1)}
-}
-
-.confetti{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-pointer-events:none;
 }
 </style>
 </head>
 
 <body>
-
-<audio id="welcomeSound" src="welcome.mp3"></audio>
 
 <div class="card">
 
@@ -107,19 +90,26 @@ pointer-events:none;
 <div class="title">🎮 Kids Quiz PRO</div>
 
 <!-- START -->
-<div id="start">
-<button class="btn p1" onclick="startGame()">👉 Tap to Play</button>
+<div id="startScreen">
+<button class="btn p1" onclick="startApp()">Tap to Play</button>
 </div>
 
 <!-- CATEGORY -->
-<div id="cat" class="hidden">
+<div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
 </div>
 
+<!-- LEVEL -->
+<div id="levelScreen" class="hidden">
+<button class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button class="btn p2" onclick="selectLevel(1)">Medium</button>
+<button class="btn p3" onclick="selectLevel(2)">Hard</button>
+</div>
+
 <!-- GAME -->
-<div id="game" class="hidden">
+<div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
 <div id="opts"></div>
 </div>
@@ -128,25 +118,41 @@ pointer-events:none;
 
 <script>
 
-let cat="math";
+let cat="";
+let level=0;
 let i=0;
 let stars=0;
 let coins=0;
 let timer;
 let time=10;
 
-/* SOUND */
-function beep(type){
-let ctx=new AudioContext();
-let o=ctx.createOscillator();
-o.connect(ctx.destination);
+/* FLOW FIX */
+function show(screen){
+document.getElementById("startScreen").classList.add("hidden");
+document.getElementById("catScreen").classList.add("hidden");
+document.getElementById("levelScreen").classList.add("hidden");
+document.getElementById("gameScreen").classList.add("hidden");
 
-if(type=="correct") o.frequency.value=800;
-else if(type=="wrong") o.frequency.value=200;
-else o.frequency.value=500;
+document.getElementById(screen).classList.remove("hidden");
+}
 
-o.start();
-setTimeout(()=>o.stop(),120);
+/* START */
+function startApp(){
+show("catScreen");
+}
+
+/* CATEGORY */
+function selectCat(c){
+cat=c;
+show("levelScreen");   // ✅ FIXED LEVEL PAGE
+}
+
+/* LEVEL */
+function selectLevel(l){
+level=l;
+i=0;
+show("gameScreen");
+load();
 }
 
 /* TIMER */
@@ -166,102 +172,49 @@ next();
 },1000);
 }
 
-/* START */
-function startGame(){
-document.getElementById("start").classList.add("hidden");
-document.getElementById("cat").classList.remove("hidden");
-
-document.getElementById("welcomeSound").play().catch(()=>{});
-}
-
-/* SELECT CATEGORY */
-function selectCat(c){
-cat=c;
-i=0;
-
-document.getElementById("cat").classList.add("hidden");
-document.getElementById("game").classList.remove("hidden");
-
-load();
-}
-
-/* FULL QUESTIONS (RESTORED) */
+/* QUESTIONS (SAFE STRUCTURE) */
 const data={
-
 math:[
-  [
-    {q:"2+2=?",o:["3","4","5","6"],a:1},
-    {q:"5+3=?",o:["6","7","8","9"],a:2},
-    {q:"10-2=?",o:["6","7","8","9"],a:2},
-    {q:"3×3=?",o:["6","7","9","12"],a:2},
-    {q:"12÷4=?",o:["2","3","4","6"],a:1},
-    {q:"7+2=?",o:["8","9","10","11"],a:1},
-    {q:"9-3=?",o:["5","6","7","8"],a:1},
-    {q:"6×1=?",o:["1","6","7","8"],a:1},
-    {q:"15÷3=?",o:["3","4","5","6"],a:2},
-    {q:"4+4=?",o:["6","7","8","9"],a:2},
-    {q:"8-2=?",o:["5","6","7","8"],a:1},
-    {q:"11+1=?",o:["10","11","12","13"],a:2},
-    {q:"14-4=?",o:["8","9","10","11"],a:2},
-    {q:"2×5=?",o:["10","11","12","9"],a:0},
-    {q:"18÷2=?",o:["8","9","10","11"],a:1},
-    {q:"20-10=?",o:["5","10","15","20"],a:1},
-    {q:"3+6=?",o:["8","9","10","11"],a:1},
-    {q:"7×1=?",o:["6","7","8","9"],a:1},
-    {q:"16÷4=?",o:["2","3","4","5"],a:2},
-    {q:"9+1=?",o:["9","10","11","12"],a:1}
-  ],
-  [
-    {q:"25×2=?",o:["40","50","60","70"],a:1},
-    {q:"100÷4=?",o:["20","25","30","35"],a:1},
-    {q:"15×3=?",o:["30","45","60","75"],a:1}
-  ],
-  [
-    {q:"144÷12=?",o:["10","11","12","13"],a:2},
-    {q:"25×4=?",o:["90","100","110","120"],a:1},
-    {q:"18×6=?",o:["96","108","118","128"],a:1}
-  ]
+ [
+  {q:"2+2=?",o:["3","4","5","6"],a:1},
+  {q:"5+3=?",o:["6","7","8","9"],a:2},
+  {q:"10-2=?",o:["6","7","8","9"],a:2}
+ ],
+ [
+  {q:"25×2=?",o:["40","50","60","70"],a:1}
+ ],
+ [
+  {q:"144÷12=?",o:["10","11","12","13"],a:2}
+ ]
 ],
-
 english:[
-  [
-    {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
-    {q:"Opposite Big?",o:["Small","Tall","Huge","Large"],a:0}
-  ],
-  [
-    {q:"He ___ playing",o:["is","are","am","be"],a:0},
-    {q:"Plural of Cat?",o:["Cats","Cat's","Cates","Caty"],a:0},
-    {q:"Correct spelling?",o:["Beautiful","Beautifull","Bautiful","Beutiful"],a:0}
-  ],
-  [
-    {q:"Past of Go?",o:["Went","Goes","Going","Gone"],a:0},
-    {q:"He ___ a boy",o:["is","are","am","be"],a:0},
-    {q:"Opposite Hot?",o:["Cold","Warm","Heat","Boil"],a:0}
-  ]
+ [
+  {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
+ ],
+ [
+  {q:"He ___ playing",o:["is","are","am","be"],a:0}
+ ],
+ [
+  {q:"Past of Go?",o:["Went","Goes","Going","Gone"],a:0}
+ ]
 ],
-
 gk:[
-  [
-    {q:"How many days in a year?",o:["365","360","400","300"],a:0},
-    {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
-  ],
-  [
-    {q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0},
-    {q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2},
-    {q:"Sun is a?",o:["Star","Planet","Moon","Comet"],a:0}
-  ],
-  [
-    {q:"We breathe?",o:["Oxygen","Carbon","Nitrogen","Helium"],a:0},
-    {q:"Earth shape?",o:["Round","Flat","Cube","Triangle"],a:0},
-    {q:"Ocean is?",o:["Water","Fire","Land","Sand"],a:0}
-  ]
+ [
+  {q:"How many days in a year?",o:["365","360","400","300"],a:0},
+  {q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0}
+ ],
+ [
+  {q:"Capital of India?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0}
+ ],
+ [
+  {q:"Sun is a?",o:["Star","Planet","Moon","Comet"],a:0}
+ ]
 ]
-
 };
 
 /* LOAD */
 function load(){
-let q=data[cat][i];
+let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
 let html="";
@@ -276,16 +229,15 @@ startTimer();
 /* CHECK */
 function check(ans,btn){
 clearInterval(timer);
-let q=data[cat][i];
+
+let q=data[cat][level][i];
 
 if(ans===q.a){
 btn.classList.add("correct","pop");
 stars++;
 coins+=10;
-beep("correct");
 }else{
 btn.classList.add("wrong","shake");
-beep("wrong");
 }
 
 document.getElementById("stars").innerText=stars;
@@ -296,13 +248,11 @@ setTimeout(next,700);
 
 /* NEXT */
 function next(){
-if(i<data[cat].length-1){
+if(i < data[cat][level].length-1){
 i++;
 load();
 }else{
-alert("Completed 🎉");
-document.getElementById("game").classList.add("hidden");
-document.getElementById("cat").classList.remove("hidden");
+show("catScreen"); // back to category safely
 }
 }
 
