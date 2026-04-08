@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kids Quiz PRO</title><style>
+<title>Kids Quiz PRO</title>
+
+<style>
 body{
  margin:0;
  font-family:Arial;
@@ -61,6 +64,10 @@ body{
  animation:shake 0.4s ease;
 }
 
+.shake{
+ animation:shake 0.4s ease;
+}
+
 @keyframes pop{
 0%{transform:scale(0.7)}
 100%{transform:scale(1)}
@@ -73,60 +80,84 @@ body{
 75%{transform:translateX(-5px)}
 100%{transform:translateX(0)}
 }
+</style>
+</head>
 
-.emoji{
- font-size:18px;
- text-align:center;
- margin-top:5px;
-}
-</style></head><body><div class="screen"><div class="top">
+<body>
+
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+
+<div class="screen">
+
+<div class="top">
 <div>⭐ <span id="stars">0</span></div>
 <div>🪙 <span id="coins">0</span></div>
 <div>⏱️ <span id="time">0</span></div>
-</div><div class="title">🎮 Kids Quiz PRO</div><div id="menu">
+</div>
+
+<div class="title">🎮 Kids Quiz PRO</div>
+
+<div id="menu">
 <button class="btn" onclick="startGame('math')">Math</button>
 <button class="btn" onclick="startGame('english')">English</button>
 <button class="btn" onclick="startGame('gk')">GK</button>
-</div><div id="game" style="display:none">
+</div>
+
+<div id="game" style="display:none">
 <div id="q"></div>
 <div id="opts"></div>
-<div class="emoji" id="emoji"></div>
 <button class="btn" onclick="next()">Next ➡</button>
 <button class="btn" onclick="home()">🏠 Home</button>
-</div></div><script>
+</div>
+
+</div>
+
+<script>
+
 let data = {
 math:{easy:[],medium:[],hard:[]},
 english:{easy:[],medium:[],hard:[]},
 gk:{easy:[],medium:[],hard:[]}
 };
 
-// FULL DATA
-
-// MATH EASY (20)
+// ================= MATH EASY (20) =================
 data.math.easy=[
 {q:"2+2=?",o:["3","4","5","6"],a:1},
 {q:"5+3=?",o:["7","8","9","6"],a:1},
 {q:"10-4=?",o:["5","6","7","8"],a:1},
 {q:"6+1=?",o:["6","7","8","9"],a:1},
 {q:"9-3=?",o:["5","6","7","8"],a:1},
-{q:"3x2=?",o:["5","6","7","8"],a:1},
-{q:"4x4=?",o:["12","14","16","18"],a:2},
-{q:"8/2=?",o:["2","3","4","5"],a:2},
+{q:"3×2=?",o:["5","6","7","8"],a:1},
+{q:"4×4=?",o:["12","14","16","18"],a:2},
+{q:"8÷2=?",o:["2","3","4","5"],a:2},
 {q:"7+2=?",o:["8","9","10","11"],a:1},
 {q:"10+10=?",o:["15","18","20","22"],a:2},
 {q:"12-2=?",o:["8","9","10","11"],a:2},
 {q:"11+1=?",o:["10","11","12","13"],a:2},
-{q:"5x5=?",o:["20","25","30","15"],a:1},
+{q:"5×5=?",o:["20","25","30","15"],a:1},
 {q:"14-4=?",o:["10","11","12","13"],a:0},
-{q:"6x3=?",o:["12","15","18","21"],a:2},
+{q:"6×3=?",o:["12","15","18","21"],a:2},
 {q:"9+1=?",o:["9","10","11","12"],a:1},
 {q:"20-5=?",o:["10","15","20","25"],a:1},
-{q:"2x6=?",o:["10","11","12","13"],a:2},
-{q:"18/2=?",o:["7","8","9","10"],a:2},
+{q:"2×6=?",o:["10","11","12","13"],a:2},
+{q:"18÷2=?",o:["7","8","9","10"],a:2},
 {q:"15+5=?",o:["18","19","20","21"],a:2}
 ];
 
-// ENGLISH EASY (20)
+data.math.medium=[
+{q:"25+25=?",o:["40","50","60","70"],a:1},
+{q:"100-30=?",o:["60","70","80","90"],a:1},
+{q:"12×2=?",o:["22","24","26","28"],a:1}
+];
+
+data.math.hard=[
+{q:"15×3=?",o:["30","40","45","50"],a:2},
+{q:"144÷12=?",o:["10","11","12","13"],a:2},
+{q:"50×2=?",o:["90","100","110","120"],a:1}
+];
+
+// ================= ENGLISH EASY (20) =================
 data.english.easy=[
 {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0},
 {q:"B is for?",o:["Ball","Dog","Egg","Fish"],a:0},
@@ -150,7 +181,19 @@ data.english.easy=[
 {q:"T is for?",o:["Tiger","Tap","Top","Tin"],a:0}
 ];
 
-// GK EASY (20)
+data.english.medium=[
+{q:"Choose correct word: _pple",o:["A","E","I","O"],a:0},
+{q:"Opposite of hot?",o:["Cold","Warm","Dry","Soft"],a:0},
+{q:"Plural of cat?",o:["Cats","Cat's","Cates","Catt"],a:0}
+];
+
+data.english.hard=[
+{q:"He ___ playing football",o:["is","are","am","be"],a:0},
+{q:"She ___ a doctor",o:["is","are","am","be"],a:0},
+{q:"They ___ happy",o:["is","are","am","be"],a:1}
+];
+
+// ================= GK EASY (20 FIXED) =================
 data.gk.easy=[
 {q:"How many days in a week?",o:["5","6","7","8"],a:2},
 {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
@@ -160,22 +203,34 @@ data.gk.easy=[
 {q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
 {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
 {q:"Planet we live on?",o:["Mars","Earth","Venus","Jupiter"],a:1},
-{q:"Dog legs?",o:["2","3","4","5"],a:2},
-{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
+{q:"How many legs does a dog have?",o:["2","3","4","5"],a:2},
+{q:"What can a bird do?",o:["Fly","Swim","Run","Walk"],a:0},
 {q:"Rainbow colors?",o:["7","5","6","8"],a:0},
 {q:"Largest animal?",o:["Elephant","Blue Whale","Tiger","Lion"],a:1},
 {q:"Human eyes?",o:["1","2","3","4"],a:1},
 {q:"Human hands?",o:["1","2","3","4"],a:1},
-{q:"Year days?",o:["365","360","400","300"],a:0},
+{q:"How many days in a year?",o:["365","360","400","300"],a:0},
 {q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
 {q:"Moon is a?",o:["Planet","Star","Satellite","Sun"],a:2},
 {q:"Plants need?",o:["Water","Stone","Plastic","Fire"],a:0},
 {q:"Fish lives in?",o:["Air","Water","Land","Fire"],a:1},
-{q:"India in?",o:["Asia","Europe","Africa","USA"],a:0}
+{q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0}
 ];
 
-let cat="",lvl="easy",i=0,stars=0,coins=0,timer;
-let current;
+data.gk.medium=[
+{q:"India capital?",o:["Delhi","Mumbai","Kolkata","Chennai"],a:0},
+{q:"1 hour = ?",o:["30 min","60 min","90 min","100 min"],a:1},
+{q:"Largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2}
+];
+
+data.gk.hard=[
+{q:"1 km = ?",o:["100 m","1000 m","10 m","500 m"],a:1},
+{q:"Light speed is?",o:["Fast","Slow","Zero","Medium"],a:0},
+{q:"Earth shape?",o:["Round","Flat","Cube","Triangle"],a:0}
+];
+
+// ================= GAME LOGIC =================
+let cat="",lvl="easy",i=0,stars=0,coins=0,timer,current;
 
 function startGame(c){
 cat=c;i=0;
@@ -187,26 +242,41 @@ load();
 function load(){
 clearInterval(timer);
 current=data[cat][lvl][i];
+
 document.getElementById("q").innerText=current.q;
+
 let opt="";
 current.o.forEach((o,idx)=>{
 opt+=`<button class='btn' onclick='check(${idx},this)'>${o}</button>`;
 });
+
 document.getElementById("opts").innerHTML=opt;
 startTimer();
 }
 
 function check(ans,btn){
+
 clearInterval(timer);
+
+let correctSound=document.getElementById("correctSound");
+let wrongSound=document.getElementById("wrongSound");
+
 let all=document.querySelectorAll("#opts button");
 all.forEach(b=>b.disabled=true);
 
 if(ans===current.a){
-btn.classList.add("correct");
+btn.classList.add("correct","shake");
+
+correctSound.currentTime=0;
+correctSound.play();
+
 stars++;coins+=10;
 }else{
 btn.classList.add("wrong");
 all[current.a].classList.add("correct");
+
+wrongSound.currentTime=0;
+wrongSound.play();
 }
 
 document.getElementById("stars").innerText=stars;
@@ -232,11 +302,15 @@ document.getElementById("game").style.display="none";
 function startTimer(){
 let t=10;
 document.getElementById("time").innerText=t;
+
 timer=setInterval(()=>{
 t--;
 document.getElementById("time").innerText=t;
 if(t<=0){clearInterval(timer);next();}
 },1000);
 }
-</script></body>
+
+</script>
+
+</body>
 </html>
