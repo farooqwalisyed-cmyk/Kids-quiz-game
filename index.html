@@ -12,7 +12,6 @@ body{
  height:100vh;
 }
 
-/* FULL SCREEN */
 .card{
  width:100%;
  height:100vh;
@@ -27,7 +26,6 @@ body{
  display:flex;
  justify-content:space-between;
  font-size:22px;
- margin-bottom:10px;
 }
 
 /* TEXT */
@@ -56,6 +54,7 @@ button{
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
+
 .opt1{background:#ff6b6b;}
 .opt2{background:#4dabf7;}
 .opt3{background:#51cf66;}
@@ -74,7 +73,10 @@ button{
 }
 
 /* NAV */
-.nav{display:flex;gap:10px;}
+.nav{
+ display:flex;
+ gap:10px;
+}
 .nav button{flex:1;}
 
 </style>
@@ -148,6 +150,8 @@ function unlockAudio(){
 }
 
 function sound(freq){
+ if(!audioCtx) return;
+
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
  o.connect(g); g.connect(audioCtx.destination);
@@ -157,11 +161,50 @@ function sound(freq){
  setTimeout(()=>o.stop(),200);
 }
 
-/* DATA */
+/* DATA FULL */
 const data={
- math:{easy:[{q:"2+2=?",o:["3","4","5","6"],a:1}]},
- english:{easy:[{q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}]},
- gk:{easy:[{q:"Days?",o:["5","6","7","8"],a:2}]}
+ math:{
+  easy:[
+   {q:"2+2=?",o:["3","4","5","6"],a:1},
+   {q:"5+3=?",o:["7","8","9","6"],a:1}
+  ],
+  medium:[
+   {q:"12+8=?",o:["18","20","22","16"],a:1},
+   {q:"15-5=?",o:["5","10","8","12"],a:1}
+  ],
+  hard:[
+   {q:"12x12=?",o:["144","124","154","134"],a:0},
+   {q:"20/4=?",o:["4","5","6","3"],a:1}
+  ]
+ },
+ english:{
+  easy:[
+   {q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0},
+   {q:"B for?",o:["Ball","Apple","Cat","Dog"],a:0}
+  ],
+  medium:[
+   {q:"Plural of book?",o:["Books","Booked","Bookies","Book"],a:0},
+   {q:"Opposite big?",o:["Small","Tall","Wide","Long"],a:0}
+  ],
+  hard:[
+   {q:"Synonym of happy?",o:["Joyful","Sad","Angry","Tired"],a:0},
+   {q:"Opposite fast?",o:["Slow","Quick","Rapid","Speed"],a:0}
+  ]
+ },
+ gk:{
+  easy:[
+   {q:"Days in week?",o:["5","6","7","8"],a:2},
+   {q:"Sun rises in?",o:["East","West","North","South"],a:0}
+  ],
+  medium:[
+   {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+   {q:"National animal?",o:["Lion","Tiger","Elephant","Dog"],a:1}
+  ],
+  hard:[
+   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0},
+   {q:"Planet closest to Sun?",o:["Mercury","Earth","Mars","Venus"],a:0}
+  ]
+ }
 };
 
 /* SCREEN */
@@ -173,7 +216,7 @@ function show(id){
 /* FLOW */
 function startGame(){
  unlockAudio();
- sound(600);
+ sound(600); // welcome
  show("category");
 }
 
@@ -185,6 +228,9 @@ function selectCat(c){
 function begin(d){
  diff=d;
  i=0;
+ stars=0;
+ coins=0;
+ updateHUD();
  show("game");
  load();
 }
@@ -206,6 +252,8 @@ function load(){
 function check(ans,btn){
  let q=data[cat][diff][i];
 
+ document.querySelectorAll("#opts button").forEach(b=>b.disabled=true);
+
  if(ans===q.a){
   btn.classList.add("correct");
   stars++;
@@ -216,10 +264,15 @@ function check(ans,btn){
   sound(200);
  }
 
- document.getElementById("stars").innerText=stars;
- document.getElementById("coins").innerText=coins;
+ updateHUD();
 
  setTimeout(()=>next(),800);
+}
+
+/* HUD */
+function updateHUD(){
+ document.getElementById("stars").innerText=stars;
+ document.getElementById("coins").innerText=coins;
 }
 
 /* NAV */
@@ -227,15 +280,27 @@ function next(){
  if(i < data[cat][diff].length-1){
   i++; load();
  }else{
-  alert("🎉 Finished!");
+  alert("🎉 Level Completed!");
   home();
  }
 }
-function prev(){ if(i>0){i--;load();}}
+
+function prev(){
+ if(i>0){ i--; load(); }
+}
 
 /* RESET */
-function restart(){i=0;stars=0;coins=0;load();}
-function home(){show("home");}
+function restart(){
+ i=0;
+ stars=0;
+ coins=0;
+ updateHUD();
+ load();
+}
+
+function home(){
+ show("home");
+}
 
 </script>
 
