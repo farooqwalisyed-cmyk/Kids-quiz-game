@@ -8,35 +8,45 @@
 body{
  margin:0;
  font-family:Arial;
+ background:linear-gradient(135deg,#6a11cb,#2575fc);
  height:100vh;
  display:flex;
  justify-content:center;
  align-items:center;
- background: linear-gradient(135deg,#9b8cff,#ffb3b3);
 }
 
 .card{
  width:95%;
  max-width:500px;
- background:white;
- border-radius:20px;
+ background:#ffffff;
+ border-radius:25px;
  padding:20px;
  text-align:center;
 }
 
+.top{
+ display:flex;
+ justify-content:space-between;
+ font-size:18px;
+ margin-bottom:10px;
+}
+
+.timer{color:red;font-weight:bold;}
+
 button{
  width:100%;
  padding:14px;
- margin:8px 0;
+ margin:6px 0;
  border:none;
  border-radius:15px;
  font-size:18px;
  color:white;
 }
 
-.btn-blue{background:#4dabf7;}
-.btn-pink{background:#ff7eb3;}
-.btn-gray{background:#ccc;color:#333;}
+.btn1{background:#ff6b6b;}
+.btn2{background:#4dabf7;}
+.btn3{background:#51cf66;}
+.btn4{background:#ffd43b;color:black;}
 
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
@@ -44,22 +54,37 @@ button{
 .screen{display:none;}
 .active{display:block;}
 
-.nav{
- display:flex;
- gap:10px;
-}
+.nav{display:flex;gap:8px;}
 .nav button{flex:1;}
-
-.lock{opacity:0.5;}
 
 .tap{animation:blink 1s infinite;}
 @keyframes blink{50%{opacity:0.3;}}
+
+.lock{opacity:0.5;}
+
+.progress{
+ height:8px;
+ background:#eee;
+ border-radius:10px;
+ margin:10px 0;
+}
+.bar{
+ height:100%;
+ width:0%;
+ background:#4dabf7;
+}
 </style>
 </head>
 
 <body>
 
 <div class="card">
+
+<div class="top">
+ ⭐ <span id="stars">0</span>
+ 🪙 <span id="coins">0</span>
+ ⏱️ <span id="time" class="timer">10</span>
+</div>
 
 <h2>🎮 Kids Quiz PRO</h2>
 
@@ -68,28 +93,30 @@ button{
 </div>
 
 <div id="category" class="screen">
-<button class="btn-blue" onclick="selectCat('math')">Math</button>
-<button class="btn-blue" onclick="selectCat('english')">English</button>
-<button class="btn-blue" onclick="selectCat('gk')">GK</button>
+<button class="btn2" onclick="selectCat('math')">Math</button>
+<button class="btn2" onclick="selectCat('english')">English</button>
+<button class="btn2" onclick="selectCat('gk')">GK</button>
 </div>
 
 <div id="level" class="screen">
-<button class="btn-pink" onclick="startGame('easy')">Easy</button>
-<button id="medBtn" class="btn-pink lock" onclick="startGame('medium')">🔒 Medium</button>
-<button id="hardBtn" class="btn-pink lock" onclick="startGame('hard')">🔒 Hard</button>
+<button class="btn1" onclick="startGame('easy')">Easy</button>
+<button id="medBtn" class="btn1 lock" onclick="startGame('medium')">🔒 Medium</button>
+<button id="hardBtn" class="btn1 lock" onclick="startGame('hard')">🔒 Hard</button>
 </div>
 
 <div id="game" class="screen">
+
+<div class="progress"><div id="bar" class="bar"></div></div>
 
 <h3 id="q"></h3>
 <div id="opts"></div>
 
 <div class="nav">
- <button class="btn-gray" onclick="prev()">⬅ Prev</button>
- <button class="btn-gray" onclick="next()">Next ➡</button>
+ <button onclick="prev()">⬅ Prev</button>
+ <button onclick="next()">Next ➡</button>
 </div>
 
-<button class="btn-gray" onclick="home()">🏠 Home</button>
+<button onclick="home()">🏠 Home</button>
 
 </div>
 
@@ -98,11 +125,14 @@ button{
 <script>
 
 let cat,diff,i=0;
+let stars=0,coins=0;
+let timer=10,interval;
+
 let unlocked={math:"easy",english:"easy",gk:"easy"};
 
 let audioCtx;
 
-/* SOUND */
+/* 🔊 SOUND */
 function playSound(type){
  if(!audioCtx){
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
@@ -118,12 +148,9 @@ function playSound(type){
  o.stop(audioCtx.currentTime+0.4);
 }
 
-function speak(text){
- speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-}
-
+/* START */
 function startApp(){
- speak("Welcome to Kids Quiz Pro");
+ speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
  show("category");
 }
 
@@ -138,7 +165,7 @@ function selectCat(c){
  show("level");
 }
 
-/* LOCK FIX */
+/* LOCK */
 function updateUI(){
  let med=document.getElementById("medBtn");
  let hard=document.getElementById("hardBtn");
@@ -172,38 +199,29 @@ function startGame(d){
  load();
 }
 
-/* SHUFFLE + 4 OPTIONS */
+/* SHUFFLE */
 function shuffle(q){
- let arr=q.o.map((text,index)=>({text,correct:index===q.a}));
+ let arr=q.o.map((t,i)=>({t,correct:i===q.a}));
  arr.sort(()=>Math.random()-0.5);
- let newA=arr.findIndex(x=>x.correct);
- return {q:q.q,o:arr.map(x=>x.text),a:newA};
+ return {
+  q:q.q,
+  o:arr.map(x=>x.t),
+  a:arr.findIndex(x=>x.correct)
+ };
 }
 
-/* DATA (4 OPTIONS FIXED) */
+/* DATA (CLEAN + 4 OPTIONS) */
 const data={
-gk:{
- easy:[
-  {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1},
-  {q:"How many days are there in a week?",o:["5","6","7","8"],a:2}
- ],
- medium:[
-  {q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
- ],
- hard:[
-  {q:"Who invented bulb?",o:["Newton","Edison","Tesla","Einstein"],a:1}
- ]
-},
-
 math:{
  easy:[
-  {q:"2+2=?",o:["3","4","5","6"],a:1}
+  {q:"2 + 2 = ?",o:["3","4","5","6"],a:1},
+  {q:"5 + 3 = ?",o:["7","8","9","6"],a:1}
  ],
  medium:[
-  {q:"12+8=?",o:["18","20","22","24"],a:1}
+  {q:"12 + 8 = ?",o:["18","20","22","24"],a:1}
  ],
  hard:[
-  {q:"12x12=?",o:["144","124","154","134"],a:0}
+  {q:"12 × 12 = ?",o:["144","124","154","134"],a:0}
  ]
 },
 
@@ -217,6 +235,19 @@ english:{
  hard:[
   {q:"Opposite of happy?",o:["Sad","Joy","Fun","Smile"],a:0}
  ]
+},
+
+gk:{
+ easy:[
+  {q:"How many days are there in a week?",o:["5","6","7","8"],a:2},
+  {q:"Which animal says meow?",o:["Dog","Cat","Cow","Lion"],a:1}
+ ],
+ medium:[
+  {q:"What is the capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
+ ],
+ hard:[
+  {q:"Who invented the light bulb?",o:["Newton","Edison","Tesla","Einstein"],a:1}
+ ]
 }
 };
 
@@ -229,25 +260,54 @@ function load(){
 
  document.getElementById("q").innerText=current.q;
 
+ let colors=["btn1","btn2","btn3","btn4"];
  let html="";
  current.o.forEach((op,idx)=>{
-  html+=`<button class="btn-blue" onclick="check(${idx},this)">${op}</button>`;
+  html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML=html;
+
+ startTimer();
+ updateProgress();
+}
+
+/* TIMER */
+function startTimer(){
+ clearInterval(interval);
+ timer=10;
+ document.getElementById("time").innerText=timer;
+
+ interval=setInterval(()=>{
+  timer--;
+  document.getElementById("time").innerText=timer;
+  if(timer===0){clearInterval(interval);next();}
+ },1000);
+}
+
+/* PROGRESS */
+function updateProgress(){
+ let total=data[cat][diff].length;
+ document.getElementById("bar").style.width=((i+1)/total*100)+"%";
 }
 
 /* CHECK */
 function check(ans,btn){
+ clearInterval(interval);
+
  if(ans===current.a){
   btn.classList.add("correct");
+  stars++; coins+=10;
   playSound("correct");
  }else{
   btn.classList.add("wrong");
   playSound("wrong");
  }
 
- setTimeout(()=>next(),600);
+ document.getElementById("stars").innerText=stars;
+ document.getElementById("coins").innerText=coins;
+
+ setTimeout(()=>next(),700);
 }
 
 /* NAV */
