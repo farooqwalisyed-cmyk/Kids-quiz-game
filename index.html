@@ -1,13 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>TEST</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kids Quiz PRO</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#6a11cb,#2575fc);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+/* CARD */
+.screen{
+width:95%;
+max-width:420px;
+background:white;
+border-radius:20px;
+padding:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* TOP BAR */
+.top{
+display:flex;
+justify-content:space-between;
+font-size:14px;
+font-weight:bold;
+color:#333;
+margin-bottom:10px;
+}
+
+/* TITLE */
+.title{
+text-align:center;
+font-size:20px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+/* BUTTONS */
+.btn{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:none;
+border-radius:10px;
+font-size:16px;
+background:#f2f2f2;
+cursor:pointer;
+transition:0.2s;
+}
+
+.btn:hover{background:#ddd;}
+
+/* CORRECT / WRONG */
+.correct{
+background:#2ecc71 !important;
+color:white;
+animation:pop 0.3s ease;
+}
+
+.wrong{
+background:#e74c3c !important;
+color:white;
+animation:shake 0.4s ease;
+}
+
+/* ANIMATIONS */
+@keyframes pop{
+0%{transform:scale(0.7)}
+100%{transform:scale(1)}
+}
+
+@keyframes shake{
+0%{transform:translateX(0)}
+25%{transform:translateX(-5px)}
+50%{transform:translateX(5px)}
+75%{transform:translateX(-5px)}
+100%{transform:translateX(0)}
+}
+</style>
 </head>
-<body style="background:lightblue; text-align:center; padding-top:100px;">
 
-<h1>TEST GAME</h1>
+<body>
 
-<button onclick="alert('CLICK WORKS')">Test Button</button>
+<!-- AUDIO -->
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+<audio id="welcomeSound" src="welcome.mp3"></audio>
+
+<div class="screen">
+
+<!-- TOP -->
+<div class="top">
+<div>⭐ <span id="stars">0</span></div>
+<div>🪙 <span id="coins">0</span></div>
+<div>⏱️ <span id="time">0</span></div>
+</div>
+
+<div class="title">🎮 Kids Quiz PRO</div>
+
+<!-- CATEGORY FIRST (FIXED ORDER) -->
+<div id="menu">
+
+<h3 style="text-align:center;">Select Category</h3>
+
+<button class="btn" onclick="setCat('math')">Math</button>
+<button class="btn" onclick="setCat('english')">English</button>
+<button class="btn" onclick="setCat('gk')">GK</button>
+
+<h3 style="text-align:center;">Select Level</h3>
+
+<button class="btn" onclick="setLevel('easy')">Easy</button>
+<button class="btn" onclick="setLevel('medium')">Medium</button>
+<button class="btn" onclick="setLevel('hard')">Hard</button>
+
+<br>
+<button class="btn" onclick="startGame()">▶ Start Game</button>
+
+</div>
+
+<!-- GAME -->
+<div id="game" style="display:none">
+<div id="q"></div>
+<div id="opts"></div>
+</div>
+
+</div>
+
+<script>
+
+let cat="math";
+let lvl="easy";
+let i=0;
+let stars=0;
+let coins=0;
+let timer;
+let current;
+
+/* DATA */
+let data={
+math:{easy:[],medium:[],hard:[]},
+english:{easy:[],medium:[],hard:[]},
+gk:{easy:[],medium:[],hard:[]}
+};
+
+/* EASY */
+data.math.easy=[
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+3=?",o:["7","8","9","10"],a:1}
+];
+
+data.english.easy=[
+{q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
+];
+
+data.gk.easy=[
+{q:"Dog legs?",o:["2","3","4","5"],a:2}
+];
+
+/* MEDIUM */
+data.math.medium=[
+{q:"12×3=?",o:["36","32","30","40"],a:0}
+];
+
+data.english.medium=[
+{q:"Opposite of Big?",o:["Small","Large","Huge","Tall"],a:0}
+];
+
+data.gk.medium=[
+{q:"Largest planet?",o:["Earth","Mars","Jupiter","Venus"],a:2}
+];
+
+/* HARD */
+data.math.hard=[
+{q:"25×4=?",o:["100","90","110","120"],a:0}
+];
+
+data.english.hard=[
+{q:"Correct spelling?",o:["Beautiful","Beautifull","Beutiful","Beautifal"],a:0}
+];
+
+data.gk.hard=[
+{q:"Bones in body?",o:["206","150","300","250"],a:0}
+];
+
+/* SET CATEGORY */
+function setCat(c){
+cat=c;
+}
+
+/* SET LEVEL */
+function setLevel(l){
+lvl=l;
+}
+
+/* START */
+function startGame(){
+
+i=0;
+
+document.getElementById("menu").style.display="none";
+document.getElementById("game").style.display="block";
+
+/* FIX AUTOPLAY ISSUE */
+let w=document.getElementById("welcomeSound");
+w.play().catch(()=>{});
+
+load();
+}
+
+/* LOAD */
+function load(){
+current=data[cat][lvl][i];
+
+document.getElementById("q").innerText=current.q;
+
+let opt="";
+current.o.forEach((o,idx)=>{
+opt+=`<button class='btn' onclick='check(${idx},this)'>${o}</button>`;
+});
+
+document.getElementById("opts").innerHTML=opt;
+
+startTimer();
+}
+
+/* CHECK */
+function check(ans,btn){
+
+clearInterval(timer);
+
+let all=document.querySelectorAll("#opts button");
+all.forEach(b=>b.disabled=true);
+
+let correct=document.getElementById("correctSound");
+let wrong=document.getElementById("wrongSound");
+
+if(ans===current.a){
+btn.classList.add("correct");
+correct.play().catch(()=>{});
+stars++;coins+=10;
+}else{
+btn.classList.add("wrong");
+all[current.a].classList.add("correct");
+wrong.play().catch(()=>{});
+}
+
+setTimeout(()=>next(),900);
+}
+
+/* NEXT */
+function next(){
+i++;
+if(i>=data[cat][lvl].length){
+menu();
+return;
+}
+load();
+}
+
+/* BACK TO MENU */
+function menu(){
+document.getElementById("menu").style.display="block";
+document.getElementById("game").style.display="none";
+}
+
+/* TIMER */
+function startTimer(){
+let t=10;
+document.getElementById("time").innerText=t;
+
+timer=setInterval(()=>{
+t--;
+document.getElementById("time").innerText=t;
+if(t<=0){
+clearInterval(timer);
+next();
+}
+},1000);
+}
+
+</script>
 
 </body>
 </html>
