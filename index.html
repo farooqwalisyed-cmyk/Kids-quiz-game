@@ -10,15 +10,23 @@ body{
  font-family:Arial;
  background: linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcB77,#4d96ff);
  height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
 }
 
+/* CENTERED GAME BOX */
 .card{
  width:100%;
- height:100vh;
- background: rgba(0,0,0,0.3);
+ max-width:500px;
+ height:95vh;
+ background: rgba(0,0,0,0.4);
  color:white;
  padding:20px;
  box-sizing:border-box;
+ border-radius:20px;
+ display:flex;
+ flex-direction:column;
 }
 
 /* HEADER */
@@ -31,12 +39,12 @@ body{
 /* TEXT */
 h2{
  text-align:center;
- font-size:36px;
+ font-size:34px;
  color:#fff700;
 }
 h3{
  text-align:center;
- font-size:30px;
+ font-size:28px;
 }
 
 /* BUTTONS */
@@ -45,7 +53,7 @@ button{
  margin:10px 0;
  border:none;
  border-radius:16px;
- font-size:22px;
+ font-size:20px;
  width:100%;
  font-weight:bold;
 }
@@ -67,9 +75,17 @@ button{
 .active{display:block;}
 
 #q{
- font-size:32px;
- margin:25px 0;
+ font-size:26px;
+ margin:20px 0;
  text-align:center;
+}
+
+/* RESULT TEXT */
+#result{
+ text-align:center;
+ font-size:22px;
+ font-weight:bold;
+ margin-top:10px;
 }
 
 /* NAV */
@@ -120,6 +136,8 @@ button{
 <h3 id="q"></h3>
 <div id="opts"></div>
 
+<div id="result"></div>
+
 <div class="nav">
  <button onclick="prev()">⬅ Prev</button>
  <button onclick="next()">Next ➡</button>
@@ -136,22 +154,19 @@ button{
 
 /* STATE */
 let cat, diff, i=0;
-let stars=0;
-let coins=0;
+let stars=0, coins=0;
+let correctCount=0;
 
 /* AUDIO */
 let audioCtx;
-
 function unlockAudio(){
  if(!audioCtx){
   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
  }
  audioCtx.resume();
 }
-
 function sound(freq){
  if(!audioCtx) return;
-
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
  o.connect(g); g.connect(audioCtx.destination);
@@ -161,7 +176,7 @@ function sound(freq){
  setTimeout(()=>o.stop(),200);
 }
 
-/* DATA FULL */
+/* DATA */
 const data={
  math:{
   easy:[
@@ -216,7 +231,7 @@ function show(id){
 /* FLOW */
 function startGame(){
  unlockAudio();
- sound(600); // welcome
+ sound(600);
  show("category");
 }
 
@@ -230,6 +245,7 @@ function begin(d){
  i=0;
  stars=0;
  coins=0;
+ correctCount=0;
  updateHUD();
  show("game");
  load();
@@ -239,6 +255,7 @@ function begin(d){
 function load(){
  let q=data[cat][diff][i];
  document.getElementById("q").innerText=q.q;
+ document.getElementById("result").innerText="";
 
  let colors=["opt1","opt2","opt3","opt4"];
  let html="";
@@ -258,15 +275,37 @@ function check(ans,btn){
   btn.classList.add("correct");
   stars++;
   coins+=10;
+  correctCount++;
+  document.getElementById("result").innerText="✅ Correct!";
   sound(900);
  }else{
   btn.classList.add("wrong");
+  document.getElementById("result").innerText="❌ Wrong!";
   sound(200);
  }
 
  updateHUD();
 
- setTimeout(()=>next(),800);
+ setTimeout(()=>next(),900);
+}
+
+/* NAV */
+function next(){
+ if(i < data[cat][diff].length-1){
+  i++;
+  load();
+ }else{
+   if(correctCount >= data[cat][diff].length/2){
+     alert("🎉 Level Completed!");
+   }else{
+     alert("❌ Try Again!");
+   }
+   home();
+ }
+}
+
+function prev(){
+ if(i>0){ i--; load(); }
 }
 
 /* HUD */
@@ -275,25 +314,12 @@ function updateHUD(){
  document.getElementById("coins").innerText=coins;
 }
 
-/* NAV */
-function next(){
- if(i < data[cat][diff].length-1){
-  i++; load();
- }else{
-  alert("🎉 Level Completed!");
-  home();
- }
-}
-
-function prev(){
- if(i>0){ i--; load(); }
-}
-
 /* RESET */
 function restart(){
  i=0;
  stars=0;
  coins=0;
+ correctCount=0;
  updateHUD();
  load();
 }
