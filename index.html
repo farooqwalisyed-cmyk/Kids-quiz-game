@@ -9,165 +9,107 @@
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#4facfe,#00f2fe);
+background:linear-gradient(135deg,#6a11cb,#2575fc);
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
 }
 
-.screen{
-width:95%;
+.card{
+width:90%;
 max-width:420px;
 background:white;
 border-radius:20px;
-padding:15px;
-box-shadow:0 10px 20px rgba(0,0,0,0.3);
+padding:20px;
 text-align:center;
-}
-
-.top{
-display:flex;
-justify-content:space-between;
-font-weight:bold;
-}
-
-.title{
-font-size:20px;
-margin:10px 0;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
 .btn{
-padding:10px;
-margin:6px 0;
 width:100%;
+padding:12px;
+margin:8px 0;
 border:none;
-border-radius:10px;
+border-radius:12px;
 font-size:16px;
 cursor:pointer;
-transition:0.2s;
 }
 
-.color{background:#ffdd59;}
-.color2{background:#1dd1a1;}
-.color3{background:#ff6b6b;}
-.color4{background:#54a0ff;}
-
-.btn:hover{transform:scale(1.03);}
+.p1{background:#ffdd59;}
+.p2{background:#1dd1a1;}
+.p3{background:#54a0ff;}
+.p4{background:#ff6b6b;}
 
 .hidden{display:none;}
 
-.blink{
-animation:blink 0.6s infinite;
+.title{
+font-size:22px;
+font-weight:bold;
+margin-bottom:15px;
+animation:blink 1s infinite;
 }
 
 @keyframes blink{
 50%{opacity:0.4;}
-}
-
-.correct{
-background:#2ecc71 !important;
-animation:pop 0.3s;
-}
-
-.wrong{
-background:#e74c3c !important;
-animation:shake 0.3s;
-}
-
-@keyframes pop{
-from{transform:scale(0.6);}
-to{transform:scale(1);}
-}
-
-@keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-5px);}
-50%{transform:translateX(5px);}
-75%{transform:translateX(-5px);}
-100%{transform:translateX(0);}
-}
-
-.nav{
-display:flex;
-justify-content:space-between;
-margin-top:10px;
-}
-
-.smallbtn{
-width:32%;
-background:#ddd;
 }
 </style>
 </head>
 
 <body>
 
-<div class="screen">
-
-<div class="top">
-<div>⭐ <span id="stars">0</span></div>
-<div>🪙 <span id="coins">0</span></div>
-<div>⏱️ <span id="time">0</span></div>
+<!-- SCREEN 1 -->
+<div id="screen1" class="card">
+<div class="title">🎮 Tap to Play</div>
+<button class="btn p1" onclick="goCategory()">START GAME</button>
 </div>
 
-<div class="title blink" id="homeTitle">🎮 Tap to Play</div>
-
-<div id="home">
-
-<button class="btn color" onclick="start()">START GAME</button>
-
-<h3>Select Category</h3>
-<button class="btn color2" onclick="setCat('math')">Math</button>
-<button class="btn color3" onclick="setCat('english')">English</button>
-<button class="btn color4" onclick="setCat('gk')">GK</button>
-
-<h3>Select Level</h3>
-<button class="btn color" onclick="setLevel(0)">Easy</button>
-<button class="btn color2" onclick="setLevel(1)">Medium</button>
-<button class="btn color3" onclick="setLevel(2)">Hard</button>
-
+<!-- SCREEN 2 -->
+<div id="screen2" class="card hidden">
+<div class="title">Select Category</div>
+<button class="btn p2" onclick="setCat('math')">Math</button>
+<button class="btn p3" onclick="setCat('english')">English</button>
+<button class="btn p4" onclick="setCat('gk')">GK</button>
+<button class="btn p1" onclick="goLevel()">NEXT ➡</button>
 </div>
 
-<div id="game" class="hidden">
+<!-- SCREEN 3 -->
+<div id="screen3" class="card hidden">
+<div class="title">Select Level</div>
+<button class="btn p1" onclick="setLevel(0)">Easy</button>
+<button class="btn p2" onclick="setLevel(1)">Medium</button>
+<button class="btn p3" onclick="setLevel(2)">Hard</button>
+<button class="btn p4" onclick="startGame()">START QUIZ</button>
+</div>
 
-<h3 id="q"></h3>
+<!-- SCREEN 4 GAME -->
+<div id="game" class="card hidden">
+<div id="q" style="font-size:18px;font-weight:bold;"></div>
 <div id="options"></div>
-
-<div class="nav">
-<button class="btn smallbtn" onclick="prev()">⬅ Prev</button>
-<button class="btn smallbtn" onclick="home()">🏠 Home</button>
-<button class="btn smallbtn" onclick="next()">Next ➡</button>
+<button class="btn p1" onclick="next()">Next</button>
 </div>
 
-</div>
-
-</div>
+<audio id="welcomeSound" src="welcome.mp3"></audio>
 
 <script>
 
 let cat="math";
 let level=0;
 let i=0;
-let stars=0;
-let coins=0;
-let used=[];
 
 /* QUESTIONS */
 const data={
 math:[
 [
-{q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5+3=?",o:["7","8","9","10"],a:1}
+{q:"2+2=?",o:["3","4","5","6"],a:1}
 ],
 [
-{q:"10×2=?",o:["20","22","18","24"],a:0}
+{q:"10×2=?",o:["20","18","22","24"],a:0}
 ],
 [
 {q:"50÷5=?",o:["5","10","15","20"],a:1}
 ]
 ],
-
 english:[
 [
 {q:"A is for?",o:["Apple","Ball","Cat","Dog"],a:0}
@@ -179,7 +121,6 @@ english:[
 {q:"Correct spelling?",o:["Beautiful","Beautifull","Bautiful","Beautifal"],a:0}
 ]
 ],
-
 gk:[
 [
 {q:"Dog legs?",o:["2","3","4","5"],a:2}
@@ -193,110 +134,67 @@ gk:[
 ]
 };
 
-/* SOUND (NO FILE NEEDED) */
-function sound(type){
-let ctx=new (window.AudioContext||window.webkitAudioContext)();
-let o=ctx.createOscillator();
-o.connect(ctx.destination);
+/* SCREEN FLOW */
+function goCategory(){
+document.getElementById("screen1").classList.add("hidden");
+document.getElementById("screen2").classList.remove("hidden");
 
-if(type=="correct") o.frequency.value=700;
-else if(type=="wrong") o.frequency.value=200;
-else o.frequency.value=500;
-
-o.start();
-setTimeout(()=>o.stop(),150);
+/* welcome sound FIX */
+document.getElementById("welcomeSound").play().catch(()=>{});
 }
 
-/* SETTERS */
+function goLevel(){
+document.getElementById("screen2").classList.add("hidden");
+document.getElementById("screen3").classList.remove("hidden");
+}
+
 function setCat(c){cat=c;}
 function setLevel(l){level=l;}
 
-/* START */
-function start(){
-document.getElementById("home").classList.add("hidden");
+/* START GAME */
+function startGame(){
+document.getElementById("screen3").classList.add("hidden");
 document.getElementById("game").classList.remove("hidden");
 i=0;
-used=[];
 load();
 }
 
-/* LOAD */
+/* LOAD Q */
 function load(){
-let qdata=data[cat][level];
-
-if(used.length===qdata.length){
-home();
-return;
-}
-
-do{
-i=Math.floor(Math.random()*qdata.length);
-}while(used.includes(i));
-
-used.push(i);
-
-let q=qdata[i];
-
+let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
 let html="";
 q.o.forEach((opt,idx)=>{
-html+=`<button class='btn color' onclick='check(${idx},this)'>${opt}</button>`;
+html+=`<button class='btn p1' onclick='check(${idx},this)'>${opt}</button>`;
 });
 
 document.getElementById("options").innerHTML=html;
-
-timer();
 }
 
 /* CHECK */
 function check(ans,btn){
 let q=data[cat][level][i];
 
-let buttons=document.querySelectorAll("#options button");
-buttons.forEach(b=>b.disabled=true);
+let all=document.querySelectorAll("#options button");
+all.forEach(b=>b.disabled=true);
 
 if(ans===q.a){
-btn.classList.add("correct");
-sound("correct");
-stars++;
-coins+=10;
+btn.style.background="green";
 }else{
-btn.classList.add("wrong");
-buttons[q.a].classList.add("correct");
-sound("wrong");
+btn.style.background="red";
+all[q.a].style.background="green";
+}
 }
 
-document.getElementById("stars").innerText=stars;
-document.getElementById("coins").innerText=coins;
-
-setTimeout(next,800);
+/* NEXT */
+function next(){
+i++;
+if(i>=data[cat][level].length){
+location.reload();
+return;
 }
-
-/* NEXT / PREV */
-function next(){load();}
-function prev(){load();}
-
-/* HOME */
-function home(){
-document.getElementById("game").classList.add("hidden");
-document.getElementById("home").classList.remove("hidden");
-}
-
-/* TIMER */
-function timer(){
-let t=10;
-document.getElementById("time").innerText=t;
-
-clearInterval(window.tm);
-window.tm=setInterval(()=>{
-t--;
-document.getElementById("time").innerText=t;
-if(t<=0){
-clearInterval(window.tm);
-next();
-}
-},1000);
+load();
 }
 
 </script>
