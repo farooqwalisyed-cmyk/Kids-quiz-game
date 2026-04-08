@@ -93,20 +93,23 @@ cursor:pointer;
 <button class="btn p1" onclick="startApp()">Tap to Play</button>
 </div>
 
-<!-- CATEGORY -->
+<!-- CATEGORY (FIXED BACK POSITION) -->
 <div id="catScreen" class="hidden">
-<button class="btn p4" onclick="goHome()">⬅ Back</button>
 
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
+
+<!-- FIXED: back button moved BELOW -->
+<button class="btn p1" onclick="goHome()">⬅ Back</button>
+
 </div>
 
-<!-- LEVEL (UNCHANGED) -->
+<!-- LEVEL -->
 <div id="levelScreen" class="hidden">
-<button class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button class="btn p2" onclick="selectLevel(1)">Medium</button>
-<button class="btn p3" onclick="selectLevel(2)">Hard</button>
+<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
 </div>
 
 <!-- GAME -->
@@ -114,7 +117,6 @@ cursor:pointer;
 <h3 id="q"></h3>
 <div id="opts"></div>
 
-<!-- ADDED NAVIGATION -->
 <button class="btn p2" onclick="prevQ()">⬅ Prev</button>
 <button class="btn p3" onclick="nextQ()">Next ➡</button>
 <button class="btn p4" onclick="goHome()">🏠 Home</button>
@@ -132,14 +134,14 @@ let coins=0;
 let timer;
 let time=10;
 
-/* ===== SOUND (ADDED ONLY) ===== */
+/* SOUND FIX (CORRECT WORKING VERSION) */
 function beep(type){
 try{
-let ctx=new AudioContext();
+let ctx=new (window.AudioContext || window.webkitAudioContext)();
 let o=ctx.createOscillator();
 o.connect(ctx.destination);
 
-if(type==="correct") o.frequency.value=800;
+if(type==="correct") o.frequency.value=900;
 else if(type==="wrong") o.frequency.value=200;
 else o.frequency.value=500;
 
@@ -148,14 +150,12 @@ setTimeout(()=>o.stop(),120);
 }catch(e){}
 }
 
-/* WELCOME SOUND */
-function playWelcome(){
-try{
-speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Kids Quiz Pro"));
-}catch(e){}
+/* START */
+function startApp(){
+show("catScreen");
 }
 
-/* SCREEN SWITCH (UNCHANGED CORE) */
+/* SCREEN SWITCH */
 function show(screen){
 startScreen.classList.add("hidden");
 catScreen.classList.add("hidden");
@@ -165,27 +165,32 @@ gameScreen.classList.add("hidden");
 document.getElementById(screen).classList.remove("hidden");
 }
 
-/* START */
-function startApp(){
-playWelcome(); // ADDED ONLY
-show("catScreen");
-}
-
 /* CATEGORY */
 function selectCat(c){
 cat=c;
 show("levelScreen");
 }
 
-/* LEVEL */
+/* LEVEL LOCK SYSTEM */
 function selectLevel(l){
+
+if(l===1 && localStorage.getItem("easyDone")!=="yes"){
+alert("Complete Easy Level first 🔒");
+return;
+}
+
+if(l===2 && localStorage.getItem("easyDone")!=="yes"){
+alert("Complete Easy Level first 🔒");
+return;
+}
+
 level=l;
 i=0;
 show("gameScreen");
 load();
 }
 
-/* QUESTIONS (UNCHANGED STRUCTURE — KEEP YOUR FULL DATA HERE) */
+/* QUESTIONS */
 const data={
 math:[
 [
@@ -236,7 +241,7 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-/* TIMER (UNCHANGED) */
+/* TIMER */
 function startTimer(){
 clearInterval(timer);
 time=10;
@@ -253,7 +258,7 @@ nextQ();
 },1000);
 }
 
-/* CHECK (ONLY SOUND ADDED) */
+/* CHECK ANSWER (FIXED SOUND) */
 function check(ans,btn){
 clearInterval(timer);
 
@@ -263,10 +268,10 @@ if(ans===q.a){
 btn.classList.add("correct","pop");
 stars++;
 coins+=10;
-beep("correct");   // ADDED
+beep("correct");
 }else{
 btn.classList.add("wrong","shake");
-beep("wrong");     // ADDED
+beep("wrong");
 }
 
 document.getElementById("stars").innerText=stars;
@@ -275,14 +280,27 @@ document.getElementById("coins").innerText=coins;
 setTimeout(nextQ,700);
 }
 
-/* NAVIGATION (ADDED ONLY) */
+/* NEXT */
 function nextQ(){
 if(i < data[cat][level].length-1){
 i++;
 load();
 }else{
+
+/* SAVE EASY COMPLETION */
+if(level===0){
+localStorage.setItem("easyDone","yes");
+unlockLevels();
+}
+
 show("catScreen");
 }
+}
+
+/* UNLOCK UI */
+function unlockLevels(){
+document.getElementById("medBtn").innerText="Medium";
+document.getElementById("hardBtn").innerText="Hard";
 }
 
 function prevQ(){
