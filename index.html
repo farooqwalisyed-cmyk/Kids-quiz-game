@@ -35,12 +35,18 @@ button{
 }
 
 .btn{background:white;}
+
+/* CATEGORY COLORS */
 .c1{background:#ff6b6b;}
 .c2{background:#4dabf7;}
 .c3{background:#51cf66;}
-.c4{background:#ffd43b;color:black;}
 
-.opt{color:white;}
+/* OPTIONS COLORS */
+.opt1{background:#ff6b6b;color:white;}
+.opt2{background:#4dabf7;color:white;}
+.opt3{background:#51cf66;color:white;}
+.opt4{background:#ffd43b;color:black;}
+
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
@@ -60,150 +66,111 @@ button{
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<button id="soundBtn" class="btn">🔊 Sound: ON</button>
-
+<!-- HOME -->
 <div id="home" class="screen active">
- <button id="startBtn" class="btn">Start Game</button>
+ <button onclick="showCategory()" class="btn">Start Game</button>
 </div>
 
-<div id="menu" class="screen">
-
+<!-- CATEGORY -->
+<div id="category" class="screen">
 <h3>Select Category</h3>
-<button class="c1 cat" data-cat="math">Math</button>
-<button class="c2 cat" data-cat="english">English</button>
-<button class="c3 cat" data-cat="gk">GK</button>
-
-<h3>Select Difficulty</h3>
-<button class="c1 diff" data-diff="easy">Easy</button>
-<button class="c2 diff" data-diff="medium">Medium</button>
-<button class="c3 diff" data-diff="hard">Hard</button>
-
-<button id="playBtn" class="btn">▶ Play Quiz</button>
-
+<button class="c1" onclick="selectCat('math')">Math</button>
+<button class="c2" onclick="selectCat('english')">English</button>
+<button class="c3" onclick="selectCat('gk')">GK</button>
 </div>
 
+<!-- LEVEL -->
+<div id="level" class="screen">
+<h3>Select Difficulty</h3>
+<button class="c1" onclick="startGame('easy')">Easy</button>
+<button class="c2" onclick="startGame('medium')">Medium</button>
+<button class="c3" onclick="startGame('hard')">Hard</button>
+</div>
+
+<!-- GAME -->
 <div id="game" class="screen">
 
 <h3 id="q"></h3>
 <div id="opts"></div>
 
 <div class="nav">
- <button id="prevBtn" class="btn">⬅ Prev</button>
- <button id="nextBtn" class="btn">Next ➡</button>
+ <button onclick="prev()" class="btn">⬅ Prev</button>
+ <button onclick="next()" class="btn">Next ➡</button>
 </div>
 
-<button id="restartBtn" class="btn">🔄 Restart</button>
-<button id="homeBtn" class="btn">🏠 Home</button>
+<button onclick="restart()" class="btn">🔄 Restart</button>
+<button onclick="home()" class="btn">🏠 Home</button>
 
 </div>
 
 </div>
 
 <script>
-window.onload=function(){
 
 let cat=null;
 let diff=null;
 let i=0;
-let sound=true;
 
-/* AUDIO */
-let audioCtx;
-function unlockAudio(){
- if(!audioCtx){
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
- }
- audioCtx.resume();
-}
-
-function playSound(type){
- if(!sound || !audioCtx) return;
-
- let o = audioCtx.createOscillator();
- let g = audioCtx.createGain();
-
- o.connect(g);
- g.connect(audioCtx.destination);
-
- if(type==="correct") o.frequency.value=900;
- if(type==="wrong") o.frequency.value=200;
-
- g.gain.value=0.2;
-
- o.start();
- setTimeout(()=>o.stop(),200);
-}
-
-/* FULL DATA (NO CRASH) */
+/* DATA */
 const data={
  math:{
   easy:[
-   {q:"2+2=?",o:["3","4","5"],a:1},
-   {q:"3+1=?",o:["4","5","6"],a:0}
+   {q:"2+2=?",o:["3","4","5","6"],a:1},
+   {q:"3+1=?",o:["4","5","6","7"],a:0}
   ],
   medium:[
-   {q:"10+5=?",o:["15","12","14"],a:0}
+   {q:"10+5=?",o:["15","12","14","11"],a:0}
   ],
   hard:[
-   {q:"12x12=?",o:["144","124","154"],a:0}
+   {q:"12x12=?",o:["144","124","154","134"],a:0}
   ]
  },
  english:{
   easy:[
-   {q:"A for?",o:["Apple","Ball","Cat"],a:0}
+   {q:"A for?",o:["Apple","Ball","Cat","Dog"],a:0}
   ],
   medium:[
-   {q:"Plural of book?",o:["Books","Booked","Bookies"],a:0}
+   {q:"Plural of book?",o:["Books","Booked","Bookies","Book"],a:0}
   ],
   hard:[
-   {q:"Opposite happy?",o:["Sad","Joy","Glad"],a:0}
+   {q:"Opposite happy?",o:["Sad","Joy","Glad","Fun"],a:0}
   ]
  },
  gk:{
   easy:[
-   {q:"Days in week?",o:["5","6","7"],a:2}
+   {q:"Days in week?",o:["5","6","7","8"],a:2}
   ],
   medium:[
-   {q:"Capital India?",o:["Delhi","Mumbai","Chennai"],a:0}
+   {q:"Capital India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0}
   ],
   hard:[
-   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic"],a:0}
+   {q:"Largest ocean?",o:["Pacific","Atlantic","Arctic","Indian"],a:0}
   ]
  }
 };
 
-/* SCREEN */
+/* SCREEN CONTROL */
 function show(id){
  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
  document.getElementById(id).classList.add("active");
 }
 
-/* START */
-document.getElementById("startBtn").onclick=function(){
- unlockAudio();
- show("menu");
-};
+/* FLOW */
+function showCategory(){
+ show("category");
+}
 
-/* SELECT */
-document.querySelectorAll(".cat").forEach(btn=>{
- btn.onclick=()=>cat=btn.dataset.cat;
-});
-document.querySelectorAll(".diff").forEach(btn=>{
- btn.onclick=()=>diff=btn.dataset.diff;
-});
+function selectCat(c){
+ cat=c;
+ show("level");
+}
 
-/* PLAY */
-document.getElementById("playBtn").onclick=function(){
-
- if(!cat || !diff){
-  alert("Select category + difficulty");
-  return;
- }
-
+function startGame(d){
+ diff=d;
  i=0;
  show("game");
  load();
-};
+}
 
 /* LOAD */
 function load(){
@@ -211,52 +178,54 @@ function load(){
 
  document.getElementById("q").innerText=q.q;
 
+ let colors=["opt1","opt2","opt3","opt4"];
  let html="";
+
  q.o.forEach((op,idx)=>{
-  html+=`<button class="opt" onclick="check(${idx},this)">${op}</button>`;
+  html+=`<button class="${colors[idx]}" onclick="check(${idx},this)">${op}</button>`;
  });
 
  document.getElementById("opts").innerHTML=html;
 }
 
 /* ANSWER */
-window.check=function(ans,btn){
+function check(ans,btn){
  let q=data[cat][diff][i];
 
+ document.querySelectorAll("#opts button").forEach(b=>b.disabled=true);
+
  if(ans===q.a){
-  playSound("correct");
   btn.classList.add("correct");
  }else{
-  playSound("wrong");
   btn.classList.add("wrong");
  }
-};
+}
 
 /* NAV */
-document.getElementById("nextBtn").onclick=function(){
+function next(){
  if(i < data[cat][diff].length-1){
   i++;
   load();
  }
-};
+}
 
-document.getElementById("prevBtn").onclick=function(){
+function prev(){
  if(i>0){
   i--;
   load();
  }
-};
+}
 
-document.getElementById("restartBtn").onclick=function(){
+/* RESET */
+function restart(){
  i=0;
  load();
-};
+}
 
-document.getElementById("homeBtn").onclick=function(){
+function home(){
  show("home");
-};
+}
 
-};
 </script>
 
 </body>
