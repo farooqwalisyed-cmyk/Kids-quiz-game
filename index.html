@@ -128,13 +128,48 @@ pointer-events:none;
 
 <script>
 
-/* ===== QUESTIONS (UNCHANGED WORKING LOGIC) ===== */
+/* ===== FULL QUESTIONS ===== */
 const data = {
+
 math:[
-Array.from({length:10},(_,i)=>({q:`${i+6}+${i+8}=?`,o:[`${i+10}`,`${i+12}`,`${i+14}`,`${i+16}`],a:2})),
-Array.from({length:10},(_,i)=>({q:`${i+10}×2=?`,o:[`${i+10}`,`${(i+10)*2}`,`${i+20}`,`${i+30}`],a:1})),
-Array.from({length:10},(_,i)=>({q:`${(i+10)*3}÷3=?`,o:[`${i+10}`,`${i+5}`,`${i+15}`,`${i+20}`],a:0}))
+[
+{q:"2+3=?",o:["4","5","6","7"],a:1},
+{q:"4+6=?",o:["9","10","11","12"],a:1},
+{q:"7-2=?",o:["4","5","6","3"],a:1},
+{q:"5+5=?",o:["8","9","10","11"],a:2},
+{q:"9-4=?",o:["4","5","6","7"],a:1},
+{q:"6+3=?",o:["8","9","10","7"],a:1},
+{q:"8-3=?",o:["6","5","4","7"],a:1},
+{q:"3+7=?",o:["9","10","11","12"],a:1},
+{q:"10-6=?",o:["3","4","5","6"],a:1},
+{q:"2+8=?",o:["9","10","11","12"],a:1}
 ],
+[
+{q:"12+8=?",o:["18","19","20","21"],a:2},
+{q:"15-5=?",o:["9","10","11","12"],a:1},
+{q:"9×2=?",o:["16","17","18","19"],a:2},
+{q:"20÷2=?",o:["8","9","10","11"],a:2},
+{q:"14+6=?",o:["18","19","20","21"],a:2},
+{q:"18-8=?",o:["8","9","10","11"],a:2},
+{q:"7×3=?",o:["18","20","21","24"],a:2},
+{q:"16÷4=?",o:["2","3","4","5"],a:2},
+{q:"11+9=?",o:["18","19","20","21"],a:2},
+{q:"25-10=?",o:["10","15","20","25"],a:1}
+],
+[
+{q:"25×4=?",o:["90","100","110","120"],a:1},
+{q:"144÷12=?",o:["10","11","12","13"],a:2},
+{q:"36×2=?",o:["70","72","74","76"],a:1},
+{q:"100-45=?",o:["50","55","60","65"],a:1},
+{q:"81÷9=?",o:["7","8","9","10"],a:2},
+{q:"50+50=?",o:["90","95","100","105"],a:2},
+{q:"64÷8=?",o:["6","7","8","9"],a:2},
+{q:"45+15=?",o:["55","60","65","70"],a:1},
+{q:"90-30=?",o:["50","60","70","80"],a:1},
+{q:"11×11=?",o:["111","121","131","141"],a:1}
+]
+],
+
 english:[
 [
 {q:"Dog has ____ legs?",o:["2","3","4","5"],a:2},
@@ -148,20 +183,77 @@ english:[
 {q:"I ____ happy",o:["am","is","are","be"],a:0},
 {q:"We ____ friends",o:["is","are","am","be"],a:1}
 ],
-Array.from({length:10},()=>({q:"Opposite of big?",o:["Small","Tall","Long","Wide"],a:0})),
-Array.from({length:10},()=>({q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0}))
+[
+{q:"Opposite of big?",o:["Small","Tall","Long","Wide"],a:0},
+{q:"Opposite of hot?",o:["Cold","Warm","Cool","Heat"],a:0},
+{q:"Opposite of up?",o:["Down","Top","Side","Over"],a:0},
+{q:"Plural of cat?",o:["Cats","Cat","Cates","Caty"],a:0},
+{q:"Plural of boy?",o:["Boys","Boy","Boies","Bois"],a:0},
+{q:"He ___ playing",o:["is","are","am","be"],a:0},
+{q:"They ___ running",o:["is","are","am","be"],a:1},
+{q:"I ___ ready",o:["am","is","are","be"],a:0},
+{q:"She ___ eating",o:["is","are","am","be"],a:0},
+{q:"We ___ happy",o:["is","are","am","be"],a:1}
 ],
-gk:[
-Array.from({length:10},()=>({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})),
-Array.from({length:10},()=>({q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0})),
-Array.from({length:10},()=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
+[
+{q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0},
+{q:"Past of eat?",o:["Ate","Eat","Eated","Eating"],a:0},
+{q:"Past of run?",o:["Ran","Run","Runned","Running"],a:0},
+{q:"Past of see?",o:["Saw","Seen","See","Seeing"],a:0},
+{q:"Past of write?",o:["Wrote","Write","Written","Writed"],a:0},
+{q:"Past of come?",o:["Came","Come","Comed","Coming"],a:0},
+{q:"Past of take?",o:["Took","Take","Taken","Taked"],a:0},
+{q:"Past of give?",o:["Gave","Give","Given","Gived"],a:0},
+{q:"Past of make?",o:["Made","Make","Making","Maked"],a:0},
+{q:"Past of speak?",o:["Spoke","Speak","Spoken","Speaked"],a:0}
 ]
+],
+
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
+{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
+{q:"India currency?",o:["Rupee","Dollar","Yen","Euro"],a:0},
+{q:"1 year has?",o:["12 months","10","11","13"],a:0},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
+{q:"Days in week?",o:["7","6","5","8"],a:0}
+],
+[
+{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
+{q:"Sun rises in?",o:["East","West","North","South"],a:0},
+{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
+{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
+{q:"HTML is used for?",o:["Web","Game","Music","Video"],a:0},
+{q:"Gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
+{q:"Plant makes food?",o:["Photosynthesis","Running","Jump","Walk"],a:0},
+{q:"Human has?",o:["Heart","Wings","Fins","Leaves"],a:0},
+{q:"India PM lives in?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
+],
+[
+{q:"1 KB=?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
+{q:"Gravity found by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
+{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
+{q:"Atom is?",o:["Smallest","Big","Huge","Medium"],a:0},
+{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
+{q:"Sound travels in?",o:["Air","Space","Only water","Light"],a:0},
+{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
+{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
+{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
+{q:"Speed of light is?",o:["Fastest","Slow","Medium","Zero"],a:0}
+]
+]
+
 };
 
-/* ===== LEVEL SYSTEM ===== */
+/* ===== REST CODE SAME (NO CHANGE) ===== */
+
 let unlock = {math:0, english:0, gk:0};
 
-/* ===== CONFETTI ===== */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
@@ -186,32 +278,18 @@ requestAnimationFrame(drawConfetti);
 }
 drawConfetti();
 
-/* ===== 🎤 CARTOON VOICE ===== */
-function speak(text){
-try{
-speechSynthesis.cancel();
-
-let msg=new SpeechSynthesisUtterance(text);
-msg.rate=1.1;
-msg.pitch=1.6;
-
-speechSynthesis.speak(msg);
-}catch(e){}
+function speak(t){
+let m=new SpeechSynthesisUtterance(t);
+m.pitch=1.6;m.rate=1.1;
+speechSynthesis.speak(m);
 }
 
 function speakReaction(type){
-if(type==="good"){
-speak("Great job!");
-}else{
-speak("Try again!");
-}
+speak(type==="good"?"Great job!":"Try again!");
 }
 
-function playSound(src){
-new Audio(src).play();
-}
+function playSound(src){new Audio(src).play();}
 
-/* ===== GAME ===== */
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
 function load(){
@@ -280,14 +358,9 @@ clearInterval(timer);
 show("catScreen");
 }
 
-/* ===== START ===== */
 function startApp(){
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-
-setTimeout(()=>{
-speak("Welcome to Kids Quiz Pro!");
-},300);
-
+setTimeout(()=>speak("Welcome to Kids Quiz Pro!"),300);
 show("catScreen");
 }
 
