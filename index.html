@@ -260,6 +260,133 @@ if(time<=0) nextQ();
 },1000);
 }
 
+  <script>
+
+/* ===== SOUND ===== */
+function playSound(src){
+new Audio(src).play();
+}
+
+/* ===== DATA (10 QUESTIONS EACH LEVEL - ALL CATEGORIES) ===== */
+const data = {
+math:[
+[
+{q:"2+2=?",o:["3","4","5","6"],a:1},
+{q:"5+3=?",o:["6","7","8","9"],a:2},
+{q:"10-4=?",o:["5","6","7","8"],a:1},
+{q:"3+6=?",o:["7","8","9","10"],a:2},
+{q:"7-2=?",o:["4","5","6","3"],a:1},
+{q:"4+4=?",o:["6","7","8","9"],a:2},
+{q:"9-3=?",o:["5","6","7","8"],a:1},
+{q:"6+2=?",o:["7","8","9","10"],a:1},
+{q:"8-4=?",o:["2","3","4","5"],a:2},
+{q:"1+1=?",o:["1","2","3","4"],a:1}
+],
+[
+{q:"10×2=?",o:["10","20","30","40"],a:1},
+{q:"15+5=?",o:["18","19","20","21"],a:2},
+{q:"25-10=?",o:["10","15","20","25"],a:1},
+{q:"6×3=?",o:["12","15","18","20"],a:2},
+{q:"9+9=?",o:["16","17","18","19"],a:2},
+{q:"8×2=?",o:["14","15","16","18"],a:2},
+{q:"30-10=?",o:["10","15","20","25"],a:2},
+{q:"12÷2=?",o:["4","5","6","7"],a:2},
+{q:"14+6=?",o:["18","19","20","21"],a:2},
+{q:"20-5=?",o:["10","15","20","25"],a:1}
+],
+[
+{q:"50÷5=?",o:["5","10","15","20"],a:1},
+{q:"100-50=?",o:["40","50","60","70"],a:1},
+{q:"12×12=?",o:["124","144","154","134"],a:1},
+{q:"81÷9=?",o:["7","8","9","10"],a:2},
+{q:"25×4=?",o:["90","100","110","120"],a:1},
+{q:"144÷12=?",o:["10","11","12","13"],a:2},
+{q:"200-100=?",o:["50","100","150","200"],a:1},
+{q:"18×2=?",o:["32","34","36","38"],a:2},
+{q:"36÷6=?",o:["5","6","7","8"],a:1},
+{q:"15×3=?",o:["30","35","40","45"],a:3}
+]
+],
+
+english:[
+[
+{q:"Dog has ___ legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
+{q:"Apple is a ___",o:["Fruit","Animal","Color","Place"],a:0},
+{q:"Sky is ___",o:["Blue","Green","Red","Black"],a:0},
+{q:"Cat says ___",o:["Meow","Bark","Moo","Quack"],a:0},
+{q:"Sun gives ___",o:["Light","Rain","Snow","Wind"],a:0},
+{q:"He ___ a boy",o:["is","are","am","be"],a:0},
+{q:"She ___ teacher",o:["is","are","am","be"],a:0},
+{q:"I ___ happy",o:["am","is","are","be"],a:0},
+{q:"We ___ friends",o:["is","are","am","be"],a:1}
+],
+[
+{q:"He ___ going",o:["is","are","am","be"],a:0},
+{q:"They ___ playing",o:["is","are","am","be"],a:1},
+{q:"She ___ eating",o:["is","are","am","be"],a:0},
+{q:"We ___ happy",o:["is","are","am","be"],a:1},
+{q:"Dog ___ barking",o:["is","are","am","be"],a:0},
+{q:"Birds ___ flying",o:["is","are","am","be"],a:1},
+{q:"I ___ student",o:["is","are","am","be"],a:2},
+{q:"You ___ smart",o:["is","are","am","be"],a:1},
+{q:"He ___ sad",o:["is","are","am","be"],a:0},
+{q:"We ___ ready",o:["is","are","am","be"],a:1}
+],
+[
+{q:"Go past tense?",o:["Went","Goed","Goes","Going"],a:0},
+{q:"Eat past tense?",o:["Eated","Ate","Eating","Eat"],a:1},
+{q:"See past tense?",o:["Saw","Seen","Seeed","Seeing"],a:0},
+{q:"Run past tense?",o:["Runed","Ran","Running","Runned"],a:1},
+{q:"Write past tense?",o:["Wrote","Written","Writed","Writing"],a:0},
+{q:"Come past tense?",o:["Came","Comed","Coming","Come"],a:0},
+{q:"Speak past tense?",o:["Spoke","Speaked","Speaking","Spoken"],a:0},
+{q:"Take past tense?",o:["Took","Taken","Taked","Taking"],a:0},
+{q:"Give past tense?",o:["Gave","Given","Gived","Giving"],a:0},
+{q:"Make past tense?",o:["Made","Maked","Making","Make"],a:0}
+]
+],
+
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
+{q:"How many days in a year?",o:["365","360","300","400"],a:0},
+{q:"Sun is a?",o:["Star","Planet","Moon","Asteroid"],a:0},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
+{q:"India currency?",o:["Rupee","Dollar","Yen","Euro"],a:0},
+{q:"1 year has?",o:["12 months","10","11","13"],a:0},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0}
+],
+[
+{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
+{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
+{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"Human body has?",o:["Heart","Wings","Fins","Leaves"],a:0},
+{q:"India PM residence?",o:["Delhi","Mumbai","Goa","Kolkata"],a:0},
+{q:"Fastest land animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
+{q:"Plant makes food by?",o:["Photosynthesis","Breathing","Jump","Running"],a:0},
+{q:"Which is gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
+{q:"Sun rises in?",o:["East","West","North","South"],a:0},
+{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0}
+],
+[
+{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
+{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
+{q:"Gravity discovered by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
+{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
+{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
+{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
+{q:"Sound travels in?",o:["Air","Space only","Water only","Light"],a:0},
+{q:"Human brain controls?",o:["Body","Car","Phone","TV"],a:0},
+{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
+{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0}
+]
+]
+};
+
 /* 🔓 LEVEL UNLOCK LOGIC */
 function nextQ(){
 if(i < data[cat][level].length-1){
