@@ -17,7 +17,6 @@ transition:0.5s;
 overflow:hidden;
 }
 
-/* THEMES */
 body.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);}
 body.dark{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);}
 body.neon{background:linear-gradient(135deg,#00f5ff,#7cffcb,#ff61d2);}
@@ -30,13 +29,10 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
-position:relative;
-z-index:2;
 }
 
 .card.dark{background:#1e1e1e;color:white;}
 .card.neon{background:#001a1a;color:#0ff;}
-.card.kids{background:#fff;}
 
 .btn{
 width:100%;
@@ -55,7 +51,6 @@ cursor:pointer;
 
 .hidden{display:none;}
 
-/* 🎉 CONFETTI */
 .confetti{
 position:fixed;
 top:-10px;
@@ -75,34 +70,35 @@ z-index:9999;
 
 <body class="kids">
 
-<div class="card kids" id="card">
+<div class="card" id="card">
 
-<div>
-⭐ <span id="stars">0</span> |
-🪙 <span id="coins">0</span>
-</div>
+<div>⭐ <span id="stars">0</span> | 🪙 <span id="coins">0</span></div>
 
 <h2>🎮 Kids Quiz PRO</h2>
 
 <button class="btn p3" onclick="changeTheme()">🎨 Theme</button>
 
+<!-- START -->
 <div id="startScreen">
 <button class="btn p1" onclick="startGame()">Start Game</button>
 </div>
 
+<!-- CATEGORY -->
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
 </div>
 
+<!-- LEVEL -->
 <div id="levelScreen" class="hidden">
-<button class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button class="btn p2" onclick="selectLevel(1)">Medium</button>
-<button class="btn p3" onclick="selectLevel(2)">Hard</button>
+<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy 🔓</button>
+<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
 <button class="btn p4" onclick="backToCategory()">⬅ Back</button>
 </div>
 
+<!-- GAME -->
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
 <div id="opts"></div>
@@ -116,86 +112,67 @@ z-index:9999;
 
 <script>
 
-/* =========================
-   🔊 SOUND FIXED
-========================= */
+/* SOUND */
 function sound(type){
-let audio=new Audio();
-
-if(type==="welcome"){
-audio.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
-}
-if(type==="correct"){
-audio.src="https://actions.google.com/sounds/v1/cartoon/pop.ogg";
-}
-if(type==="wrong"){
-audio.src="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
+let a=new Audio();
+if(type==="welcome") a.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+if(type==="correct") a.src="https://actions.google.com/sounds/v1/cartoon/pop.ogg";
+if(type==="wrong") a.src="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
+a.play();
 }
 
-audio.play();
-}
-
-/* =========================
-   🎤 VOICE
-========================= */
-function speak(text){
-let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.75;
+/* VOICE */
+function speak(t){
+let msg=new SpeechSynthesisUtterance(t);
+msg.rate=0.8;
 msg.pitch=1.8;
 speechSynthesis.speak(msg);
 }
 
-/* =========================
-   🎉 CONFETTI FIX
-========================= */
+/* CONFETTI */
 function blast(){
-for(let i=0;i<80;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*window.innerWidth+"px";
-c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-c.style.animationDuration=(2+Math.random()*2)+"s";
-document.body.appendChild(c);
-
-setTimeout(()=>c.remove(),4000);
+for(let i=0;i<60;i++){
+let d=document.createElement("div");
+d.className="confetti";
+d.style.left=Math.random()*window.innerWidth+"px";
+d.style.background=`hsl(${Math.random()*360},100%,50%)`;
+d.style.animationDuration=(2+Math.random()*2)+"s";
+document.body.appendChild(d);
+setTimeout(()=>d.remove(),4000);
 }
 }
 
-/* =========================
-   📚 QUESTIONS (RESTORED)
-========================= */
+/* QUESTIONS */
 const data={
 math:[
 [
 {q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"4+5=?",o:["7","8","9","10"],a:2}
+{q:"5+5=?",o:["8","9","10","11"],a:2}
 ],
 [
-{q:"10+5=?",o:["14","15","16","17"],a:1}
+{q:"10+5=?",o:["12","14","15","16"],a:2}
 ],
 [
-{q:"20+15=?",o:["30","35","40","45"],a:1}
+{q:"20+10=?",o:["25","30","35","40"],a:1}
 ]
 ],
-
 english:[
 [
-{q:"Apple is?",o:["Fruit","Car","Animal","City"],a:0}
+{q:"Apple is?",o:["Fruit","Animal","Car","City"],a:0}
 ],
 [
-{q:"Opposite Hot?",o:["Cold","Warm","Fire","Heat"],a:0}
+{q:"Opposite of Hot?",o:["Cold","Warm","Fire","Ice"],a:0}
 ],
 [
-{q:"Past go?",o:["Went","Goed","Gone","Going"],a:0}
+{q:"Past of Go?",o:["Went","Gone","Go","Going"],a:0}
 ]
 ],
-
 gk:[
 [
 {q:"Capital India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
 ],
 [
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0}
+{q:"Planet we live?",o:["Earth","Mars","Moon","Sun"],a:0}
 ],
 [
 {q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0}
@@ -203,15 +180,15 @@ gk:[
 ]
 };
 
-/* =========================
-   🔥 STATE
-========================= */
+/* STATE */
 let cat="",level=0,i=0;
-let unlock=JSON.parse(localStorage.getItem("unlock"))||[true,false,false];
+let unlock=JSON.parse(localStorage.getItem("unlock")||"null");
+if(!unlock||!Array.isArray(unlock)){
+unlock=[true,false,false];
+localStorage.setItem("unlock",JSON.stringify(unlock));
+}
 
-/* =========================
-   🧠 RESET FIX (IMPORTANT)
-========================= */
+/* RESET */
 function resetGame(){
 i=0;
 level=0;
@@ -219,120 +196,106 @@ cat="";
 speechSynthesis.cancel();
 }
 
-/* =========================
-   🎮 START FIX
-========================= */
+/* START */
 function startGame(){
 resetGame();
 sound("welcome");
 show("catScreen");
 }
 
-/* =========================
-   📂 CATEGORY FIX
-========================= */
+/* CATEGORY */
 function selectCat(c){
 resetGame();
 cat=c;
 show("levelScreen");
+updateLevelUI();
 }
 
-/* =========================
-   🔓 LEVEL LOCK FIX
-========================= */
-function selectLevel(l){
+/* LEVEL UI */
+function updateLevelUI(){
+document.getElementById("easyBtn").innerHTML="Easy "+(unlock[0]?"🔓":"🔒");
+document.getElementById("medBtn").innerHTML="Medium "+(unlock[1]?"🔓":"🔒");
+document.getElementById("hardBtn").innerHTML="Hard "+(unlock[2]?"🔓":"🔒");
+}
 
+/* LEVEL SELECT */
+function selectLevel(l){
 if(!unlock[l]){
-alert("Level locked! Complete previous level");
+alert("Locked!");
 return;
 }
-
 level=l;
 i=0;
 show("gameScreen");
 load();
 }
 
-/* =========================
-   📖 LOAD QUESTION
-========================= */
+/* LOAD */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
-let html="";
+let h="";
 q.o.forEach((o,idx)=>{
-html+=`<button class="btn p1" onclick="check(${idx})">${o}</button>`;
+h+=`<button class='btn p1' onclick='check(${idx})'>${o}</button>`;
 });
-document.getElementById("opts").innerHTML=html;
+document.getElementById("opts").innerHTML=h;
 
 speechSynthesis.cancel();
 speak(q.q);
 }
 
-/* =========================
-   ✅ ANSWER CHECK
-========================= */
-function check(ans){
+/* CHECK */
+function check(a){
 let q=data[cat][level][i];
-
-if(ans==q.a){
+if(a==q.a){
 sound("correct");
 blast();
 }else{
 sound("wrong");
 }
-
 setTimeout(nextQ,500);
 }
 
-/* =========================
-   ➡ NEXT
-========================= */
+/* NEXT */
 function nextQ(){
 if(i<data[cat][level].length-1){
 i++;
 load();
 }else{
 
+if(level<2){
 unlock[level+1]=true;
 localStorage.setItem("unlock",JSON.stringify(unlock));
+}
 
 show("catScreen");
 }
 }
 
+/* NAV */
 function prevQ(){if(i>0){i--;load();}}
 function goHome(){resetGame();show("catScreen");}
 function backToCategory(){show("catScreen");}
 
-/* =========================
-   🎨 SCREEN MANAGER
-========================= */
+/* SCREEN */
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
 }
 
-/* =========================
-   🎨 THEME FIX
-========================= */
+/* THEME */
 function changeTheme(){
-let body=document.body;
-let card=document.getElementById("card");
-
-if(body.classList.contains("kids")){
-body.className="dark";
-card.className="card dark";
+let b=document.body;
+if(b.classList.contains("kids")){
+b.className="dark";
 }
-else if(body.classList.contains("dark")){
-body.className="neon";
-card.className="card neon";
+else if(b.classList.contains("dark")){
+b.className="neon";
 }
 else{
-body.className="kids";
-card.className="card kids";
+b.className="kids";
 }
 }
 
