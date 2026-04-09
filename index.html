@@ -16,10 +16,18 @@ align-items:center;
 transition:0.5s;
 }
 
-/* 🎨 THEMES FIXED */
-body.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);}
-body.dark{background:#0f172a;}
-body.neon{background:#000;}
+/* 🎨 FIX 1: COLOURFUL THEMES (NO BLACK DARK MODE) */
+body.kids{
+background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
+}
+
+body.dark{
+background:linear-gradient(135deg,#1f1c2c,#928dab,#43cea2);
+}
+
+body.neon{
+background:linear-gradient(135deg,#00f5ff,#7cffcb,#ff61d2);
+}
 
 .card{
 width:92%;
@@ -33,7 +41,7 @@ transition:0.5s;
 }
 
 .card.dark{background:#1e1e1e;color:white;}
-.card.neon{background:#000;color:#0ff;box-shadow:0 0 20px #0ff;}
+.card.neon{background:#001a1a;color:#0ff;box-shadow:0 0 20px #0ff;}
 .card.kids{background:#fff;}
 
 .btn{
@@ -98,7 +106,6 @@ pointer-events:none;
 <h3 id="q"></h3>
 <div id="opts"></div>
 
-<!-- 🔥 ADDED BUTTONS -->
 <button class="btn p2" onclick="prevQ()">⬅ Prev</button>
 <button class="btn p3" onclick="nextQ()">Next ➡</button>
 <button class="btn p4" onclick="goHome()">🏠 Home</button>
@@ -109,7 +116,7 @@ pointer-events:none;
 
 <script>
 
-/* 🔊 SOUND FIX */
+/* 🔊 SOUND (UNCHANGED) */
 function sound(type){
 let s=null;
 if(type==="welcome") s="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
@@ -118,24 +125,31 @@ if(type==="wrong") s="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
 if(s) new Audio(s).play();
 }
 
-/* 🎤 VOICE READING */
+/* 🎤 FIX 2: SLOWER AI VOICE */
 function speak(text){
 let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.9;
-msg.pitch=1.3;
+msg.rate=0.65;   // 🔥 SLOWED DOWN
+msg.pitch=1.2;
 speechSynthesis.speak(msg);
 }
 
-/* 🎉 CONFETTI FIX */
+/* 🎉 FIX 3: SLOWER CONFETTI */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 
 let parts=[];
+
 function blast(){
-for(let i=0;i<80;i++){
-parts.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,c:`hsl(${Math.random()*360},100%,50%)`});
+for(let i=0;i<60;i++){
+parts.push({
+x:Math.random()*canvas.width,
+y:0,
+r:Math.random()*5+2,
+c:`hsl(${Math.random()*360},100%,50%)`,
+speed:1.2   // 🔥 SLOWER FALL
+});
 }
 }
 
@@ -146,14 +160,14 @@ ctx.fillStyle=p.c;
 ctx.beginPath();
 ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
 ctx.fill();
-p.y+=3;
+p.y+=p.speed;
 });
 parts=parts.filter(p=>p.y<canvas.height);
 requestAnimationFrame(draw);
 }
 draw();
 
-/* 📚 QUESTIONS (UNCHANGED STYLE - FULL SAFE SAMPLE STRUCTURE) */
+/* 📚 QUESTIONS (UNCHANGED - SAME AS BEFORE) */
 const data={
 math:[
 [
@@ -204,13 +218,13 @@ gk:[
 /* GAME STATE */
 let cat="",level=0,i=0,stars=0,coins=0,time=10,timer;
 
-/* 🔊 FIXED START */
+/* START */
 function startGame(){
 sound("welcome");
 show("catScreen");
 }
 
-/* 🎨 THEMES FIXED */
+/* THEMES */
 function changeTheme(){
 let body=document.body;
 let card=document.getElementById("card");
@@ -229,16 +243,15 @@ card.className="card dark";
 }
 }
 
-/* GAME FLOW */
+/* GAME */
 function selectCat(c){cat=c;show("levelScreen");}
 function selectLevel(l){level=l;i=0;show("gameScreen");load();}
 
-/* LOAD QUESTION */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
-/* 🔊 VOICE QUESTION */
+/* VOICE FIX */
 speechSynthesis.cancel();
 speak(q.q);
 
@@ -251,7 +264,6 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-/* ANSWER CHECK */
 function check(ans){
 clearInterval(timer);
 let q=data[cat][level][i];
@@ -267,7 +279,6 @@ sound("wrong");
 setTimeout(nextQ,500);
 }
 
-/* TIMER */
 function startTimer(){
 time=10-(level*2);
 document.getElementById("time").innerText=time;
@@ -279,7 +290,6 @@ if(time<=0) nextQ();
 },1000);
 }
 
-/* NEXT / PREV FIX */
 function nextQ(){
 if(i<data[cat][level].length-1){
 i++;
@@ -300,7 +310,6 @@ function goHome(){
 show("catScreen");
 }
 
-/* SCREEN SWITCH */
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
