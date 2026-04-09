@@ -131,10 +131,22 @@ pointer-events:none;
 /* ===== QUESTIONS (FULL ADDED) ===== */
 const data = {
 math:[
-Array.from({length:10},(_,i)=>({q:`${i+1}+${i+2}=?`,o:[`${i}`,`${i+3}`,`${i+5}`,`${i+6}`],a:1})),
-Array.from({length:10},(_,i)=>({q:`${i+5}×2=?`,o:[`${i+5}`,`${(i+5)*2}`,`${i+10}`,`${i+15}`],a:1})),
-Array.from({length:10},(_,i)=>({q:`${(i+2)*10}÷2=?`,o:[`${i+5}`,`${(i+2)*5}`,`${i+10}`,`${i+20}`],a:1}))
+Array.from({length:10},(_,i)=>{
+let a=i+1;
+let b=i+2;
+let correct=a+b;
+
+return {
+q:`${a}+${b}=?`,
+o:[
+`${correct}`,
+`${correct+1}`,
+`${correct-1}`,
+`${correct+2}`
 ],
+a:0
+};
+})
 english:[
 Array.from({length:10},(_,i)=>({q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0})),
 Array.from({length:10},(_,i)=>({q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0})),
