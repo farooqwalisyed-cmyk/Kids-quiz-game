@@ -128,69 +128,49 @@ pointer-events:none;
 
 <script>
 
-/* ===== QUESTIONS (FULL ADDED) ===== */
-const data = {
-math:[
-Array.from({length:10},(_,i)=>{
-let a=i+1;
-let b=i+2;
-let correct=a+b;
+/* ===== FIXED QUESTIONS ===== */
+function genMathEasy(){
+return Array.from({length:10},(_,i)=>{
+let a=i+1,b=i+2,ans=a+b;
+return {q:`${a}+${b}=?`,o:[`${ans}`,`${ans+1}`,`${ans-1}`,`${ans+2}`],a:0};
+});
+}
 
-return {
-q:`${a}+${b}=?`,
-o:[
-`${correct}`,
-`${correct+1}`,
-`${correct-1}`,
-`${correct+2}`
-],
-a:0
-};
-})
+function genMathMed(){
+return Array.from({length:10},(_,i)=>{
+let a=i+5,ans=a*2;
+return {q:`${a}×2=?`,o:[`${ans}`,`${ans+2}`,`${ans-2}`,`${ans+4}`],a:0};
+});
+}
+
+function genMathHard(){
+return Array.from({length:10},(_,i)=>{
+let a=(i+2)*10,ans=a/2;
+return {q:`${a}÷2=?`,o:[`${ans}`,`${ans+5}`,`${ans-5}`,`${ans+10}`],a:0};
+});
+}
+
+const data = {
+math:[genMathEasy(),genMathMed(),genMathHard()],
 english:[
-Array.from({length:10},(_,i)=>({q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0})),
-Array.from({length:10},(_,i)=>({q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0})),
-Array.from({length:10},(_,i)=>({q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0}))
+Array.from({length:10},()=>({q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0})),
+Array.from({length:10},()=>({q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0})),
+Array.from({length:10},()=>({q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0}))
 ],
 gk:[
-Array.from({length:10},(_,i)=>({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})),
-Array.from({length:10},(_,i)=>({q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0})),
-Array.from({length:10},(_,i)=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
+Array.from({length:10},()=>({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})),
+Array.from({length:10},()=>({q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0})),
+Array.from({length:10},()=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
 ]
 };
 
-/* ===== REST SAME ===== */
+/* ===== SAME LOGIC ===== */
 
-let unlock = {math:0, english:0, gk:0};
-
-const canvas=document.getElementById("confetti");
-const ctx=canvas.getContext("2d");
-canvas.width=innerWidth;
-canvas.height=innerHeight;
-
-let confetti=[];
-function blastConfetti(){
-for(let i=0;i<80;i++){
-confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,d:Math.random()*50,color:`hsl(${Math.random()*360},100%,50%)`});
-}}
-function drawConfetti(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-confetti.forEach(p=>{
-ctx.fillStyle=p.color;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=2+p.d/30;
-});
-confetti=confetti.filter(p=>p.y<canvas.height);
-requestAnimationFrame(drawConfetti);
-}
-drawConfetti();
-
-function speak(t){speechSynthesis.speak(new SpeechSynthesisUtterance(t));}
-function playSound(src){new Audio(src).play();}
-
+let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
+
+function playSound(src){new Audio(src).play();}
+function speak(t){speechSynthesis.speak(new SpeechSynthesisUtterance(t));}
 
 function load(){
 let q=data[cat][level][i];
@@ -213,7 +193,6 @@ if(ok){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-blastConfetti();
 }else{
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
@@ -243,7 +222,12 @@ goHome();
 }}
 
 function prevQ(){if(i>0){i--;load();}}
-function goHome(){i=0;clearInterval(timer);show("catScreen");}
+
+function goHome(){
+i=0;
+clearInterval(timer);
+show("startScreen");   /* ✅ FIXED */
+}
 
 function startApp(){
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
