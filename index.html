@@ -85,10 +85,12 @@ pointer-events:none;
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
 </div>
 
+<!-- LEVEL SCREEN + BACK BUTTON -->
 <div id="levelScreen" class="hidden">
 <button class="btn p1" onclick="selectLevel(0)">Easy</button>
 <button class="btn p2" onclick="selectLevel(1)">Medium</button>
 <button class="btn p3" onclick="selectLevel(2)">Hard</button>
+<button class="btn p4" onclick="backToCategory()">⬅ Back</button>
 </div>
 
 <div id="gameScreen" class="hidden">
@@ -98,14 +100,13 @@ pointer-events:none;
 <button class="btn p2" onclick="prevQ()">⬅ Prev</button>
 <button class="btn p3" onclick="nextQ()">Next ➡</button>
 <button class="btn p4" onclick="goHome()">🏠 Home</button>
-
 </div>
 
 </div>
 
 <script>
 
-/* 🔊 FIXED SOUND SYSTEM */
+/* SOUND */
 function sound(type){
 let s="";
 if(type==="welcome") s="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
@@ -114,16 +115,15 @@ if(type==="wrong") s="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
 if(s) new Audio(s).play();
 }
 
-/* 🎤 CARTOON VOICE (IMPROVED SIMULATION) */
+/* VOICE */
 function speak(text){
 let msg=new SpeechSynthesisUtterance(text);
 msg.rate=0.75;
 msg.pitch=1.8;
-msg.lang="en-US";
 speechSynthesis.speak(msg);
 }
 
-/* 🎉 CONFETTI FIX (FASTER BUT SMOOTH) */
+/* CONFETTI */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
@@ -132,13 +132,13 @@ canvas.height=window.innerHeight;
 let parts=[];
 
 function blast(){
-for(let i=0;i<120;i++){   // 🔥 more particles
+for(let i=0;i<120;i++){
 parts.push({
 x:Math.random()*canvas.width,
 y:0,
 r:Math.random()*6+2,
 c:`hsl(${Math.random()*360},100%,50%)`,
-speed:3.5   // 🔥 faster fall
+speed:3.5
 });
 }
 }
@@ -157,111 +157,93 @@ requestAnimationFrame(draw);
 }
 draw();
 
-/* 📚 QUESTIONS (UNCHANGED) */
+/* 📚 FULL QUESTIONS RESTORED */
 const data={
 math:[
 [
 {q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"4+5=?",o:["7","8","9","10"],a:2}
+{q:"4+5=?",o:["7","8","9","10"],a:2},
+{q:"6+2=?",o:["6","7","8","9"],a:2}
 ],
 [
-{q:"10+5=?",o:["14","15","16","17"],a:1}
+{q:"10+5=?",o:["14","15","16","17"],a:1},
+{q:"12+6=?",o:["17","18","19","20"],a:1}
 ],
 [
-{q:"20+15=?",o:["30","35","40","45"],a:1}
+{q:"20+15=?",o:["30","35","40","45"],a:1},
+{q:"25+10=?",o:["30","35","40","45"],a:1}
 ]
 ],
 
 english:[
 [
-{q:"Apple is?",o:["Fruit","Car","Animal","City"],a:0}
+{q:"Apple is?",o:["Fruit","Car","Animal","City"],a:0},
+{q:"Dog says?",o:["Bark","Meow","Moo","Roar"],a:0}
 ],
 [
+{q:"Opposite Big?",o:["Small","Tall","Huge","Long"],a:0},
 {q:"Opposite Hot?",o:["Cold","Warm","Fire","Heat"],a:0}
 ],
 [
-{q:"Past go?",o:["Went","Goed","Gone","Going"],a:0}
+{q:"Past go?",o:["Went","Goed","Gone","Going"],a:0},
+{q:"Past eat?",o:["Ate","Eated","Eat","Eating"],a:0}
 ]
 ],
 
 gk:[
 [
-{q:"Capital India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
+{q:"Capital India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
+{q:"Sun is?",o:["Star","Planet","Moon","Rock"],a:0}
 ],
 [
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0}
-],
-[
+{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
 {q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0}
+],
+[
+{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0}
 ]
 ]
 };
 
 /* STATE */
-let cat="",level=0,i=0,stars=0,coins=0;
+let cat="",level=0,i=0;
 
-/* 🔊 START */
+/* START */
 function startGame(){
 sound("welcome");
 show("catScreen");
 }
 
-/* 🎨 THEMES */
-function changeTheme(){
-let body=document.body;
-let card=document.getElementById("card");
-
-if(body.classList.contains("dark")){
-body.className="neon";
-card.className="card neon";
-}
-else if(body.classList.contains("neon")){
-body.className="kids";
-card.className="card kids";
-}
-else{
-body.className="dark";
-card.className="card dark";
-}
-}
-
-/* GAME */
+/* CATEGORY */
 function selectCat(c){cat=c;show("levelScreen");}
 
-/* 🔓 LEVEL UNLOCK SYSTEM */
+/* LEVEL FIX (NO LOCK BUG) */
 function selectLevel(l){
-let unlocked=JSON.parse(localStorage.getItem("unlock"))||[true,false,false];
-
-if(!unlocked[l]){
-alert("Level locked! Complete previous level");
-return;
-}
-
 level=l;i=0;show("gameScreen");load();
 }
 
+/* LOAD */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
-
-/* 🎤 VOICE FIX */
-speechSynthesis.cancel();
-speak(q.q);
 
 let html="";
 q.o.forEach((o,idx)=>{
 html+=`<button class="btn p1" onclick="check(${idx})">${o}</button>`;
 });
 document.getElementById("opts").innerHTML=html;
+
+/* voice */
+speechSynthesis.cancel();
+speak(q.q);
 }
 
 function check(ans){
 let q=data[cat][level][i];
 
 if(ans==q.a){
-stars++;coins+=10;
-blast();
 sound("correct");
+blast();
 }else{
 sound("wrong");
 }
@@ -273,14 +255,6 @@ function nextQ(){
 if(i<data[cat][level].length-1){
 i++;load();
 }else{
-
-/* unlock next level */
-let unlock=JSON.parse(localStorage.getItem("unlock"))||[true,false,false];
-unlock[level+1]=true;
-localStorage.setItem("unlock",JSON.stringify(unlock));
-
-saveScore();
-
 show("catScreen");
 }
 }
@@ -291,19 +265,16 @@ if(i>0){i--;load();}
 
 function goHome(){show("catScreen");}
 
+/* BACK BUTTON */
+function backToCategory(){
+show("catScreen");
+}
+
+/* SCREEN SWITCH */
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
-}
-
-/* 🏆 LEADERBOARD */
-function saveScore(){
-let board=JSON.parse(localStorage.getItem("board"))||[];
-board.push(stars);
-board.sort((a,b)=>b-a);
-board=board.slice(0,5);
-localStorage.setItem("board",JSON.stringify(board));
 }
 
 </script>
