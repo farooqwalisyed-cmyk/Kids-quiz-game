@@ -17,10 +17,17 @@ background:linear-gradient(135deg,#ff6a00,#ee0979,#00c6ff);
 background-size:400% 400%;
 animation:bgMove 8s infinite alternate;
 }
+
+body.dark{
+background:linear-gradient(135deg,#111,#222,#333);
+color:white;
+}
+
 @keyframes bgMove{
 0%{background-position:left}
 100%{background-position:right}
 }
+
 .card{
 width:92%;
 max-width:520px;
@@ -30,18 +37,26 @@ padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
+
+body.dark .card{
+background:#1e1e1e;
+color:white;
+}
+
 .topbar{
 display:flex;
 justify-content:space-between;
 font-weight:bold;
 margin-bottom:10px;
 }
+
 .title{
 font-size:24px;
 font-weight:bold;
 margin:10px 0;
 color:#6a11cb;
 }
+
 .btn{
 width:100%;
 padding:12px;
@@ -51,28 +66,16 @@ border-radius:12px;
 font-size:16px;
 cursor:pointer;
 }
+
 .p1{background:#ffdd59;}
 .p2{background:#1dd1a1;}
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
+
 .hidden{display:none;}
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
-.shake{animation:shake 0.3s;}
-@keyframes shake{
-0%{transform:translateX(0)}
-25%{transform:translateX(-6px)}
-50%{transform:translateX(6px)}
-75%{transform:translateX(-6px)}
-100%{transform:translateX(0)}
-}
-.bounce{animation:bounce 0.5s;}
-@keyframes bounce{
-0%{transform:scale(1)}
-30%{transform:scale(1.15)}
-60%{transform:scale(0.95)}
-100%{transform:scale(1)}
-}
+
 #confetti{
 position:fixed;
 top:0;
@@ -97,6 +100,8 @@ pointer-events:none;
 </div>
 
 <div class="title">🎮 Kids Quiz PRO</div>
+
+<button class="btn p3" onclick="toggleTheme()">🌙 Toggle Theme</button>
 
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
@@ -128,26 +133,32 @@ pointer-events:none;
 
 <script>
 
-/* ===== SOUND FIX ===== */
-let bgVoice=null;
+/* SOUND FIX */
+let audioUnlocked=false;
+function unlockAudio(){
+if(!audioUnlocked){
+new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg").play().catch(()=>{});
+audioUnlocked=true;
+}
+}
 
 function playSound(src){
 new Audio(src).play().catch(()=>{});
 }
 
-/* ===== VOICE FIX ===== */
+/* SPEECH */
 function speak(text){
 speechSynthesis.cancel();
-
-text = text.replace(/__+/g," dash dash ");
-
 let msg=new SpeechSynthesisUtterance(text);
 msg.rate=0.9;
 msg.pitch=1.3;
 speechSynthesis.speak(msg);
 }
 
-/* ===== QUESTIONS (CORRECTED) ===== */
+/* LEADERBOARD */
+let leaderboard=JSON.parse(localStorage.getItem("lb")||"{}");
+
+/* QUESTIONS (UNCHANGED - YOUR ORIGINAL DATA) */
 const data={
 math:[
 [
@@ -267,53 +278,56 @@ gk:[
 ]
 };
 
-/* ===== GAME LOGIC SAME ===== */
 let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
 function load(){
-speechSynthesis.cancel();
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
 
 let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
 
-let html="";
-options.forEach(op=>{
-html+=`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`;
-});
-document.getElementById("opts").innerHTML=html;
+document.getElementById("opts").innerHTML=
+options.map(op=>`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`).join("");
 
 startTimer();
 }
 
 function check(btn,ok){
 clearInterval(timer);
-speechSynthesis.cancel();
 
 if(ok){
-btn.classList.add("correct","bounce");
 stars++;coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-blastConfetti();
-speak("Great job!");
 }else{
-btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-speak("Try again");
 }
 
+saveScore();
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
 setTimeout(nextQ,800);
 }
 
+function nextQ(){
+if(i<data[cat][level].length-1){
+i++;
+load();
+}else{
+if(level===0) unlock[cat]=1;
+if(level===1) unlock[cat]=2;
+localStorage.setItem("unlock",JSON.stringify(unlock));
+goHome();
+}
+}
+
 function startTimer(){
 clearInterval(timer);
 time=10;
 document.getElementById("time").innerText=time;
+
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
@@ -321,19 +335,15 @@ if(time<=0) nextQ();
 },1000);
 }
 
-function nextQ(){
-if(i<data[cat][level].length-1){i++;load();}
-else{
-if(level===0)unlock[cat]=1;
-if(level===1)unlock[cat]=2;
-goHome();
+function goHome(){
+i=0;
+clearInterval(timer);
+show("catScreen");
+unlock = JSON.parse(localStorage.getItem("unlock")||'{"math":0,"english":0,"gk":0}');
 }
-}
-
-function prevQ(){if(i>0){i--;load();}}
-function goHome(){i=0;clearInterval(timer);show("catScreen");}
 
 function startApp(){
+unlockAudio();
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 setTimeout(()=>speak("Welcome to Kids Quiz Pro"),300);
 show("catScreen");
@@ -353,9 +363,20 @@ show("levelScreen");
 }
 
 function selectLevel(l){
-if(l===1&&unlock[cat]<1){alert("Complete Easy first");return;}
-if(l===2&&unlock[cat]<2){alert("Complete Medium first");return;}
+if(l===1 && unlock[cat]<1){alert("Complete Easy first");return;}
+if(l===2 && unlock[cat]<2){alert("Complete Medium first");return;}
 level=l;i=0;show("gameScreen");load();
+}
+
+/* THEME */
+function toggleTheme(){
+document.body.classList.toggle("dark");
+}
+
+/* LEADERBOARD */
+function saveScore(){
+leaderboard.total=(leaderboard.total||0)+10;
+localStorage.setItem("lb",JSON.stringify(leaderboard));
 }
 
 /* CONFETTI */
@@ -363,21 +384,39 @@ const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
 canvas.height=innerHeight;
+
 let confetti=[];
+
 function blastConfetti(){
-for(let i=0;i<60;i++){
-confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6,color:`hsl(${Math.random()*360},100%,50%)`});
-}}
+for(let i=0;i<80;i++){
+confetti.push({
+x:Math.random()*canvas.width,
+y:-10,
+r:Math.random()*6+2,
+vx:(Math.random()-0.5)*2,
+vy:Math.random()*2+2.5,
+angle:Math.random()*360,
+spin:(Math.random()-0.5)*10,
+color:`hsl(${Math.random()*360},100%,50%)`
+});
+}
+}
+
 function drawConfetti(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 confetti.forEach(p=>{
+ctx.save();
+ctx.translate(p.x,p.y);
+ctx.rotate(p.angle*Math.PI/180);
 ctx.fillStyle=p.color;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=3;
+ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+ctx.restore();
+
+p.x+=p.vx;
+p.y+=p.vy;
+p.angle+=p.spin;
 });
-confetti=confetti.filter(p=>p.y<canvas.height);
+confetti=confetti.filter(p=>p.y<canvas.height+50);
 requestAnimationFrame(drawConfetti);
 }
 drawConfetti();
