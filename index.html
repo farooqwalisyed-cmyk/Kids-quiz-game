@@ -33,7 +33,6 @@ box-shadow:0 10px 25px rgba(0,0,0,0.3);
 .topbar{
 display:flex;
 justify-content:space-between;
-align-items:center;
 font-weight:bold;
 margin-bottom:10px;
 }
@@ -60,19 +59,21 @@ cursor:pointer;
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
-.progress{
-width:100%;
-height:8px;
-background:#ddd;
-border-radius:10px;
-margin-bottom:10px;
-overflow:hidden;
+.bounce{animation:bounce 0.5s;}
+@keyframes bounce{
+0%{transform:scale(1)}
+30%{transform:scale(1.15)}
+60%{transform:scale(0.95)}
+100%{transform:scale(1)}
 }
-.bar{
-height:100%;
-width:0%;
-background:#6a11cb;
-transition:0.3s;
+
+.shake{animation:shake 0.3s;}
+@keyframes shake{
+0%{transform:translateX(0)}
+25%{transform:translateX(-6px)}
+50%{transform:translateX(6px)}
+75%{transform:translateX(-6px)}
+100%{transform:translateX(0)}
 }
 </style>
 </head>
@@ -85,27 +86,25 @@ transition:0.3s;
 <div>⭐ <span id="stars">0</span></div>
 <div>🪙 <span id="coins">0</span></div>
 <div>⏱️ <span id="time">10</span></div>
-<button onclick="toggleMusic()">🔊</button>
 </div>
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
-<div class="progress"><div class="bar" id="bar"></div></div>
-
 <div id="startScreen">
-<button class="btn p1" onclick="startApp()">Tap to Start</button>
+<button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
 </div>
 
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
+<button class="btn p1" onclick="goHome()">🏠 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
-<button class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
-<button class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
 </div>
 
 <div id="gameScreen" class="hidden">
@@ -121,108 +120,100 @@ transition:0.3s;
 
 <script>
 
-/* ===== MUSIC ===== */
-let music=new Audio("https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg");
-music.loop=true;
-function toggleMusic(){
-music.paused?music.play():music.pause();
-}
-
-/* ===== SAVE ===== */
-function saveGame(){
-localStorage.setItem("quizSave",JSON.stringify({stars,coins,unlock}));
-}
-function loadGame(){
-let d=JSON.parse(localStorage.getItem("quizSave"));
-if(d){stars=d.stars;coins=d.coins;unlock=d.unlock;}
-}
+/* ===== BACKGROUND MUSIC ===== */
+let bgMusic = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=kids-happy-110917.mp3");
+bgMusic.loop = true;
 
 /* ===== VOICE ===== */
-function speak(t){
-speechSynthesis.cancel();
-speechSynthesis.speak(new SpeechSynthesisUtterance(t));
-}
-function voice(type){
-speak(type==="good"?"Great job!":"Try again!");
+function speak(text){
+let msg = new SpeechSynthesisUtterance(text);
+msg.rate = 1;
+speechSynthesis.speak(msg);
 }
 
-/* ===== QUESTIONS (FULL 10 EACH) ===== */
-const data={
+/* ===== SOUND ===== */
+function playSound(src){
+new Audio(src).play();
+}
+
+/* ===== DATA (ALL FIXED QUESTIONS) ===== */
+const data = {
+
 math:[
 [
-{q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"4+6=?",o:["8","9","10","11"],a:2},
-{q:"5+7=?",o:["11","12","13","14"],a:1},
-{q:"6+8=?",o:["12","13","14","15"],a:2},
-{q:"9+5=?",o:["13","14","15","16"],a:1},
-{q:"3+9=?",o:["11","12","13","14"],a:1},
-{q:"8+7=?",o:["14","15","16","17"],a:1},
-{q:"6+6=?",o:["11","12","13","14"],a:1},
-{q:"7+8=?",o:["14","15","16","17"],a:1},
-{q:"9+9=?",o:["17","18","19","20"],a:1}
+{q:"6+8=?",o:["12","14","16","18"],a:1},
+{q:"7+9=?",o:["14","16","18","20"],a:1},
+{q:"8+10=?",o:["16","18","20","22"],a:1},
+{q:"9+6=?",o:["13","15","17","19"],a:1},
+{q:"12+5=?",o:["15","17","19","21"],a:1},
+{q:"11+7=?",o:["16","18","20","22"],a:1},
+{q:"10+9=?",o:["17","19","21","23"],a:1},
+{q:"13+6=?",o:["17","19","21","23"],a:1},
+{q:"14+5=?",o:["17","19","21","23"],a:1},
+{q:"15+4=?",o:["17","19","21","23"],a:1}
 ],
 [
-{q:"12+8=?",o:["18","19","20","21"],a:2},
-{q:"15+7=?",o:["20","21","22","23"],a:2},
-{q:"18-6=?",o:["10","11","12","13"],a:2},
-{q:"20-9=?",o:["10","11","12","13"],a:1},
-{q:"14+5=?",o:["18","19","20","21"],a:1},
-{q:"16+4=?",o:["18","19","20","21"],a:2},
-{q:"25-10=?",o:["10","15","20","25"],a:1},
-{q:"30-12=?",o:["16","17","18","19"],a:2},
-{q:"11+11=?",o:["20","21","22","23"],a:2},
-{q:"13+6=?",o:["18","19","20","21"],a:1}
+{q:"12×2=?",o:["20","22","24","26"],a:2},
+{q:"15×2=?",o:["25","30","35","40"],a:1},
+{q:"20÷4=?",o:["4","5","6","7"],a:1},
+{q:"18÷3=?",o:["5","6","7","8"],a:1},
+{q:"14×2=?",o:["24","26","28","30"],a:2},
+{q:"16×2=?",o:["30","32","34","36"],a:1},
+{q:"21÷3=?",o:["6","7","8","9"],a:1},
+{q:"24÷4=?",o:["5","6","7","8"],a:1},
+{q:"30÷5=?",o:["5","6","7","8"],a:1},
+{q:"18×2=?",o:["32","34","36","38"],a:2}
 ],
 [
-{q:"25×2=?",o:["40","45","50","55"],a:2},
+{q:"25×4=?",o:["90","100","110","120"],a:1},
 {q:"36÷6=?",o:["5","6","7","8"],a:1},
-{q:"12×3=?",o:["30","32","34","36"],a:3},
-{q:"49÷7=?",o:["6","7","8","9"],a:1},
-{q:"15×4=?",o:["50","55","60","65"],a:2},
+{q:"45÷5=?",o:["7","8","9","10"],a:2},
+{q:"32×2=?",o:["60","62","64","66"],a:2},
+{q:"48÷6=?",o:["6","7","8","9"],a:2},
+{q:"56÷7=?",o:["6","7","8","9"],a:2},
 {q:"64÷8=?",o:["6","7","8","9"],a:2},
-{q:"18×2=?",o:["32","34","36","38"],a:2},
+{q:"72÷9=?",o:["6","7","8","9"],a:2},
 {q:"81÷9=?",o:["7","8","9","10"],a:2},
-{q:"20×3=?",o:["50","55","60","65"],a:2},
-{q:"100÷10=?",o:["8","9","10","11"],a:2}
+{q:"90÷10=?",o:["7","8","9","10"],a:2}
 ]
 ],
 
 english:[
 [
 {q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
-{q:"Dog says ?",o:["Meow","Bark","Moo","Quack"],a:1},
-{q:"Sky is ?",o:["Blue","Green","Red","Black"],a:0},
-{q:"Cat has ?",o:["2 legs","4 legs","6 legs","8 legs"],a:1},
-{q:"Sun gives ?",o:["Rain","Light","Snow","Wind"],a:1},
-{q:"Bird can ?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Fish lives in ?",o:["Air","Water","Land","Tree"],a:1},
-{q:"Grass is ?",o:["Blue","Green","Red","Black"],a:1},
-{q:"Fire is ?",o:["Cold","Hot","Wet","Soft"],a:1},
-{q:"Ice is ?",o:["Hot","Cold","Dry","Warm"],a:1}
+{q:"Dog has how many legs?",o:["2","3","4","5"],a:2},
+{q:"Bird can?",o:["Fly","Swim","Run","Jump"],a:0},
+{q:"Sun gives?",o:["Light","Rain","Snow","Ice"],a:0},
+{q:"Cat says?",o:["Meow","Bark","Moo","Quack"],a:0},
+{q:"Sky is?",o:["Blue","Green","Red","Black"],a:0},
+{q:"Fish lives in?",o:["Water","Air","Land","Tree"],a:0},
+{q:"Cow gives?",o:["Milk","Water","Juice","Oil"],a:0},
+{q:"Fire is?",o:["Hot","Cold","Wet","Soft"],a:0},
+{q:"Ice is?",o:["Cold","Hot","Dry","Hard"],a:0}
 ],
 [
-{q:"He - a boy",o:["is","are","am","be"],a:0},
-{q:"They - playing",o:["is","are","am","be"],a:1},
-{q:"She - happy",o:["is","are","am","be"],a:0},
-{q:"We - friends",o:["is","are","am","be"],a:1},
-{q:"I - ready",o:["is","are","am","be"],a:2},
-{q:"You - smart",o:["is","are","am","be"],a:1},
-{q:"Dog - barking",o:["is","are","am","be"],a:0},
-{q:"Birds - flying",o:["is","are","am","be"],a:1},
-{q:"He - sad",o:["is","are","am","be"],a:0},
-{q:"We - ready",o:["is","are","am","be"],a:1}
+{q:"He ___ playing",o:["is","are","am","be"],a:0},
+{q:"They ___ happy",o:["is","are","am","be"],a:1},
+{q:"I ___ a boy",o:["is","are","am","be"],a:2},
+{q:"She ___ reading",o:["is","are","am","be"],a:0},
+{q:"We ___ friends",o:["is","are","am","be"],a:1},
+{q:"You ___ smart",o:["is","are","am","be"],a:1},
+{q:"Dog ___ barking",o:["is","are","am","be"],a:0},
+{q:"Birds ___ flying",o:["is","are","am","be"],a:1},
+{q:"He ___ tall",o:["is","are","am","be"],a:0},
+{q:"I ___ ready",o:["is","are","am","be"],a:2}
 ],
 [
 {q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Eat past tense?",o:["Ate","Eat","Eated","Eating"],a:0},
-{q:"Run past tense?",o:["Ran","Runed","Running","Runned"],a:0},
-{q:"See past tense?",o:["Saw","Seen","Seeed","Seeing"],a:0},
-{q:"Come past tense?",o:["Came","Comed","Coming","Come"],a:0},
-{q:"Take past tense?",o:["Took","Taken","Taked","Taking"],a:0},
-{q:"Give past tense?",o:["Gave","Given","Gived","Giving"],a:0},
-{q:"Write past tense?",o:["Wrote","Written","Writed","Writing"],a:0},
-{q:"Speak past tense?",o:["Spoke","Speaked","Speaking","Spoken"],a:0},
-{q:"Make past tense?",o:["Made","Maked","Making","Make"],a:0}
+{q:"Eat past tense?",o:["Ate","Eated","Eating","Eat"],a:0},
+{q:"Run past tense?",o:["Ran","Runed","Running","Runs"],a:0},
+{q:"Write past?",o:["Wrote","Written","Write","Writed"],a:0},
+{q:"Come past?",o:["Came","Comed","Coming","Come"],a:0},
+{q:"Take past?",o:["Took","Taken","Take","Taked"],a:0},
+{q:"Give past?",o:["Gave","Given","Give","Gived"],a:0},
+{q:"See past?",o:["Saw","Seen","See","Seed"],a:0},
+{q:"Make past?",o:["Made","Making","Make","Maked"],a:0},
+{q:"Speak past?",o:["Spoke","Spoken","Speak","Speaked"],a:0}
 ]
 ],
 
@@ -235,56 +226,49 @@ gk:[
 {q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
 {q:"Currency of India?",o:["Rupee","Dollar","Yen","Euro"],a:0},
 {q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"1 year months?",o:["12","10","11","13"],a:0},
 {q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Day has hours?",o:["24","12","48","36"],a:0}
+{q:"Days in week?",o:["7","5","6","8"],a:0},
+{q:"1 year months?",o:["12","10","11","13"],a:0}
 ],
 [
 {q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
-{q:"HTML is for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Boiling point water?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
+{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
 {q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
+{q:"Gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
 {q:"Sun rises in?",o:["East","West","North","South"],a:0},
 {q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
-{q:"Plant food process?",o:["Photosynthesis","Breathing","Jump","Run"],a:0},
-{q:"Human organ?",o:["Heart","Leaf","Root","Branch"],a:0},
-{q:"PM residence?",o:["Delhi","Mumbai","Goa","Kolkata"],a:0}
+{q:"Plants make food?",o:["Photosynthesis","Running","Jumping","Sleeping"],a:0},
+{q:"Human has?",o:["Heart","Wings","Fins","Leaves"],a:0},
+{q:"PM lives in?",o:["Delhi","Mumbai","Goa","Kolkata"],a:0}
 ],
 [
-{q:"1 KB=?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
+{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
 {q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
 {q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Huge","Medium"],a:0},
+{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
 {q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels?",o:["Air","Space","Light","Vacuum"],a:0},
+{q:"Sound travels in?",o:["Air","Space","Water only","Light"],a:0},
 {q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
 {q:"Earth revolves?",o:["Sun","Moon","Mars","Star"],a:0},
 {q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
 {q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0}
 ]
 ]
+
 };
 
-/* ===== GAME ===== */
-let unlock={math:0,english:0,gk:0};
+/* ===== GAME LOGIC ===== */
+let unlock = JSON.parse(localStorage.getItem("unlock")) || {math:0,english:0,gk:0};
+
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
-
-loadGame();
-
-function updateBar(){
-let total=data[cat][level].length;
-document.getElementById("bar").style.width=((i+1)/total)*100+"%";
-}
 
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
-updateBar();
 
-let options=q.o.map((t,idx)=>({t,ok:idx===q.a}))
-.sort(()=>Math.random()-0.5);
+let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
 
 let html="";
 options.forEach(op=>{
@@ -299,18 +283,19 @@ function check(btn,ok){
 clearInterval(timer);
 
 if(ok){
-btn.classList.add("correct");
+btn.classList.add("correct","bounce");
 stars++; coins+=10;
-voice("good");
+playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+speak("Great job!");
 }else{
-btn.classList.add("wrong");
-voice("bad");
+btn.classList.add("wrong","shake");
+playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+speak("Try again!");
 }
 
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 
-saveGame();
 setTimeout(nextQ,700);
 }
 
@@ -328,11 +313,11 @@ if(time<=0) nextQ();
 
 function nextQ(){
 if(i < data[cat][level].length-1){
-i++;load();
+i++; load();
 }else{
 if(level===0) unlock[cat]=1;
 if(level===1) unlock[cat]=2;
-saveGame();
+localStorage.setItem("unlock",JSON.stringify(unlock));
 goHome();
 }
 }
@@ -346,7 +331,8 @@ show("catScreen");
 }
 
 function startApp(){
-music.play();
+playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+bgMusic.play();
 show("catScreen");
 }
 
@@ -358,12 +344,18 @@ document.getElementById(id).classList.remove("hidden");
 
 function selectCat(c){
 cat=c;
+
+document.getElementById("medBtn").innerText = unlock[cat]>=1?"Medium":"Medium 🔒";
+document.getElementById("hardBtn").innerText = unlock[cat]>=2?"Hard":"Hard 🔒";
+
 show("levelScreen");
 }
 
 function selectLevel(l){
-level=l;
-i=0;
+if(l===1 && unlock[cat]<1){alert("Complete Easy first");return;}
+if(l===2 && unlock[cat]<2){alert("Complete Medium first");return;}
+
+level=l; i=0;
 show("gameScreen");
 load();
 }
