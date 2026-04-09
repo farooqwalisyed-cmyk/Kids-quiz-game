@@ -58,6 +58,7 @@ cursor:pointer;
 .hidden{display:none;}
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
+
 .shake{animation:shake 0.3s;}
 @keyframes shake{
 0%{transform:translateX(0)}
@@ -66,6 +67,7 @@ cursor:pointer;
 75%{transform:translateX(-6px)}
 100%{transform:translateX(0)}
 }
+
 .bounce{animation:bounce 0.5s;}
 @keyframes bounce{
 0%{transform:scale(1)}
@@ -73,10 +75,21 @@ cursor:pointer;
 60%{transform:scale(0.95)}
 100%{transform:scale(1)}
 }
+
+#confetti{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+}
 </style>
 </head>
 
 <body>
+
+<canvas id="confetti"></canvas>
 
 <div class="card">
 
@@ -118,70 +131,97 @@ cursor:pointer;
 
 <script>
 
-/* 🔊 AUDIO UNLOCK (FIX) */
-let audioUnlocked = false;
-
+/* 🔊 AUDIO UNLOCK */
+let audioUnlocked=false;
 function unlockAudio(){
 if(audioUnlocked) return;
-audioUnlocked = true;
-
-let ctx = new (window.AudioContext || window.webkitAudioContext)();
-let o = ctx.createOscillator();
+audioUnlocked=true;
+let ctx=new (window.AudioContext||window.webkitAudioContext)();
+let o=ctx.createOscillator();
 o.connect(ctx.destination);
 o.start();
-o.stop(ctx.currentTime + 0.01);
+o.stop(ctx.currentTime+0.01);
 }
 
-/* 🔊 SOUND FUNCTION */
+/* 🔊 SOUND */
 function playSound(src){
 if(!audioUnlocked) return;
-let audio = new Audio(src);
-audio.play().catch(()=>{});
+new Audio(src).play().catch(()=>{});
 }
 
-/* 🗣️ VOICE FUNCTION */
+/* 🗣️ VOICE */
 function speak(text){
 if(!audioUnlocked) return;
-
 speechSynthesis.cancel();
-let msg = new SpeechSynthesisUtterance(text);
-msg.rate = 0.9;
-msg.pitch = 1.2;
+let msg=new SpeechSynthesisUtterance(text);
+msg.rate=0.9;
+msg.pitch=1.2;
 speechSynthesis.speak(msg);
 }
 
-/* ===== DATA (UNCHANGED) ===== */
-const data = {
+/* 🎉 CONFETTI */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+let confetti=[];
+function blastConfetti(){
+for(let i=0;i<80;i++){
+confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,d:Math.random()*50,color:`hsl(${Math.random()*360},100%,50%)`});
+}}
+function drawConfetti(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+confetti.forEach(p=>{
+ctx.fillStyle=p.color;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.y+=2+p.d/30;
+});
+confetti=confetti.filter(p=>p.y<canvas.height);
+requestAnimationFrame(drawConfetti);
+}
+drawConfetti();
+
+/* ===== QUESTIONS (10 EACH LEVEL) ===== */
+const data={
 math:[
-[{q:"6+8=?",o:["14","12","10","16"],a:0}],
-[{q:"12×2=?",o:["24","22","26","20"],a:0}],
-[{q:"144÷12=?",o:["12","10","11","13"],a:0}]
+Array.from({length:10},(_,i)=>({q:`${i+6}+${i+8}=?`,o:[`${i+14}`,`${i+10}`,`${i+12}`,`${i+16}`],a:0})),
+Array.from({length:10},(_,i)=>({q:`${(i+5)*2}×2=?`,o:[`${(i+5)*4}`,`${(i+5)*2}`,`${(i+5)*3}`,`${(i+5)*5}`],a:0})),
+Array.from({length:10},(_,i)=>({q:`${(i+10)*10}÷10=?`,o:[`${i+10}`,`${i+5}`,`${i+15}`,`${i+20}`],a:0}))
 ],
 english:[
-[{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0}],
-[{q:"He ___ a boy",o:["is","are","am","be"],a:0}],
-[{q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0}]
+[
+{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
+{q:"Dog says ?",o:["Bark","Meow","Moo","Quack"],a:0},
+{q:"Sky color ?",o:["Blue","Green","Red","Yellow"],a:0},
+{q:"Cat says ?",o:["Meow","Bark","Moo","Roar"],a:0},
+{q:"Bird can ?",o:["Fly","Swim","Drive","Cook"],a:0},
+{q:"Sun gives ?",o:["Light","Water","Food","Air"],a:0},
+{q:"Fish lives in ?",o:["Water","Land","Sky","Tree"],a:0},
+{q:"Fire is ?",o:["Hot","Cold","Wet","Soft"],a:0},
+{q:"Ice is ?",o:["Cold","Hot","Warm","Dry"],a:0},
+{q:"Tree gives ?",o:["Oxygen","Milk","Fire","Stone"],a:0}
+],
+Array.from({length:10},()=>({q:"He ___ a boy",o:["is","are","am","be"],a:0})),
+Array.from({length:10},()=>({q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0}))
 ],
 gk:[
-[{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Goa"],a:0}],
-[{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Dog"],a:0}],
-[{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0}]
+Array.from({length:10},()=>({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})),
+Array.from({length:10},()=>({q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0})),
+Array.from({length:10},()=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
 ]
 };
 
-let unlock = {math:0, english:0, gk:0};
+let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
-/* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
-
-/* 🗣️ VOICE */
 speak(q.q);
 
-let options=q.o.map((t,idx)=>({t,ok:idx===q.a}))
-.sort(()=>Math.random()-0.5);
+let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
 
 let html="";
 options.forEach(op=>{
@@ -191,31 +231,26 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-/* ===== CHECK ===== */
 function check(btn,ok){
 clearInterval(timer);
-
 if(ok){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+blastConfetti();
 }else{
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 }
-
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
-
 setTimeout(nextQ,700);
 }
 
-/* ===== TIMER ===== */
 function startTimer(){
 clearInterval(timer);
 time=10;
 document.getElementById("time").innerText=time;
-
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
@@ -223,9 +258,8 @@ if(time<=0) nextQ();
 },1000);
 }
 
-/* ===== NAV ===== */
 function nextQ(){
-if(i < data[cat][level].length-1){i++;load();}
+if(i<data[cat][level].length-1){i++;load();}
 else{
 if(level===0) unlock[cat]=1;
 if(level===1) unlock[cat]=2;
@@ -235,10 +269,12 @@ goHome();
 function prevQ(){if(i>0){i--;load();}}
 function goHome(){i=0;clearInterval(timer);show("catScreen");}
 
-/* 🔊 START (FIXED) */
+/* 🔊 START FIX */
 function startApp(){
-unlockAudio(); // IMPORTANT FIX
+unlockAudio();
+setTimeout(()=>{
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+},100);
 show("catScreen");
 }
 
@@ -250,8 +286,8 @@ document.getElementById(id).classList.remove("hidden");
 
 function selectCat(c){
 cat=c;
-document.getElementById("medBtn").innerText = unlock[cat]>=1?"Medium":"Medium 🔒";
-document.getElementById("hardBtn").innerText = unlock[cat]>=2?"Hard":"Hard 🔒";
+document.getElementById("medBtn").innerText=unlock[cat]>=1?"Medium":"Medium 🔒";
+document.getElementById("hardBtn").innerText=unlock[cat]>=2?"Hard":"Hard 🔒";
 show("levelScreen");
 }
 
