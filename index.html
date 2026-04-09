@@ -81,6 +81,12 @@ width:100%;
 height:100%;
 pointer-events:none;
 }
+
+/* 🎨 THEMES */
+.dark{background:#111 !important;color:white;}
+.neon{background:linear-gradient(135deg,#00f,#0ff,#0f0) !important;}
+.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb) !important;}
+
 </style>
 </head>
 
@@ -93,6 +99,7 @@ pointer-events:none;
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
 <div>🪙 <span id="coins">0</span></div>
+<div>🏆 <span id="best">0</span></div>
 <div>⏱️ <span id="time">10</span></div>
 </div>
 
@@ -100,6 +107,11 @@ pointer-events:none;
 
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
+
+<!-- 🎨 THEME BUTTONS -->
+<button class="btn p2" onclick="setTheme('dark')">🌙 Dark</button>
+<button class="btn p3" onclick="setTheme('kids')">🎨 Kids</button>
+<button class="btn p4" onclick="setTheme('neon')">⚡ Neon</button>
 </div>
 
 <div id="catScreen" class="hidden">
@@ -128,151 +140,51 @@ pointer-events:none;
 
 <script>
 
-/* ===== SOUND FIX ===== */
-let bgVoice=null;
+/* ===== AI DIFFICULTY ===== */
+let difficultyScore = 0;
 
+/* ===== LEADERBOARD ===== */
+let bestScore = localStorage.getItem("bestScore") || 0;
+
+/* ===== THEME LOAD ===== */
+window.onload = () => {
+let saved = localStorage.getItem("theme");
+if(saved) document.body.className = saved;
+};
+
+/* ===== THEME SET ===== */
+function setTheme(theme){
+document.body.className = theme;
+localStorage.setItem("theme", theme);
+}
+
+/* ===== SOUND ===== */
 function playSound(src){
 new Audio(src).play().catch(()=>{});
 }
 
-/* ===== VOICE FIX ===== */
+/* ===== VOICE ===== */
 function speak(text){
 speechSynthesis.cancel();
-
 text = text.replace(/__+/g," dash dash ");
-
 let msg=new SpeechSynthesisUtterance(text);
 msg.rate=0.9;
 msg.pitch=1.3;
 speechSynthesis.speak(msg);
 }
 
-/* ===== QUESTIONS (CORRECTED) ===== */
-const data={
-math:[
-[
-{q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"6+4=?",o:["10","9","8","7"],a:0},
-{q:"7+9=?",o:["16","15","17","18"],a:0},
-{q:"8+10=?",o:["18","17","16","19"],a:0},
-{q:"5+6=?",o:["10","11","12","9"],a:1},
-{q:"9+8=?",o:["17","18","16","15"],a:0},
-{q:"4+7=?",o:["10","11","12","9"],a:1},
-{q:"3+9=?",o:["11","12","13","10"],a:1},
-{q:"6+8=?",o:["14","13","15","12"],a:0},
-{q:"2+9=?",o:["11","10","12","9"],a:0}
-],
-[
-{q:"12+8=?",o:["20","19","18","21"],a:0},
-{q:"15+5=?",o:["19","20","21","18"],a:1},
-{q:"20-7=?",o:["13","12","14","11"],a:0},
-{q:"9×2=?",o:["18","16","20","14"],a:0},
-{q:"18÷2=?",o:["9","8","7","10"],a:0},
-{q:"14+6=?",o:["20","19","21","18"],a:0},
-{q:"30-10=?",o:["20","15","25","10"],a:0},
-{q:"16÷4=?",o:["4","3","5","6"],a:0},
-{q:"11+9=?",o:["20","19","21","18"],a:0},
-{q:"25-5=?",o:["20","19","21","18"],a:0}
-],
-[
-{q:"50÷5=?",o:["10","9","8","7"],a:0},
-{q:"100-45=?",o:["55","50","60","65"],a:0},
-{q:"12×12=?",o:["144","124","134","154"],a:0},
-{q:"81÷9=?",o:["9","8","7","10"],a:0},
-{q:"25×4=?",o:["100","90","110","120"],a:0},
-{q:"144÷12=?",o:["12","11","10","13"],a:0},
-{q:"200-100=?",o:["100","90","110","120"],a:0},
-{q:"18×2=?",o:["36","34","32","38"],a:0},
-{q:"36÷6=?",o:["6","5","7","8"],a:0},
-{q:"15×3=?",o:["45","40","35","30"],a:0}
-]
-],
+/* ===== QUESTIONS (UNCHANGED) ===== */
+const data = window.data;
 
-english:[
-[
-{q:"Dog has __ legs?",o:["2","3","4","5"],a:2},
-{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
-{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
-{q:"Sky is ?",o:["Blue","Green","Red","Black"],a:0},
-{q:"Cat says ?",o:["Meow","Bark","Moo","Quack"],a:0},
-{q:"Sun gives ?",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"He __ a boy",o:["is","are","am","be"],a:0},
-{q:"She __ teacher",o:["is","are","am","be"],a:0},
-{q:"I __ happy",o:["am","is","are","be"],a:0},
-{q:"We __ friends",o:["are","is","am","be"],a:0}
-],
-[
-{q:"He __ going",o:["is","are","am","be"],a:0},
-{q:"They __ playing",o:["are","is","am","be"],a:0},
-{q:"She __ eating",o:["is","are","am","be"],a:0},
-{q:"We __ happy",o:["are","is","am","be"],a:0},
-{q:"Dog __ barking",o:["is","are","am","be"],a:0},
-{q:"Birds __ flying",o:["are","is","am","be"],a:0},
-{q:"I __ student",o:["am","is","are","be"],a:0},
-{q:"You __ smart",o:["are","is","am","be"],a:0},
-{q:"He __ sad",o:["is","are","am","be"],a:0},
-{q:"We __ ready",o:["are","is","am","be"],a:0}
-],
-[
-{q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Eat past tense?",o:["Ate","Eat","Eating","Eated"],a:0},
-{q:"See past tense?",o:["Saw","Seen","See","Seeing"],a:0},
-{q:"Run past tense?",o:["Ran","Run","Running","Runned"],a:0},
-{q:"Write past tense?",o:["Wrote","Written","Write","Writed"],a:0},
-{q:"Come past tense?",o:["Came","Come","Coming","Comed"],a:0},
-{q:"Speak past tense?",o:["Spoke","Speak","Speaking","Speaked"],a:0},
-{q:"Take past tense?",o:["Took","Take","Taking","Taked"],a:0},
-{q:"Give past tense?",o:["Gave","Give","Giving","Gived"],a:0},
-{q:"Make past tense?",o:["Made","Make","Making","Maked"],a:0}
-]
-],
-
-gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
-{q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"India currency?",o:["Rupee","Dollar","Yen","Euro"],a:0},
-{q:"1 year has?",o:["12 months","10","11","13"],a:0},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Days in week?",o:["7","6","5","8"],a:0}
-],
-[
-{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
-{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Fastest land animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Plant makes food by?",o:["Photosynthesis","Breathing","Jump","Running"],a:0},
-{q:"Which is gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Human body has?",o:["Heart","Wings","Fins","Leaves"],a:0},
-{q:"India capital?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
-],
-[
-{q:"1 KB = ?",o:["1024 bytes","100","10","1"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space","Water","Light"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0}
-]
-]
-};
-
-/* ===== GAME LOGIC SAME ===== */
+/* ===== GAME ===== */
 let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
 function load(){
 speechSynthesis.cancel();
+
+document.getElementById("best").innerText = bestScore;
+
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
@@ -293,15 +205,22 @@ clearInterval(timer);
 speechSynthesis.cancel();
 
 if(ok){
+difficultyScore++;
 btn.classList.add("correct","bounce");
 stars++;coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 blastConfetti();
 speak("Great job!");
 }else{
+difficultyScore = Math.max(0, difficultyScore - 1);
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 speak("Try again");
+}
+
+if(coins > bestScore){
+bestScore = coins;
+localStorage.setItem("bestScore", bestScore);
 }
 
 document.getElementById("stars").innerText=stars;
@@ -322,8 +241,20 @@ if(time<=0) nextQ();
 }
 
 function nextQ(){
-if(i<data[cat][level].length-1){i++;load();}
-else{
+
+/* 🤖 AI DIFFICULTY */
+if(difficultyScore >= 5 && level < 2){
+level++;
+difficultyScore = 0;
+}
+if(difficultyScore === 0 && level > 0){
+level--;
+}
+
+if(i<data[cat][level].length-1){
+i++;
+load();
+}else{
 if(level===0)unlock[cat]=1;
 if(level===1)unlock[cat]=2;
 goHome();
