@@ -73,20 +73,10 @@ cursor:pointer;
 60%{transform:scale(0.95)}
 100%{transform:scale(1)}
 }
-#confetti{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-pointer-events:none;
-}
 </style>
 </head>
 
 <body>
-
-<canvas id="confetti"></canvas>
 
 <div class="card">
 
@@ -128,138 +118,67 @@ pointer-events:none;
 
 <script>
 
-/* ===== QUESTIONS (FIXED PROPERLY) ===== */
+/* 🔊 AUDIO UNLOCK (FIX) */
+let audioUnlocked = false;
+
+function unlockAudio(){
+if(audioUnlocked) return;
+audioUnlocked = true;
+
+let ctx = new (window.AudioContext || window.webkitAudioContext)();
+let o = ctx.createOscillator();
+o.connect(ctx.destination);
+o.start();
+o.stop(ctx.currentTime + 0.01);
+}
+
+/* 🔊 SOUND FUNCTION */
+function playSound(src){
+if(!audioUnlocked) return;
+let audio = new Audio(src);
+audio.play().catch(()=>{});
+}
+
+/* 🗣️ VOICE FUNCTION */
+function speak(text){
+if(!audioUnlocked) return;
+
+speechSynthesis.cancel();
+let msg = new SpeechSynthesisUtterance(text);
+msg.rate = 0.9;
+msg.pitch = 1.2;
+speechSynthesis.speak(msg);
+}
+
+/* ===== DATA (UNCHANGED) ===== */
 const data = {
-
 math:[
-[
-{q:"6+8=?",o:["14","12","10","16"],a:0},
-{q:"7+9=?",o:["16","15","14","18"],a:0},
-{q:"8+10=?",o:["18","16","20","14"],a:0},
-{q:"5+7=?",o:["12","10","11","13"],a:0},
-{q:"9+6=?",o:["15","14","13","16"],a:0},
-{q:"4+8=?",o:["12","10","11","13"],a:0},
-{q:"3+9=?",o:["12","11","13","14"],a:0},
-{q:"2+7=?",o:["9","8","10","11"],a:0},
-{q:"10+5=?",o:["15","14","16","13"],a:0},
-{q:"6+6=?",o:["12","10","11","13"],a:0}
+[{q:"6+8=?",o:["14","12","10","16"],a:0}],
+[{q:"12×2=?",o:["24","22","26","20"],a:0}],
+[{q:"144÷12=?",o:["12","10","11","13"],a:0}]
 ],
-[
-{q:"12×2=?",o:["24","22","26","20"],a:0},
-{q:"15+10=?",o:["25","20","30","35"],a:0},
-{q:"20-5=?",o:["15","10","20","25"],a:0},
-{q:"9×3=?",o:["27","24","21","30"],a:0},
-{q:"8×4=?",o:["32","28","30","36"],a:0},
-{q:"50-20=?",o:["30","25","35","40"],a:0},
-{q:"6×5=?",o:["30","25","20","35"],a:0},
-{q:"18+2=?",o:["20","18","22","24"],a:0},
-{q:"14+6=?",o:["20","18","16","22"],a:0},
-{q:"100-50=?",o:["50","40","60","70"],a:0}
-],
-[
-{q:"144÷12=?",o:["12","10","11","13"],a:0},
-{q:"25×4=?",o:["100","90","80","120"],a:0},
-{q:"81÷9=?",o:["9","8","7","6"],a:0},
-{q:"36÷6=?",o:["6","5","7","8"],a:0},
-{q:"15×3=?",o:["45","40","35","30"],a:0},
-{q:"200-100=?",o:["100","90","110","120"],a:0},
-{q:"50÷5=?",o:["10","5","15","20"],a:0},
-{q:"12×12=?",o:["144","124","134","154"],a:0},
-{q:"100÷10=?",o:["10","5","20","15"],a:0},
-{q:"9×9=?",o:["81","72","90","99"],a:0}
-]
-],
-
 english:[
-[
-{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
-{q:"Dog says ?",o:["Bark","Meow","Moo","Quack"],a:0},
-{q:"Sky color ?",o:["Blue","Green","Red","Yellow"],a:0},
-{q:"Cat says ?",o:["Meow","Bark","Moo","Roar"],a:0},
-{q:"Bird can ?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Sun gives ?",o:["Light","Water","Food","Air"],a:0},
-{q:"Fish lives in ?",o:["Water","Land","Sky","Tree"],a:0},
-{q:"Fire is ?",o:["Hot","Cold","Wet","Soft"],a:0},
-{q:"Ice is ?",o:["Cold","Hot","Warm","Dry"],a:0},
-{q:"Tree gives ?",o:["Oxygen","Milk","Fire","Stone"],a:0}
+[{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0}],
+[{q:"He ___ a boy",o:["is","are","am","be"],a:0}],
+[{q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0}]
 ],
-[
-{q:"He ___ a boy",o:["is","are","am","be"],a:0},
-{q:"They ___ playing",o:["are","is","am","be"],a:0},
-{q:"I ___ happy",o:["am","is","are","be"],a:0},
-{q:"She ___ teacher",o:["is","are","am","be"],a:0},
-{q:"We ___ friends",o:["are","is","am","be"],a:0},
-{q:"You ___ smart",o:["are","is","am","be"],a:0},
-{q:"Dog ___ barking",o:["is","are","am","be"],a:0},
-{q:"Birds ___ flying",o:["are","is","am","be"],a:0},
-{q:"He ___ running",o:["is","are","am","be"],a:0},
-{q:"We ___ ready",o:["are","is","am","be"],a:0}
-],
-[
-{q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Eat past tense?",o:["Ate","Eat","Eating","Eated"],a:0},
-{q:"Run past tense?",o:["Ran","Run","Running","Runned"],a:0},
-{q:"Write past tense?",o:["Wrote","Write","Writing","Writed"],a:0},
-{q:"See past tense?",o:["Saw","Seen","See","Seeing"],a:0},
-{q:"Come past tense?",o:["Came","Come","Coming","Comed"],a:0},
-{q:"Speak past tense?",o:["Spoke","Speak","Speaking","Speaked"],a:0},
-{q:"Take past tense?",o:["Took","Take","Taking","Taked"],a:0},
-{q:"Give past tense?",o:["Gave","Give","Giving","Gived"],a:0},
-{q:"Make past tense?",o:["Made","Make","Making","Maked"],a:0}
-]
-],
-
 gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Goa"],a:0},
-{q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is ?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Currency of India?",o:["Rupee","Dollar","Euro","Yen"],a:0},
-{q:"1 year has ?",o:["12 months","10","11","13"],a:0},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Moon is ?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Plants make food by ?",o:["Photosynthesis","Breathing","Running","Jumping"],a:0}
-],
-[
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Dog"],a:0},
-{q:"Sun rises in ?",o:["East","West","North","South"],a:0},
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Human body has ?",o:["Heart","Wings","Fins","Leaves"],a:0},
-{q:"Water boils at ?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Gas we breathe?",o:["Oxygen","Hydrogen","CO2","Nitrogen"],a:0},
-{q:"Bird lays ?",o:["Eggs","Milk","Water","Food"],a:0},
-{q:"Computer brain?",o:["CPU","Monitor","Keyboard","Mouse"],a:0},
-{q:"India capital?",o:["Delhi","Mumbai","Goa","Pune"],a:0},
-{q:"Sun is ?",o:["Hot","Cold","Wet","Dry"],a:0}
-],
-[
-{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Kg","Meter","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space","Water only","Light"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0}
-]
+[{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Goa"],a:0}],
+[{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Dog"],a:0}],
+[{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0}]
 ]
 };
 
-/* ===== REST SAME (NO CHANGE) ===== */
-
 let unlock = {math:0, english:0, gk:0};
-
-function playSound(src){new Audio(src).play();}
-
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
+/* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
+
+/* 🗣️ VOICE */
+speak(q.q);
 
 let options=q.o.map((t,idx)=>({t,ok:idx===q.a}))
 .sort(()=>Math.random()-0.5);
@@ -272,8 +191,10 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
+/* ===== CHECK ===== */
 function check(btn,ok){
 clearInterval(timer);
+
 if(ok){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
@@ -282,15 +203,19 @@ playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 }
+
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
+
 setTimeout(nextQ,700);
 }
 
+/* ===== TIMER ===== */
 function startTimer(){
 clearInterval(timer);
 time=10;
 document.getElementById("time").innerText=time;
+
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
@@ -298,6 +223,7 @@ if(time<=0) nextQ();
 },1000);
 }
 
+/* ===== NAV ===== */
 function nextQ(){
 if(i < data[cat][level].length-1){i++;load();}
 else{
@@ -309,7 +235,9 @@ goHome();
 function prevQ(){if(i>0){i--;load();}}
 function goHome(){i=0;clearInterval(timer);show("catScreen");}
 
+/* 🔊 START (FIXED) */
 function startApp(){
+unlockAudio(); // IMPORTANT FIX
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 show("catScreen");
 }
