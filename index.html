@@ -41,7 +41,6 @@ font-size:24px;
 font-weight:bold;
 margin:10px 0;
 color:#6a11cb;
-text-shadow:1px 1px 2px #ccc;
 }
 .btn{
 width:100%;
@@ -51,9 +50,7 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
-transition:0.2s;
 }
-.btn:hover{transform:scale(1.03);}
 .p1{background:#ffdd59;}
 .p2{background:#1dd1a1;}
 .p3{background:#54a0ff;}
@@ -131,24 +128,38 @@ pointer-events:none;
 
 <script>
 
-/* ===== LEVEL UNLOCK SYSTEM ===== */
+/* ===== QUESTIONS (FULL ADDED) ===== */
+const data = {
+math:[
+Array.from({length:10},(_,i)=>({q:`${i+1}+${i+2}=?`,o:[`${i}`,`${i+3}`,`${i+5}`,`${i+6}`],a:1})),
+Array.from({length:10},(_,i)=>({q:`${i+5}×2=?`,o:[`${i+5}`,`${(i+5)*2}`,`${i+10}`,`${i+15}`],a:1})),
+Array.from({length:10},(_,i)=>({q:`${(i+2)*10}÷2=?`,o:[`${i+5}`,`${(i+2)*5}`,`${i+10}`,`${i+20}`],a:1}))
+],
+english:[
+Array.from({length:10},(_,i)=>({q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0})),
+Array.from({length:10},(_,i)=>({q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0})),
+Array.from({length:10},(_,i)=>({q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0}))
+],
+gk:[
+Array.from({length:10},(_,i)=>({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})),
+Array.from({length:10},(_,i)=>({q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0})),
+Array.from({length:10},(_,i)=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
+]
+};
+
+/* ===== REST SAME ===== */
+
 let unlock = {math:0, english:0, gk:0};
 
-/* ===== CONFETTI ===== */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
 canvas.height=innerHeight;
+
 let confetti=[];
 function blastConfetti(){
 for(let i=0;i<80;i++){
-confetti.push({
-x:Math.random()*canvas.width,
-y:0,
-r:Math.random()*6+2,
-d:Math.random()*50,
-color:`hsl(${Math.random()*360},100%,50%)`
-});
+confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,d:Math.random()*50,color:`hsl(${Math.random()*360},100%,50%)`});
 }}
 function drawConfetti(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -164,54 +175,8 @@ requestAnimationFrame(drawConfetti);
 }
 drawConfetti();
 
-/* ===== VOICE ===== */
-function speak(text){
-speechSynthesis.cancel();
-speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-}
-
-/* ===== SOUND ===== */
-function playSound(src){ new Audio(src).play(); }
-
-/* ===== QUESTIONS (FULL ADDED) ===== */
-const data = {
-math:[ Array(3).fill(0).map((_,lvl)=>[
-{q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5+3=?",o:["6","7","8","9"],a:2},
-{q:"10-4=?",o:["5","6","7","8"],a:1},
-{q:"3+6=?",o:["7","8","9","10"],a:2},
-{q:"7-2=?",o:["4","5","6","3"],a:1},
-{q:"4+4=?",o:["6","7","8","9"],a:2},
-{q:"9-3=?",o:["5","6","7","8"],a:1},
-{q:"6+2=?",o:["7","8","9","10"],a:1},
-{q:"8-4=?",o:["2","3","4","5"],a:2},
-{q:"1+1=?",o:["1","2","3","4"],a:1}
-])],
-english:[ Array(3).fill(0).map(()=>[
-{q:"Dog has ___ legs?",o:["2","3","4","5"],a:2},
-{q:"Bird can?",o:["Fly","Swim","Run","Walk"],a:0},
-{q:"Apple is a ___",o:["Fruit","Animal","Color","Place"],a:0},
-{q:"Sky is ___",o:["Blue","Green","Red","Black"],a:0},
-{q:"Cat says ___",o:["Meow","Bark","Moo","Quack"],a:0},
-{q:"Sun gives ___",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"He ___ a boy",o:["is","are","am","be"],a:0},
-{q:"She ___ teacher",o:["is","are","am","be"],a:0},
-{q:"I ___ happy",o:["am","is","are","be"],a:0},
-{q:"We ___ friends",o:["is","are","am","be"],a:1}
-])],
-gk:[ Array(3).fill(0).map(()=>[
-{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
-{q:"How many days in a year?",o:["365","360","300","400"],a:0},
-{q:"Sun is a?",o:["Star","Planet","Moon","Asteroid"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"India currency?",o:["Rupee","Dollar","Yen","Euro"],a:0},
-{q:"1 year has?",o:["12 months","10","11","13"],a:0},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0}
-])]
-};
+function speak(t){speechSynthesis.speak(new SpeechSynthesisUtterance(t));}
+function playSound(src){new Audio(src).play();}
 
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
@@ -219,9 +184,14 @@ function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
-let opts=q.o.map((t,i)=>({t,ok:i===q.a})).sort(()=>Math.random()-0.5);
-document.getElementById("opts").innerHTML=
-opts.map(o=>`<button class="btn p1" onclick="check(this,${o.ok})">${o.t}</button>`).join("");
+
+let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
+
+let html="";
+options.forEach(op=>{
+html+=`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`;
+});
+document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
@@ -229,15 +199,15 @@ function check(btn,ok){
 clearInterval(timer);
 if(ok){
 btn.classList.add("correct","bounce");
-stars++;coins+=10;
+stars++; coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 blastConfetti();
 }else{
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 }
-stars.innerText=stars;
-coins.innerText=coins;
+document.getElementById("stars").innerText=stars;
+document.getElementById("coins").innerText=coins;
 setTimeout(nextQ,700);
 }
 
@@ -253,17 +223,15 @@ if(time<=0) nextQ();
 }
 
 function nextQ(){
-if(i<data[cat][level].length-1){i++;load();}
+if(i < data[cat][level].length-1){i++;load();}
 else{
 if(level===0) unlock[cat]=1;
 if(level===1) unlock[cat]=2;
 goHome();
-}
-}
+}}
 
-function prevQ(){ if(i>0){i--;load();} }
-
-function goHome(){ i=0;clearInterval(timer);show("catScreen"); }
+function prevQ(){if(i>0){i--;load();}}
+function goHome(){i=0;clearInterval(timer);show("catScreen");}
 
 function startApp(){
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
@@ -278,8 +246,8 @@ document.getElementById(id).classList.remove("hidden");
 
 function selectCat(c){
 cat=c;
-medBtn.innerText=unlock[cat]>=1?"Medium":"Medium 🔒";
-hardBtn.innerText=unlock[cat]>=2?"Hard":"Hard 🔒";
+document.getElementById("medBtn").innerText = unlock[cat]>=1?"Medium":"Medium 🔒";
+document.getElementById("hardBtn").innerText = unlock[cat]>=2?"Hard":"Hard 🔒";
 show("levelScreen");
 }
 
@@ -290,6 +258,5 @@ level=l;i=0;show("gameScreen");load();
 }
 
 </script>
-
 </body>
 </html>
