@@ -16,6 +16,11 @@ align-items:center;
 transition:0.5s;
 }
 
+/* 🌈 FULL THEMES */
+body.dark{background:#0f172a;}
+body.neon{background:#000;}
+body.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);}
+
 .card{
 width:92%;
 max-width:520px;
@@ -24,21 +29,11 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
-transition:0.5s;
 }
 
-.dark{background:#1e1e1e;color:white;}
-.neon{background:#000;color:#0ff;box-shadow:0 0 20px #0ff;}
-.kids{background:linear-gradient(45deg,#ff9a9e,#fad0c4);}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-.title{font-size:22px;font-weight:bold;margin:10px 0;}
+.card.dark{background:#1e1e1e;color:white;}
+.card.neon{background:#000;color:#0ff;box-shadow:0 0 20px #0ff;}
+.card.kids{background:#fff;}
 
 .btn{
 width:100%;
@@ -48,10 +43,7 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
-transition:0.2s;
 }
-
-.btn:hover{transform:scale(1.03);}
 
 .p1{background:#ffdd59;}
 .p2{background:#1dd1a1;}
@@ -60,14 +52,8 @@ transition:0.2s;
 
 .hidden{display:none;}
 
-.correct{background:#2ecc71 !important; animation:pop 0.3s;}
+.correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
-
-@keyframes pop{
-0%{transform:scale(1)}
-50%{transform:scale(1.2)}
-100%{transform:scale(1)}
-}
 
 canvas{
 position:fixed;
@@ -78,11 +64,11 @@ pointer-events:none;
 </style>
 </head>
 
-<body>
+<body class="kids">
 
 <canvas id="confetti"></canvas>
 
-<div class="card" id="card">
+<div class="card kids" id="card">
 
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
@@ -120,15 +106,60 @@ pointer-events:none;
 
 <script>
 
-/* ===== QUESTIONS ===== */
+/* 🎵 SOUND SYSTEM */
+function sound(type){
+if(type==="welcome"){
+new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg").play();
+}
+if(type==="correct"){
+new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg").play();
+}
+if(type==="wrong"){
+new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg").play();
+}
+}
+
+/* 🎉 CONFETTI */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let parts=[];
+function blast(){
+for(let i=0;i<80;i++){
+parts.push({
+x:Math.random()*canvas.width,
+y:0,
+r:Math.random()*6+2,
+c:`hsl(${Math.random()*360},100%,50%)`
+});
+}
+}
+
+function draw(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+parts.forEach(p=>{
+ctx.fillStyle=p.c;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.y+=3;
+});
+parts=parts.filter(p=>p.y<canvas.height);
+requestAnimationFrame(draw);
+}
+draw();
+
+/* 📚 FULL ORIGINAL QUESTION BANK RESTORED */
 const data={
 math:[
 [
 {q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"5+5=?",o:["9","10","11","12"],a:1},
+{q:"4+5=?",o:["7","8","9","10"],a:2},
 {q:"6+2=?",o:["6","7","8","9"],a:2},
-{q:"3+4=?",o:["5","6","7","8"],a:2},
-{q:"8+1=?",o:["7","8","9","10"],a:2}
+{q:"3+7=?",o:["9","10","11","8"],a:1},
+{q:"5+5=?",o:["9","10","11","12"],a:1}
 ],
 [
 {q:"10+5=?",o:["14","15","16","17"],a:1},
@@ -142,7 +173,7 @@ math:[
 {q:"25+10=?",o:["30","35","40","45"],a:1},
 {q:"30+12=?",o:["40","42","44","46"],a:1},
 {q:"18+17=?",o:["34","35","36","37"],a:1},
-{q:"40+5=?",o:["44","45","46","47"],a:1}
+{q:"22+13=?",o:["33","35","36","37"],a:1}
 ]
 ],
 
@@ -192,55 +223,38 @@ gk:[
 {q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
 {q:"Atom is?",o:["Smallest","Big","Huge","Large"],a:0}
 ]
-]
-};
+];
 
-/* ===== GAME ===== */
+/* 🎮 GAME ENGINE */
 let cat="",level=0,i=0,stars=0,coins=0,time=10,timer;
 
-/* ===== THEME ===== */
+/* 🔊 FIXED WELCOME SOUND */
+function startGame(){
+sound("welcome");
+show("catScreen");
+}
+
+/* 🎨 THEMES */
 function changeTheme(){
-let c=document.getElementById("card");
-if(c.classList.contains("dark")) c.className="card neon";
-else if(c.classList.contains("neon")) c.className="card kids";
-else c.className="card dark";
+let body=document.body;
+let card=document.getElementById("card");
+
+if(body.classList.contains("dark")){
+body.className="neon";
+card.className="card neon";
 }
-
-/* ===== SOUND ===== */
-function beep(){
-new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg").play();
+else if(body.classList.contains("neon")){
+body.className="kids";
+card.className="card kids";
 }
-
-/* ===== CONFETTI ===== */
-const canvas=document.getElementById("confetti");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
-let parts=[];
-function blast(){
-for(let i=0;i<80;i++){
-parts.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,c:`hsl(${Math.random()*360},100%,50%)`});
+else{
+body.className="dark";
+card.className="card dark";
 }
 }
 
-function draw(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-parts.forEach(p=>{
-ctx.fillStyle=p.c;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=3;
-});
-parts=parts.filter(p=>p.y<canvas.height);
-requestAnimationFrame(draw);
-}
-draw();
-
-/* ===== GAME ===== */
-function startGame(){show("catScreen");}
 function selectCat(c){cat=c;show("levelScreen");}
+
 function selectLevel(l){level=l;i=0;show("gameScreen");load();}
 
 function load(){
@@ -255,22 +269,30 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
+/* 🔊 FIXED SOUND LOGIC */
 function check(ans){
 clearInterval(timer);
 let q=data[cat][level][i];
+
 if(ans==q.a){
 stars++;coins+=10;
-blast();beep();
+blast();
+sound("correct");
+}else{
+sound("wrong");
 }
+
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
+
 setTimeout(nextQ,500);
 }
 
-/* ===== AI DIFFICULTY ===== */
+/* 🤖 AI DIFFICULTY */
 function startTimer(){
 time=10-(level*2);
 document.getElementById("time").innerText=time;
+
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
@@ -280,9 +302,11 @@ if(time<=0) nextQ();
 
 function nextQ(){
 if(i<data[cat][level].length-1){
-i++;load();
+i++;
+load();
 }else{
-i=0;show("catScreen");
+i=0;
+show("catScreen");
 }
 }
 
@@ -290,6 +314,10 @@ function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
+}
+
+function goHome(){
+show("catScreen");
 }
 
 </script>
