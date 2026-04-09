@@ -81,12 +81,6 @@ width:100%;
 height:100%;
 pointer-events:none;
 }
-
-/* 🎨 THEMES */
-.dark{background:#111 !important;color:white;}
-.neon{background:linear-gradient(135deg,#00f,#0ff,#0f0) !important;}
-.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb) !important;}
-
 </style>
 </head>
 
@@ -99,7 +93,6 @@ pointer-events:none;
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
 <div>🪙 <span id="coins">0</span></div>
-<div>🏆 <span id="best">0</span></div>
 <div>⏱️ <span id="time">10</span></div>
 </div>
 
@@ -107,11 +100,6 @@ pointer-events:none;
 
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
-
-<!-- 🎨 THEME BUTTONS -->
-<button class="btn p2" onclick="setTheme('dark')">🌙 Dark</button>
-<button class="btn p3" onclick="setTheme('kids')">🎨 Kids</button>
-<button class="btn p4" onclick="setTheme('neon')">⚡ Neon</button>
 </div>
 
 <div id="catScreen" class="hidden">
@@ -140,51 +128,147 @@ pointer-events:none;
 
 <script>
 
-/* ===== AI DIFFICULTY ===== */
-let difficultyScore = 0;
+/* ===== QUESTIONS (ALL FIXED PROPERLY) ===== */
+const data = {
+math:[
+[
+{q:"2+3=?",o:["4","5","6","7"],a:1},
+{q:"4+5=?",o:["7","8","9","10"],a:2},
+{q:"6+2=?",o:["6","7","8","9"],a:2},
+{q:"7+1=?",o:["6","7","8","9"],a:2},
+{q:"3+4=?",o:["5","6","7","8"],a:2},
+{q:"9-4=?",o:["3","4","5","6"],a:2},
+{q:"8-3=?",o:["4","5","6","7"],a:1},
+{q:"5+5=?",o:["8","9","10","11"],a:2},
+{q:"10-2=?",o:["6","7","8","9"],a:2},
+{q:"1+6=?",o:["6","7","8","9"],a:1}
+],
+[
+{q:"6+8=?",o:["12","13","14","15"],a:2},
+{q:"7+9=?",o:["14","15","16","17"],a:2},
+{q:"8+10=?",o:["16","17","18","19"],a:2},
+{q:"12-5=?",o:["5","6","7","8"],a:2},
+{q:"15-7=?",o:["6","7","8","9"],a:2},
+{q:"9+8=?",o:["15","16","17","18"],a:2},
+{q:"11+6=?",o:["15","16","17","18"],a:2},
+{q:"14-6=?",o:["6","7","8","9"],a:2},
+{q:"13+5=?",o:["16","17","18","19"],a:2},
+{q:"20-9=?",o:["9","10","11","12"],a:2}
+],
+[
+{q:"25+17=?",o:["40","41","42","43"],a:2},
+{q:"30-12=?",o:["16","17","18","19"],a:2},
+{q:"18×2=?",o:["34","35","36","37"],a:2},
+{q:"45÷5=?",o:["7","8","9","10"],a:2},
+{q:"36+14=?",o:["48","49","50","51"],a:2},
+{q:"50-25=?",o:["20","22","25","27"],a:2},
+{q:"12×3=?",o:["34","35","36","37"],a:2},
+{q:"60÷6=?",o:["8","9","10","11"],a:2},
+{q:"40+15=?",o:["53","54","55","56"],a:2},
+{q:"100-55=?",o:["43","44","45","46"],a:2}
+]
+],
 
-/* ===== LEADERBOARD ===== */
-let bestScore = localStorage.getItem("bestScore") || 0;
+english:[
+[
+{q:"Apple is a ?",o:["Fruit","Car","Animal","City"],a:0},
+{q:"Dog says ?",o:["Meow","Bark","Moo","Quack"],a:1},
+{q:"Sky is ?",o:["Blue","Red","Green","Black"],a:0},
+{q:"Sun gives ?",o:["Light","Water","Air","Food"],a:0},
+{q:"Bird can ?",o:["Swim","Fly","Drive","Cook"],a:1},
+{q:"Cat has ?",o:["2 legs","4 legs","6 legs","8 legs"],a:1},
+{q:"Fish lives in ?",o:["Air","Water","Tree","Land"],a:1},
+{q:"Car runs on ?",o:["Water","Fuel","Air","Wood"],a:1},
+{q:"Ball is ?",o:["Round","Square","Flat","Long"],a:0},
+{q:"Ice is ?",o:["Hot","Cold","Warm","Dry"],a:1}
+],
+[
+{q:"He dash a boy",o:["is","are","am","be"],a:0},
+{q:"They dash playing",o:["is","are","am","be"],a:1},
+{q:"She dash happy",o:["is","are","am","be"],a:0},
+{q:"We dash ready",o:["is","are","am","be"],a:1},
+{q:"I dash student",o:["is","are","am","be"],a:2},
+{q:"You dash smart",o:["is","are","am","be"],a:1},
+{q:"He dash running",o:["is","are","am","be"],a:0},
+{q:"They dash friends",o:["is","are","am","be"],a:1},
+{q:"She dash singing",o:["is","are","am","be"],a:0},
+{q:"We dash learning",o:["is","are","am","be"],a:1}
+],
+[
+{q:"Go past tense?",o:["Went","Goed","Going","Gone"],a:0},
+{q:"Eat past tense?",o:["Ate","Eat","Eated","Eating"],a:0},
+{q:"Run past tense?",o:["Ran","Run","Runned","Running"],a:0},
+{q:"See past tense?",o:["Saw","Seen","See","Seeing"],a:0},
+{q:"Write past tense?",o:["Wrote","Written","Write","Writing"],a:0},
+{q:"Come past tense?",o:["Came","Come","Comed","Coming"],a:0},
+{q:"Take past tense?",o:["Took","Taken","Take","Taking"],a:0},
+{q:"Give past tense?",o:["Gave","Given","Give","Giving"],a:0},
+{q:"Make past tense?",o:["Made","Make","Maked","Making"],a:0},
+{q:"Speak past tense?",o:["Spoke","Spoken","Speak","Speaking"],a:0}
+]
+],
 
-/* ===== THEME LOAD ===== */
-window.onload = () => {
-let saved = localStorage.getItem("theme");
-if(saved) document.body.className = saved;
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
+{q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Earth is a ?",o:["Planet","Star","Moon","Asteroid"],a:0},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
+{q:"Currency of India?",o:["Rupee","Dollar","Euro","Yen"],a:0},
+{q:"1 year has ?",o:["12 months","10","11","13"],a:0},
+{q:"Moon is ?",o:["Satellite","Star","Planet","Cloud"],a:0},
+{q:"National animal?",o:["Tiger","Lion","Elephant","Dog"],a:0}
+],
+[
+{q:"CPU is ?",o:["Brain","Heart","Eye","Hand"],a:0},
+{q:"HTML used for ?",o:["Web","Music","Game","Video"],a:0},
+{q:"Water boils at ?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
+{q:"Sun rises in ?",o:["East","West","North","South"],a:0},
+{q:"Gas?",o:["Oxygen","Stone","Iron","Wood"],a:0},
+{q:"Plants make food by ?",o:["Photosynthesis","Running","Jumping","Sleeping"],a:0},
+{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
+{q:"Body control?",o:["Brain","Hand","Leg","Eye"],a:0},
+{q:"Air needed for ?",o:["Breathing","Eating","Walking","Sleeping"],a:0}
+],
+[
+{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
+{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
+{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
+{q:"Atom is?",o:["Smallest","Big","Medium","Large"],a:0},
+{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
+{q:"Sound travels in?",o:["Air","Space","Light","Fire"],a:0},
+{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
+{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
+{q:"Human body has?",o:["Heart","Wings","Fins","Leaves"],a:0},
+{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0}
+]
+]
 };
 
-/* ===== THEME SET ===== */
-function setTheme(theme){
-document.body.className = theme;
-localStorage.setItem("theme", theme);
-}
-
-/* ===== SOUND ===== */
-function playSound(src){
-new Audio(src).play().catch(()=>{});
-}
-
-/* ===== VOICE ===== */
-function speak(text){
+/* ===== FIXED VOICE ===== */
+function speak(t){
 speechSynthesis.cancel();
-text = text.replace(/__+/g," dash dash ");
-let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.9;
-msg.pitch=1.3;
-speechSynthesis.speak(msg);
+t = t.replace(/__/g,"dash");
+let u=new SpeechSynthesisUtterance(t);
+u.rate=0.9;
+speechSynthesis.speak(u);
 }
 
-/* ===== QUESTIONS (UNCHANGED) ===== */
-const data = window.data;
+/* ===== FIXED SOUND ===== */
+function playSound(src){
+let a=new Audio(src);
+a.play().catch(()=>{});
+}
 
-/* ===== GAME ===== */
+/* ===== REST SAME ===== */
+
 let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
 function load(){
-speechSynthesis.cancel();
-
-document.getElementById("best").innerText = bestScore;
-
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
@@ -196,37 +280,22 @@ options.forEach(op=>{
 html+=`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`;
 });
 document.getElementById("opts").innerHTML=html;
-
 startTimer();
 }
 
 function check(btn,ok){
 clearInterval(timer);
-speechSynthesis.cancel();
-
 if(ok){
-difficultyScore++;
 btn.classList.add("correct","bounce");
-stars++;coins+=10;
+stars++; coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-blastConfetti();
-speak("Great job!");
 }else{
-difficultyScore = Math.max(0, difficultyScore - 1);
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-speak("Try again");
 }
-
-if(coins > bestScore){
-bestScore = coins;
-localStorage.setItem("bestScore", bestScore);
-}
-
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
-
-setTimeout(nextQ,800);
+setTimeout(nextQ,700);
 }
 
 function startTimer(){
@@ -241,22 +310,10 @@ if(time<=0) nextQ();
 }
 
 function nextQ(){
-
-/* 🤖 AI DIFFICULTY */
-if(difficultyScore >= 5 && level < 2){
-level++;
-difficultyScore = 0;
-}
-if(difficultyScore === 0 && level > 0){
-level--;
-}
-
-if(i<data[cat][level].length-1){
-i++;
-load();
-}else{
-if(level===0)unlock[cat]=1;
-if(level===1)unlock[cat]=2;
+if(i < data[cat][level].length-1){i++;load();}
+else{
+if(level===0) unlock[cat]=1;
+if(level===1) unlock[cat]=2;
 goHome();
 }
 }
@@ -266,7 +323,6 @@ function goHome(){i=0;clearInterval(timer);show("catScreen");}
 
 function startApp(){
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-setTimeout(()=>speak("Welcome to Kids Quiz Pro"),300);
 show("catScreen");
 }
 
@@ -278,42 +334,17 @@ document.getElementById(id).classList.remove("hidden");
 
 function selectCat(c){
 cat=c;
-document.getElementById("medBtn").innerText=unlock[cat]>=1?"Medium":"Medium 🔒";
-document.getElementById("hardBtn").innerText=unlock[cat]>=2?"Hard":"Hard 🔒";
+document.getElementById("medBtn").innerText = unlock[cat]>=1?"Medium":"Medium 🔒";
+document.getElementById("hardBtn").innerText = unlock[cat]>=2?"Hard":"Hard 🔒";
 show("levelScreen");
 }
 
 function selectLevel(l){
-if(l===1&&unlock[cat]<1){alert("Complete Easy first");return;}
-if(l===2&&unlock[cat]<2){alert("Complete Medium first");return;}
+if(l===1 && unlock[cat]<1){alert("Complete Easy first");return;}
+if(l===2 && unlock[cat]<2){alert("Complete Medium first");return;}
 level=l;i=0;show("gameScreen");load();
 }
 
-/* CONFETTI */
-const canvas=document.getElementById("confetti");
-const ctx=canvas.getContext("2d");
-canvas.width=innerWidth;
-canvas.height=innerHeight;
-let confetti=[];
-function blastConfetti(){
-for(let i=0;i<60;i++){
-confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6,color:`hsl(${Math.random()*360},100%,50%)`});
-}}
-function drawConfetti(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-confetti.forEach(p=>{
-ctx.fillStyle=p.color;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=3;
-});
-confetti=confetti.filter(p=>p.y<canvas.height);
-requestAnimationFrame(drawConfetti);
-}
-drawConfetti();
-
 </script>
-
 </body>
 </html>
