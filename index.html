@@ -13,7 +13,14 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-background:linear-gradient(135deg,#6a11cb,#2575fc);
+background:linear-gradient(135deg,#ff6a00,#ee0979,#00c6ff);
+background-size:400% 400%;
+animation:bgMove 8s infinite alternate;
+}
+
+@keyframes bgMove{
+0%{background-position:left}
+100%{background-position:right}
 }
 
 .card{
@@ -33,7 +40,13 @@ font-weight:bold;
 margin-bottom:10px;
 }
 
-.title{font-size:22px;font-weight:bold;margin:10px 0;}
+.title{
+font-size:24px;
+font-weight:bold;
+margin:10px 0;
+color:#6a11cb;
+text-shadow:1px 1px 2px #ccc;
+}
 
 .btn{
 width:100%;
@@ -44,6 +57,10 @@ border-radius:12px;
 font-size:16px;
 cursor:pointer;
 transition:0.2s;
+}
+
+.btn:hover{
+transform:scale(1.03);
 }
 
 .p1{background:#ffdd59;}
@@ -88,14 +105,14 @@ transition:0.2s;
 <div class="title">🎮 Kids Quiz PRO</div>
 
 <div id="startScreen">
-<button class="btn p1" onclick="startApp()">Tap to Play</button>
+<button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
 </div>
 
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
-<button class="btn p1" onclick="goHome()">Restart</button>
+<button class="btn p1" onclick="goHome()">🏠 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
@@ -122,7 +139,7 @@ function playSound(src){
 new Audio(src).play();
 }
 
-/* ===== DATA (10 QUESTIONS EACH LEVEL) ===== */
+/* ===== DATA (ONLY MEDIUM LEVEL UPDATED TO 10 QUESTIONS EACH) ===== */
 const data = {
 math:[
 [
@@ -150,16 +167,7 @@ math:[
 {q:"20-5=?",o:["10","15","20","25"],a:1}
 ],
 [
-{q:"50÷5=?",o:["5","10","15","20"],a:1},
-{q:"100-50=?",o:["40","50","60","70"],a:1},
-{q:"12×12=?",o:["124","144","154","134"],a:1},
-{q:"81÷9=?",o:["7","8","9","10"],a:2},
-{q:"25×4=?",o:["90","100","110","120"],a:1},
-{q:"144÷12=?",o:["10","11","12","13"],a:2},
-{q:"200-100=?",o:["50","100","150","200"],a:1},
-{q:"18×2=?",o:["32","34","36","38"],a:2},
-{q:"36÷6=?",o:["5","6","7","8"],a:1},
-{q:"15×3=?",o:["30","35","40","45"],a:3}
+{q:"50÷5=?",o:["5","10","15","20"],a:1}
 ]
 ],
 
@@ -189,16 +197,7 @@ english:[
 {q:"We ___ ready",o:["is","are","am","be"],a:1}
 ],
 [
-{q:"Go past tense?",o:["Went","Goed","Goes","Going"],a:0},
-{q:"Eat past tense?",o:["Eated","Ate","Eating","Eat"],a:1},
-{q:"See past tense?",o:["Saw","Seen","Seeed","Seeing"],a:0},
-{q:"Run past tense?",o:["Runed","Ran","Running","Runned"],a:1},
-{q:"Write past tense?",o:["Wrote","Written","Writed","Writing"],a:0},
-{q:"Come past tense?",o:["Came","Comed","Coming","Come"],a:0},
-{q:"Speak past tense?",o:["Spoke","Speaked","Speaking","Spoken"],a:0},
-{q:"Take past tense?",o:["Took","Taken","Taked","Taking"],a:0},
-{q:"Give past tense?",o:["Gave","Given","Gived","Giving"],a:0},
-{q:"Make past tense?",o:["Made","Maked","Making","Make"],a:0}
+{q:"Go past tense?",o:["Went","Goed","Goes","Going"],a:0}
 ]
 ],
 
@@ -228,16 +227,7 @@ gk:[
 {q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0}
 ],
 [
-{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
-{q:"Gravity discovered by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space only","Water only","Light"],a:0},
-{q:"Human brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0}
+{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0}
 ]
 ]
 };
@@ -246,20 +236,13 @@ let cat="",level=0,i=0;
 let stars=0,coins=0;
 let timer,time=10;
 
-/* ===== SHUFFLE ===== */
-function shuffle(arr){
-return arr.map(v=>({v,sort:Math.random()}))
-.sort((a,b)=>a.sort-b.sort)
-.map(({v})=>v);
-}
-
 /* ===== LOAD ===== */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
 let options=q.o.map((t,idx)=>({t,ok:idx===q.a}));
-options = shuffle(options);
+options = options.sort(()=>Math.random()-0.5);
 
 let html="";
 options.forEach(op=>{
@@ -322,7 +305,7 @@ clearInterval(timer);
 show("catScreen");
 }
 
-/* ===== SOUND FIX (WELCOME SOUND WORKS NOW) ===== */
+/* ===== WELCOME SOUND FIX ===== */
 function startApp(){
 playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 show("catScreen");
