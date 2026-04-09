@@ -14,37 +14,33 @@ display:flex;
 justify-content:center;
 align-items:center;
 transition:0.5s;
-overflow:hidden;
 }
 
-body.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);}
-body.dark{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);}
+body.kids{background:linear-gradient(135deg,#ff9a9e,#fad0c4);}
+body.dark{background:linear-gradient(135deg,#0f0c29,#302b63);}
 body.neon{background:linear-gradient(135deg,#00f5ff,#7cffcb,#ff61d2);}
 
 .card{
 width:92%;
-max-width:520px;
+max-width:500px;
 background:white;
-border-radius:20px;
 padding:18px;
+border-radius:18px;
 text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,0.3);
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
 }
-
-.card.dark{background:#1e1e1e;color:white;}
-.card.neon{background:#001a1a;color:#0ff;}
 
 .btn{
 width:100%;
-padding:12px;
+padding:10px;
 margin:6px 0;
 border:none;
-border-radius:12px;
+border-radius:10px;
 font-size:16px;
 cursor:pointer;
 }
 
-.p1{background:#ffdd59;}
+.p1{background:#ffd32a;}
 .p2{background:#1dd1a1;}
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
@@ -53,59 +49,57 @@ cursor:pointer;
 
 .confetti{
 position:fixed;
-top:-10px;
 width:8px;
 height:8px;
+top:-10px;
 border-radius:50%;
 animation:fall linear forwards;
-z-index:9999;
 }
 
 @keyframes fall{
-0%{transform:translateY(0) rotate(0deg);}
-100%{transform:translateY(110vh) rotate(720deg);}
+to{transform:translateY(110vh) rotate(360deg);}
 }
 </style>
 </head>
 
 <body class="kids">
 
-<div class="card" id="card">
+<div class="card">
 
 <div>⭐ <span id="stars">0</span> | 🪙 <span id="coins">0</span></div>
 
 <h2>🎮 Kids Quiz PRO</h2>
 
-<button class="btn p3" onclick="changeTheme()">🎨 Theme</button>
+<button class="btn p3" onclick="theme()">🎨 Theme</button>
 
 <!-- START -->
 <div id="startScreen">
-<button class="btn p1" onclick="startGame()">Start Game</button>
+<button class="btn p1" onclick="start()">Start Game</button>
 </div>
 
 <!-- CATEGORY -->
 <div id="catScreen" class="hidden">
-<button class="btn p2" onclick="selectCat('math')">Math</button>
-<button class="btn p3" onclick="selectCat('english')">English</button>
-<button class="btn p4" onclick="selectCat('gk')">GK</button>
+<button class="btn p2" onclick="catSelect('math')">Math</button>
+<button class="btn p3" onclick="catSelect('english')">English</button>
+<button class="btn p4" onclick="catSelect('gk')">GK</button>
 </div>
 
 <!-- LEVEL -->
 <div id="levelScreen" class="hidden">
-<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy 🔓</button>
-<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
-<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
-<button class="btn p4" onclick="backToCategory()">⬅ Back</button>
+<button id="easyBtn" class="btn p1" onclick="levelSelect(0)">Easy 🔓</button>
+<button id="medBtn" class="btn p2" onclick="levelSelect(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="levelSelect(2)">Hard 🔒</button>
+<button class="btn p4" onclick="back()">⬅ Back</button>
 </div>
 
 <!-- GAME -->
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
-<div id="opts"></div>
+<div id="options"></div>
 
-<button class="btn p2" onclick="prevQ()">⬅ Prev</button>
-<button class="btn p3" onclick="nextQ()">Next ➡</button>
-<button class="btn p4" onclick="goHome()">🏠 Home</button>
+<button class="btn p2" onclick="prev()">⬅ Prev</button>
+<button class="btn p3" onclick="next()">Next ➡</button>
+<button class="btn p4" onclick="home()">🏠 Home</button>
 </div>
 
 </div>
@@ -113,25 +107,25 @@ z-index:9999;
 <script>
 
 /* SOUND */
-function sound(type){
+function sound(t){
 let a=new Audio();
-if(type==="welcome") a.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
-if(type==="correct") a.src="https://actions.google.com/sounds/v1/cartoon/pop.ogg";
-if(type==="wrong") a.src="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
+if(t==="correct") a.src="https://actions.google.com/sounds/v1/cartoon/pop.ogg";
+if(t==="wrong") a.src="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
+if(t==="welcome") a.src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
 a.play();
 }
 
 /* VOICE */
 function speak(t){
 let msg=new SpeechSynthesisUtterance(t);
-msg.rate=0.8;
-msg.pitch=1.8;
+msg.rate=0.85;
+msg.pitch=1.6;
 speechSynthesis.speak(msg);
 }
 
 /* CONFETTI */
-function blast(){
-for(let i=0;i<60;i++){
+function confetti(){
+for(let i=0;i<50;i++){
 let d=document.createElement("div");
 d.className="confetti";
 d.style.left=Math.random()*window.innerWidth+"px";
@@ -147,10 +141,10 @@ const data={
 math:[
 [
 {q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"5+5=?",o:["8","9","10","11"],a:2}
+{q:"5+5=?",o:["10","11","12","13"],a:0}
 ],
 [
-{q:"10+5=?",o:["12","14","15","16"],a:2}
+{q:"10+5=?",o:["13","14","15","16"],a:2}
 ],
 [
 {q:"20+10=?",o:["25","30","35","40"],a:1}
@@ -158,68 +152,63 @@ math:[
 ],
 english:[
 [
-{q:"Apple is?",o:["Fruit","Animal","Car","City"],a:0}
+{q:"Apple is a?",o:["Fruit","Animal","Car","City"],a:0}
 ],
 [
 {q:"Opposite of Hot?",o:["Cold","Warm","Fire","Ice"],a:0}
 ],
 [
-{q:"Past of Go?",o:["Went","Gone","Go","Going"],a:0}
+{q:"Past tense of Go?",o:["Went","Gone","Going","Go"],a:0}
 ]
 ],
 gk:[
 [
-{q:"Capital India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
+{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
 ],
 [
-{q:"Planet we live?",o:["Earth","Mars","Moon","Sun"],a:0}
+{q:"Planet we live on?",o:["Earth","Mars","Moon","Sun"],a:0}
 ],
 [
-{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0}
+{q:"CPU is brain of?",o:["Computer","Human","Robot","Phone"],a:0}
 ]
 ]
 };
 
 /* STATE */
 let cat="",level=0,i=0;
-let unlock=JSON.parse(localStorage.getItem("unlock")||"null");
-if(!unlock||!Array.isArray(unlock)){
+
+let unlock=JSON.parse(localStorage.getItem("unlock"));
+if(!unlock || unlock.length!==3){
 unlock=[true,false,false];
 localStorage.setItem("unlock",JSON.stringify(unlock));
 }
 
-/* RESET */
-function resetGame(){
-i=0;
-level=0;
-cat="";
-speechSynthesis.cancel();
-}
-
 /* START */
-function startGame(){
-resetGame();
+function start(){
 sound("welcome");
 show("catScreen");
 }
 
 /* CATEGORY */
-function selectCat(c){
-resetGame();
+function catSelect(c){
 cat=c;
+i=0;
+level=0;
 show("levelScreen");
-updateLevelUI();
+setTimeout(updateLevelUI,50);
 }
 
 /* LEVEL UI */
 function updateLevelUI(){
+unlock=JSON.parse(localStorage.getItem("unlock"));
+
 document.getElementById("easyBtn").innerHTML="Easy "+(unlock[0]?"🔓":"🔒");
 document.getElementById("medBtn").innerHTML="Medium "+(unlock[1]?"🔓":"🔒");
 document.getElementById("hardBtn").innerHTML="Hard "+(unlock[2]?"🔓":"🔒");
 }
 
 /* LEVEL SELECT */
-function selectLevel(l){
+function levelSelect(l){
 if(!unlock[l]){
 alert("Locked!");
 return;
@@ -230,7 +219,7 @@ show("gameScreen");
 load();
 }
 
-/* LOAD */
+/* LOAD QUESTION */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
@@ -239,7 +228,8 @@ let h="";
 q.o.forEach((o,idx)=>{
 h+=`<button class='btn p1' onclick='check(${idx})'>${o}</button>`;
 });
-document.getElementById("opts").innerHTML=h;
+
+document.getElementById("options").innerHTML=h;
 
 speechSynthesis.cancel();
 speak(q.q);
@@ -248,17 +238,19 @@ speak(q.q);
 /* CHECK */
 function check(a){
 let q=data[cat][level][i];
-if(a==q.a){
+
+if(a===q.a){
 sound("correct");
-blast();
+confetti();
 }else{
 sound("wrong");
 }
-setTimeout(nextQ,500);
+
+setTimeout(next,600);
 }
 
 /* NEXT */
-function nextQ(){
+function next(){
 if(i<data[cat][level].length-1){
 i++;
 load();
@@ -267,16 +259,30 @@ load();
 if(level<2){
 unlock[level+1]=true;
 localStorage.setItem("unlock",JSON.stringify(unlock));
+updateLevelUI();
 }
 
 show("catScreen");
 }
 }
 
-/* NAV */
-function prevQ(){if(i>0){i--;load();}}
-function goHome(){resetGame();show("catScreen");}
-function backToCategory(){show("catScreen");}
+/* PREV */
+function prev(){
+if(i>0){
+i--;
+load();
+}
+}
+
+/* HOME */
+function home(){
+show("catScreen");
+}
+
+/* BACK */
+function back(){
+show("catScreen");
+}
 
 /* SCREEN */
 function show(id){
@@ -286,19 +292,14 @@ document.getElementById(id).classList.remove("hidden");
 }
 
 /* THEME */
-function changeTheme(){
+function theme(){
 let b=document.body;
-if(b.classList.contains("kids")){
-b.className="dark";
-}
-else if(b.classList.contains("dark")){
-b.className="neon";
-}
-else{
-b.className="kids";
-}
+if(b.classList.contains("kids")) b.className="dark";
+else if(b.classList.contains("dark")) b.className="neon";
+else b.className="kids";
 }
 
 </script>
+
 </body>
 </html>
