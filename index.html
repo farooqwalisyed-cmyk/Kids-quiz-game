@@ -6,6 +6,7 @@
 <title>Kids Quiz PRO</title>
 
 <style>
+/* SAME STYLES (UNCHANGED) */
 body{
 margin:0;
 font-family:Arial;
@@ -128,129 +129,50 @@ pointer-events:none;
 
 <script>
 
-/* ===== QUESTIONS (FIXED MATH ONLY) ===== */
-const data = {
-math:[
-[
-{q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"4+5=?",o:["7","8","9","10"],a:2},
-{q:"6+2=?",o:["6","7","8","9"],a:2},
-{q:"3+7=?",o:["8","9","10","11"],a:2},
-{q:"5+5=?",o:["9","10","11","12"],a:1},
-{q:"9-4=?",o:["3","4","5","6"],a:2},
-{q:"8-3=?",o:["4","5","6","7"],a:1},
-{q:"7+6=?",o:["11","12","13","14"],a:2},
-{q:"10-2=?",o:["6","7","8","9"],a:2},
-{q:"6+8=?",o:["12","13","14","15"],a:2}
-],
-[
-{q:"12+8=?",o:["18","19","20","21"],a:2},
-{q:"15-5=?",o:["8","9","10","11"],a:2},
-{q:"9×2=?",o:["16","17","18","19"],a:2},
-{q:"14+6=?",o:["18","19","20","21"],a:2},
-{q:"20-7=?",o:["11","12","13","14"],a:2},
-{q:"6×3=?",o:["16","17","18","19"],a:2},
-{q:"25-10=?",o:["10","12","15","20"],a:2},
-{q:"18÷2=?",o:["7","8","9","10"],a:2},
-{q:"7+9=?",o:["14","15","16","17"],a:2},
-{q:"8+10=?",o:["16","17","18","19"],a:2}
-],
-[
-{q:"50÷5=?",o:["5","8","10","12"],a:2},
-{q:"100-25=?",o:["70","75","80","85"],a:1},
-{q:"12×12=?",o:["124","134","144","154"],a:2},
-{q:"81÷9=?",o:["7","8","9","10"],a:2},
-{q:"25×4=?",o:["90","100","110","120"],a:1},
-{q:"144÷12=?",o:["10","11","12","13"],a:2},
-{q:"200-50=?",o:["100","150","180","200"],a:1},
-{q:"18×3=?",o:["48","52","54","56"],a:2},
-{q:"36÷6=?",o:["5","6","7","8"],a:1},
-{q:"15×3=?",o:["30","35","40","45"],a:3}
-]
-],
+/* ===== BACKGROUND MUSIC ===== */
+let bgMusic = new Audio("https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg");
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
 
-english:[
-[
-{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
-{q:"Dog says ?",o:["Meow","Bark","Moo","Roar"],a:1},
-{q:"Sky color ?",o:["Blue","Red","Green","Pink"],a:0},
-{q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0},
-{q:"Bird can ?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Sun gives ?",o:["Light","Water","Ice","Wind"],a:0},
-{q:"Cat says ?",o:["Meow","Bark","Roar","Quack"],a:0},
-{q:"Fish lives in ?",o:["Water","Land","Air","Tree"],a:0},
-{q:"We drink ?",o:["Water","Sand","Stone","Wood"],a:0},
-{q:"Ball is ?",o:["Round","Square","Flat","Long"],a:0}
-],
-[
-{q:"He ___ going",o:["is","are","am","be"],a:0},
-{q:"They ___ playing",o:["is","are","am","be"],a:1},
-{q:"I ___ happy",o:["am","is","are","be"],a:0},
-{q:"We ___ friends",o:["is","are","am","be"],a:1},
-{q:"She ___ eating",o:["is","are","am","be"],a:0},
-{q:"Dog ___ barking",o:["is","are","am","be"],a:0},
-{q:"Birds ___ flying",o:["is","are","am","be"],a:1},
-{q:"You ___ smart",o:["is","are","am","be"],a:1},
-{q:"He ___ sad",o:["is","are","am","be"],a:0},
-{q:"We ___ ready",o:["is","are","am","be"],a:1}
-],
-[
-{q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Past of eat?",o:["Ate","Eated","Eat","Eating"],a:0},
-{q:"Past of run?",o:["Ran","Runed","Running","Runs"],a:0},
-{q:"Past of see?",o:["Saw","Seen","Seeing","See"],a:0},
-{q:"Past of come?",o:["Came","Comed","Coming","Come"],a:0},
-{q:"Past of make?",o:["Made","Maked","Making","Make"],a:0},
-{q:"Past of give?",o:["Gave","Gived","Giving","Give"],a:0},
-{q:"Past of take?",o:["Took","Taked","Taking","Take"],a:0},
-{q:"Past of write?",o:["Wrote","Writed","Writing","Write"],a:0},
-{q:"Past of speak?",o:["Spoke","Speaked","Speaking","Speak"],a:0}
-]
-],
+/* ===== KIDS VOICE ===== */
+function speak(t){
+try{
+speechSynthesis.cancel();
+t = t.replace(/___/g,"dash dash");
 
-gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
-{q:"Sun is a ?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Currency of India?",o:["Rupee","Dollar","Euro","Yen"],a:0},
-{q:"National animal?",o:["Tiger","Lion","Elephant","Dog"],a:0},
-{q:"How many days in week?",o:["7","5","6","8"],a:0},
-{q:"Earth is a?",o:["Planet","Star","Moon","Gas"],a:0},
-{q:"Rainbow colors?",o:["7","6","5","8"],a:0},
-{q:"Moon is a?",o:["Satellite","Planet","Star","Cloud"],a:0}
-],
-[
-{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
-{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Plants make food?",o:["Photosynthesis","Running","Jump","Eat"],a:0},
-{q:"Body part?",o:["Heart","Wheel","Engine","Pipe"],a:0},
-{q:"Animal?",o:["Dog","Car","Chair","Table"],a:0}
-],
-[
-{q:"1 KB = ?",o:["1024 bytes","100 bytes","10 bytes","1 byte"],a:0},
-{q:"Gravity found by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Unit of electricity?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space","Vacuum","Light"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Photosynthesis needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
-{q:"Light speed is?",o:["Fastest","Slow","Medium","Zero"],a:0}
-]
-]
-};
+let msg = new SpeechSynthesisUtterance(t);
+msg.rate = 1;
+msg.pitch = 1.6;   // 👶 kid style
+msg.volume = 1;
+speechSynthesis.speak(msg);
+}catch(e){}
+}
 
-/* ===== REST SAME ===== */
-let unlock = {math:0, english:0, gk:0};
+/* ===== VOICE FEEDBACK ===== */
+function speakFeedback(type){
+let text = type==="correct" ? "Great job!" : "Try again!";
+let msg = new SpeechSynthesisUtterance(text);
+msg.pitch = 1.7;
+msg.rate = 1;
+speechSynthesis.speak(msg);
+}
 
+/* ===== SOUND ===== */
+function playSound(src){ new Audio(src).play(); }
+
+/* ===== START ===== */
+function startApp(){
+playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+
+/* start bg music after user click */
+bgMusic.play().catch(()=>{});
+
+show("catScreen");
+}
+
+/* ===== KEEP YOUR ORIGINAL LOGIC SAME ===== */
+
+/* CONFETTI */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
@@ -275,11 +197,13 @@ requestAnimationFrame(drawConfetti);
 }
 drawConfetti();
 
-function speak(t){speechSynthesis.speak(new SpeechSynthesisUtterance(t));}
-function playSound(src){new Audio(src).play();}
-
+/* VARIABLES */
+let unlock = {math:0, english:0, gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
+/* ===== YOUR EXISTING DATA HERE (KEEP SAME) ===== */
+
+/* LOAD */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
@@ -295,26 +219,34 @@ document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
+/* CHECK */
 function check(btn,ok){
 clearInterval(timer);
+
 if(ok){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 blastConfetti();
+speakFeedback("correct");   // ✅ added
 }else{
 btn.classList.add("wrong","shake");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+speakFeedback("wrong");     // ✅ added
 }
+
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
+
 setTimeout(nextQ,700);
 }
 
+/* TIMER */
 function startTimer(){
 clearInterval(timer);
 time=10;
 document.getElementById("time").innerText=time;
+
 timer=setInterval(()=>{
 time--;
 document.getElementById("time").innerText=time;
@@ -322,6 +254,7 @@ if(time<=0) nextQ();
 },1000);
 }
 
+/* NAV */
 function nextQ(){
 if(i < data[cat][level].length-1){i++;load();}
 else{
@@ -329,14 +262,8 @@ if(level===0) unlock[cat]=1;
 if(level===1) unlock[cat]=2;
 goHome();
 }}
-
 function prevQ(){if(i>0){i--;load();}}
 function goHome(){i=0;clearInterval(timer);show("catScreen");}
-
-function startApp(){
-playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-show("catScreen");
-}
 
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
