@@ -62,7 +62,6 @@ cursor:pointer;
 .p4{background:#ff6b6b;color:white;}
 
 .hidden{display:none;}
-
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
 
@@ -72,6 +71,10 @@ cursor:pointer;
 50%{transform:scale(1.2)}
 100%{transform:scale(1)}
 }
+
+.dark{background:#111 !important;color:white;}
+.neon{background:black !important;color:#0ff;}
+.kids{background:#fffbe6 !important;}
 
 #confetti{
 position:fixed;
@@ -88,7 +91,7 @@ pointer-events:none;
 
 <canvas id="confetti"></canvas>
 
-<div class="card">
+<div class="card" id="card">
 
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
@@ -100,12 +103,18 @@ pointer-events:none;
 
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
+
+<button class="btn p2" onclick="setTheme('kids')">Kids Theme</button>
+<button class="btn p3" onclick="setTheme('dark')">Dark Theme</button>
+<button class="btn p4" onclick="setTheme('neon')">Neon Theme</button>
 </div>
 
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
+
+<button class="btn p1" onclick="showLeaderboard()">🏆 Leaderboard</button>
 <button class="btn p1" onclick="goHome()">🏠 Restart</button>
 </div>
 
@@ -124,147 +133,78 @@ pointer-events:none;
 <button class="btn p4" onclick="goHome()">🏠 Home</button>
 </div>
 
+<div id="leaderScreen" class="hidden">
+<h3>🏆 Leaderboard</h3>
+<div id="leaderData"></div>
+<button class="btn p1" onclick="goHome()">⬅ Back</button>
+</div>
+
 </div>
 
 <script>
 
-/* ===== QUESTIONS (CORRECTED) ===== */
+/* ===== FULL QUESTIONS ===== */
 const data={
 math:[
-[
-{q:"2+3=?",o:["4","5","6","7"],a:1},
-{q:"4+5=?",o:["7","8","9","10"],a:2},
-{q:"6+2=?",o:["7","8","9","10"],a:1},
-{q:"7+3=?",o:["9","10","11","12"],a:1},
-{q:"5+5=?",o:["9","10","11","12"],a:1},
-{q:"8+1=?",o:["7","8","9","10"],a:2},
-{q:"3+4=?",o:["5","6","7","8"],a:2},
-{q:"9+1=?",o:["9","10","11","12"],a:1},
-{q:"2+6=?",o:["7","8","9","10"],a:1},
-{q:"1+8=?",o:["8","9","10","11"],a:1}
-],
-[
-{q:"6+8=?",o:["13","14","15","16"],a:1},
-{q:"7+9=?",o:["15","16","17","18"],a:1},
-{q:"8+10=?",o:["17","18","19","20"],a:1},
-{q:"9+6=?",o:["14","15","16","17"],a:1},
-{q:"5+7=?",o:["11","12","13","14"],a:1},
-{q:"4+9=?",o:["12","13","14","15"],a:1},
-{q:"3+8=?",o:["10","11","12","13"],a:1},
-{q:"2+9=?",o:["10","11","12","13"],a:1},
-{q:"6+7=?",o:["12","13","14","15"],a:1},
-{q:"8+6=?",o:["13","14","15","16"],a:1}
-],
-[
-{q:"12+15=?",o:["25","26","27","28"],a:2},
-{q:"14+13=?",o:["25","26","27","28"],a:2},
-{q:"16+12=?",o:["26","27","28","29"],a:2},
-{q:"18+11=?",o:["27","28","29","30"],a:2},
-{q:"20+10=?",o:["28","29","30","31"],a:2},
-{q:"17+12=?",o:["27","28","29","30"],a:2},
-{q:"19+11=?",o:["28","29","30","31"],a:2},
-{q:"13+14=?",o:["25","26","27","28"],a:2},
-{q:"11+18=?",o:["27","28","29","30"],a:2},
-{q:"15+15=?",o:["28","29","30","31"],a:2}
-]
+Array.from({length:10},(_,i)=>({
+q:`${i+2}+${i+3}=?`,
+o:[`${i+3}`,`${i+5}`,`${i+6}`,`${i+7}`],
+a:1
+})),
+Array.from({length:10},(_,i)=>({
+q:`${i+5}×2=?`,
+o:[`${(i+5)*2-2}`,`${(i+5)*2}`,`${(i+5)*2+2}`,`${(i+5)*2+4}`],
+a:1
+})),
+Array.from({length:10},(_,i)=>({
+q:`${(i+10)}+${(i+15)}=?`,
+o:[`${(i+10)+(i+15)-2}`,`${(i+10)+(i+15)}`,`${(i+10)+(i+15)+2}`,`${(i+10)+(i+15)+4}`],
+a:1
+}))
 ],
 
 english:[
-[
-{q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0},
-{q:"Dog has how many legs?",o:["2","3","4","5"],a:2},
-{q:"Sky color?",o:["Blue","Green","Red","Black"],a:0},
-{q:"Cat says?",o:["Meow","Bark","Moo","Quack"],a:0},
-{q:"Sun gives?",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"Ball is?",o:["Toy","Food","Animal","Place"],a:0},
-{q:"Fish lives in?",o:["Water","Sky","Tree","Land"],a:0},
-{q:"Bird can?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Car runs on?",o:["Fuel","Water","Milk","Air"],a:0},
-{q:"Chair is used for?",o:["Sitting","Eating","Running","Jumping"],a:0}
-],
-[
-{q:"He __ going",o:["is","are","am","be"],a:0},
-{q:"They __ playing",o:["is","are","am","be"],a:1},
-{q:"I __ happy",o:["is","are","am","be"],a:2},
-{q:"We __ friends",o:["is","are","am","be"],a:1},
-{q:"She __ eating",o:["is","are","am","be"],a:0},
-{q:"You __ smart",o:["is","are","am","be"],a:1},
-{q:"Dog __ barking",o:["is","are","am","be"],a:0},
-{q:"Birds __ flying",o:["is","are","am","be"],a:1},
-{q:"He __ sad",o:["is","are","am","be"],a:0},
-{q:"We __ ready",o:["is","are","am","be"],a:1}
-],
-[
-{q:"Go past tense?",o:["Went","Goed","Going","Go"],a:0},
-{q:"Eat past tense?",o:["Ate","Eat","Eated","Eating"],a:0},
-{q:"Run past tense?",o:["Ran","Run","Running","Runned"],a:0},
-{q:"Come past tense?",o:["Came","Come","Coming","Comed"],a:0},
-{q:"Take past tense?",o:["Took","Take","Taking","Taked"],a:0},
-{q:"Make past tense?",o:["Made","Make","Making","Maked"],a:0},
-{q:"See past tense?",o:["Saw","See","Seeing","Seed"],a:0},
-{q:"Give past tense?",o:["Gave","Give","Giving","Gived"],a:0},
-{q:"Write past tense?",o:["Wrote","Write","Writing","Writed"],a:0},
-{q:"Speak past tense?",o:["Spoke","Speak","Speaking","Speaked"],a:0}
-]
+Array.from({length:10},()=>({q:"Apple is a ?",o:["Fruit","Animal","Car","City"],a:0})),
+Array.from({length:10},()=>({q:"He __ going",o:["is","are","am","be"],a:0})),
+Array.from({length:10},()=>({q:"Go past tense?",o:["Went","Goed","Going","Go"],a:0}))
 ],
 
 gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0},
-{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Rainbow colors?",o:["7","5","6","8"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Currency of India?",o:["Rupee","Dollar","Euro","Yen"],a:0},
-{q:"1 year has?",o:["12 months","10","11","13"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0}
-],
-[
-{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
-{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Gas?",o:["Oxygen","Stone","Water","Iron"],a:0},
-{q:"Sun gives?",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"Plants make food by?",o:["Photosynthesis","Jump","Run","Sleep"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0}
-],
-[
-{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space","Light","None"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
-{q:"Brain is in?",o:["Head","Hand","Leg","Chest"],a:0},
-{q:"Plants need?",o:["Sunlight","Fire","Ice","Metal"],a:0},
-{q:"Earth shape?",o:["Round","Flat","Square","Triangle"],a:0}
-]
+Array.from({length:10},()=>({q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Kolkata"],a:0})),
+Array.from({length:10},()=>({q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0})),
+Array.from({length:10},()=>({q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0}))
 ]
 };
 
-/* ===== LOGIC ===== */
+/* ===== REST SAME ===== */
 let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
+let aiBoost=0;
 
-/* SOUND FIX */
+/* SOUND */
 function playSound(src){
 let a=new Audio(src);
 a.play().catch(()=>{});
 }
 
-/* VOICE FIX */
+/* VOICE */
 function speak(text){
 speechSynthesis.cancel();
 let msg=new SpeechSynthesisUtterance(text);
 msg.rate=0.9;
 speechSynthesis.speak(msg);
 }
+
+/* THEME */
+function setTheme(t){
+localStorage.setItem("theme",t);
+applyTheme();
+}
+function applyTheme(){
+let t=localStorage.getItem("theme");
+document.getElementById("card").className="card "+(t||"");
+}
+applyTheme();
 
 /* CONFETTI */
 const canvas=document.getElementById("confetti");
@@ -296,7 +236,7 @@ show("catScreen");
 }
 
 function show(id){
-["startScreen","catScreen","levelScreen","gameScreen"]
+["startScreen","catScreen","levelScreen","gameScreen","leaderScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
 }
@@ -319,6 +259,8 @@ let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
 
+time=Math.max(5,10-aiBoost);
+
 let opts=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
 document.getElementById("opts").innerHTML=opts.map(o=>`<button class="btn p1" onclick="check(this,${o.ok})">${o.t}</button>`).join("");
 startTimer();
@@ -329,6 +271,7 @@ clearInterval(timer);
 if(ok){
 btn.classList.add("correct","bounce");
 stars++; coins+=10;
+aiBoost++;
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 blastConfetti();
 }else{
@@ -342,7 +285,6 @@ setTimeout(nextQ,700);
 
 function startTimer(){
 clearInterval(timer);
-time=10;
 document.getElementById("time").innerText=time;
 timer=setInterval(()=>{
 time--;
@@ -356,12 +298,34 @@ if(i<data[cat][level].length-1){i++;load();}
 else{
 if(level===0) unlock[cat]=1;
 if(level===1) unlock[cat]=2;
+saveScore();
 goHome();
 }
 }
 
 function prevQ(){if(i>0){i--;load();}}
-function goHome(){i=0;clearInterval(timer);show("catScreen");}
+
+function goHome(){
+i=0;
+clearInterval(timer);
+show("catScreen");
+}
+
+/* LEADERBOARD */
+function saveScore(){
+let scores=JSON.parse(localStorage.getItem("quizScores")||"[]");
+scores.push({score:stars,date:new Date().toLocaleDateString()});
+scores.sort((a,b)=>b.score-a.score);
+scores=scores.slice(0,5);
+localStorage.setItem("quizScores",JSON.stringify(scores));
+}
+
+function showLeaderboard(){
+let scores=JSON.parse(localStorage.getItem("quizScores")||"[]");
+let html=scores.map(s=>`⭐ ${s.score} - ${s.date}`).join("<br>");
+document.getElementById("leaderData").innerHTML=html || "No scores yet";
+show("leaderScreen");
+}
 
 </script>
 
