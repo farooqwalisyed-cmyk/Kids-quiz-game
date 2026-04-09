@@ -13,13 +13,7 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-background:linear-gradient(135deg,#ff6a00,#ee0979,#00c6ff);
-background-size:400% 400%;
-animation:bgMove 8s infinite alternate;
-}
-@keyframes bgMove{
-0%{background-position:left}
-100%{background-position:right}
+transition:0.5s;
 }
 
 .card{
@@ -30,7 +24,12 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
+transition:0.5s;
 }
+
+.dark{background:#1e1e1e;color:white;}
+.neon{background:#000;color:#0ff;box-shadow:0 0 20px #0ff;}
+.kids{background:linear-gradient(45deg,#ff9a9e,#fad0c4);}
 
 .topbar{
 display:flex;
@@ -49,7 +48,10 @@ border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
+transition:0.2s;
 }
+
+.btn:hover{transform:scale(1.03);}
 
 .p1{background:#ffdd59;}
 .p2{background:#1dd1a1;}
@@ -57,15 +59,20 @@ cursor:pointer;
 .p4{background:#ff6b6b;color:white;}
 
 .hidden{display:none;}
-.correct{background:#2ecc71 !important;}
+
+.correct{background:#2ecc71 !important; animation:pop 0.3s;}
 .wrong{background:#e74c3c !important;}
 
-#confetti{
+@keyframes pop{
+0%{transform:scale(1)}
+50%{transform:scale(1.2)}
+100%{transform:scale(1)}
+}
+
+canvas{
 position:fixed;
 top:0;
 left:0;
-width:100%;
-height:100%;
 pointer-events:none;
 }
 </style>
@@ -75,7 +82,7 @@ pointer-events:none;
 
 <canvas id="confetti"></canvas>
 
-<div class="card">
+<div class="card" id="card">
 
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
@@ -85,149 +92,184 @@ pointer-events:none;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
+<button class="btn p3" onclick="changeTheme()">🎨 Theme</button>
+
 <div id="startScreen">
-<button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
+<button class="btn p1" onclick="startGame()">Start</button>
 </div>
 
 <div id="catScreen" class="hidden">
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
-<button class="btn p1" onclick="goHome()">🏠 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
-<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
-<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+<button class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button class="btn p2" onclick="selectLevel(1)">Medium</button>
+<button class="btn p3" onclick="selectLevel(2)">Hard</button>
 </div>
 
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
 <div id="opts"></div>
-
-<button class="btn p2" onclick="prevQ()">⬅ Prev</button>
-<button class="btn p3" onclick="nextQ()">Next ➡</button>
-<button class="btn p4" onclick="goHome()">🏠 Home</button>
+<button class="btn p4" onclick="goHome()">Home</button>
 </div>
 
 </div>
 
 <script>
 
-/* ===== FULL QUESTIONS (10 EACH LEVEL) ===== */
-const data = {
+/* ===== QUESTIONS ===== */
+const data={
 math:[
-Array.from({length:10},(_,i)=>({
-q:`${i+2}+${i+3}=?`,
-o:[`${i+3}`,`${i+5}`,`${i+6}`,`${i+7}`],
-a:1
-})),
-Array.from({length:10},(_,i)=>({
-q:`${i+5}+${i+8}=?`,
-o:[`${i+10}`,`${i+13}`,`${i+14}`,`${i+15}`],
-a:1
-})),
-Array.from({length:10},(_,i)=>({
-q:`${i+10}+${i+15}=?`,
-o:[`${i+20}`,`${i+25}`,`${i+30}`,`${i+35}`],
-a:1
-}))
+[
+{q:"2+3=?",o:["4","5","6","7"],a:1},
+{q:"5+5=?",o:["9","10","11","12"],a:1},
+{q:"6+2=?",o:["6","7","8","9"],a:2},
+{q:"3+4=?",o:["5","6","7","8"],a:2},
+{q:"8+1=?",o:["7","8","9","10"],a:2}
+],
+[
+{q:"10+5=?",o:["14","15","16","17"],a:1},
+{q:"12+6=?",o:["17","18","19","20"],a:1},
+{q:"9+9=?",o:["16","17","18","19"],a:2},
+{q:"14+3=?",o:["16","17","18","19"],a:1},
+{q:"11+7=?",o:["17","18","19","20"],a:1}
+],
+[
+{q:"20+15=?",o:["30","35","40","45"],a:1},
+{q:"25+10=?",o:["30","35","40","45"],a:1},
+{q:"30+12=?",o:["40","42","44","46"],a:1},
+{q:"18+17=?",o:["34","35","36","37"],a:1},
+{q:"40+5=?",o:["44","45","46","47"],a:1}
+]
 ],
 
 english:[
 [
-{q:"Apple is a ?",o:["Fruit","Car","Animal","City"],a:0},
-{q:"Dog says ?",o:["Bark","Meow","Moo","Roar"],a:0},
-{q:"Sky is ?",o:["Blue","Red","Green","Black"],a:0},
-{q:"Sun gives ?",o:["Light","Water","Food","Air"],a:0},
-{q:"Bird can ?",o:["Fly","Drive","Cook","Swim"],a:0},
-{q:"Fish lives in ?",o:["Water","Air","Land","Fire"],a:0},
-{q:"Boy is ?",o:["Male","Female","Animal","Thing"],a:0},
-{q:"Milk is ?",o:["Drink","Food","Toy","Book"],a:0},
-{q:"Tree is ?",o:["Plant","Animal","Car","Phone"],a:0},
-{q:"Cat says ?",o:["Meow","Bark","Roar","Moo"],a:0}
+{q:"Apple is?",o:["Fruit","Car","Animal","City"],a:0},
+{q:"Dog says?",o:["Bark","Meow","Moo","Roar"],a:0},
+{q:"Sky color?",o:["Blue","Red","Green","Black"],a:0},
+{q:"Bird can?",o:["Fly","Swim","Run","Drive"],a:0},
+{q:"Milk is?",o:["Drink","Stone","Car","Wood"],a:0}
 ],
 [
-{q:"Opposite of Big?",o:["Small","Tall","Huge","Long"],a:0},
-{q:"Opposite of Hot?",o:["Cold","Warm","Cool","Fire"],a:0},
-{q:"Opposite of Up?",o:["Down","Left","Right","Front"],a:0},
-{q:"Opposite of Fast?",o:["Slow","Quick","Speed","Rush"],a:0},
-{q:"Opposite of Happy?",o:["Sad","Joy","Smile","Fun"],a:0},
-{q:"Opposite of Light?",o:["Dark","Bright","Shiny","Glow"],a:0},
-{q:"Opposite of Day?",o:["Night","Morning","Evening","Noon"],a:0},
-{q:"Opposite of Clean?",o:["Dirty","Neat","Clear","Pure"],a:0},
-{q:"Opposite of Open?",o:["Close","Start","Begin","Unlock"],a:0},
-{q:"Opposite of Early?",o:["Late","Soon","Fast","Quick"],a:0}
+{q:"Opposite Big?",o:["Small","Tall","Huge","Long"],a:0},
+{q:"Opposite Hot?",o:["Cold","Warm","Fire","Heat"],a:0},
+{q:"Opposite Up?",o:["Down","Left","Right","Front"],a:0},
+{q:"Opposite Fast?",o:["Slow","Quick","Rush","Speed"],a:0},
+{q:"Opposite Happy?",o:["Sad","Joy","Fun","Smile"],a:0}
 ],
 [
-{q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Past of eat?",o:["Ate","Eated","Eating","Eat"],a:0},
-{q:"Past of run?",o:["Ran","Runed","Running","Runs"],a:0},
-{q:"Past of come?",o:["Came","Comed","Coming","Comes"],a:0},
-{q:"Past of see?",o:["Saw","Seed","Seeing","Sees"],a:0},
-{q:"Past of take?",o:["Took","Taked","Taking","Takes"],a:0},
-{q:"Past of make?",o:["Made","Maked","Making","Makes"],a:0},
-{q:"Past of give?",o:["Gave","Gived","Giving","Gives"],a:0},
-{q:"Past of write?",o:["Wrote","Writed","Writing","Writes"],a:0},
-{q:"Past of speak?",o:["Spoke","Speaked","Speaking","Speaks"],a:0}
+{q:"Past go?",o:["Went","Goed","Gone","Going"],a:0},
+{q:"Past eat?",o:["Ate","Eated","Eat","Eating"],a:0},
+{q:"Past run?",o:["Ran","Runed","Running","Runs"],a:0},
+{q:"Past come?",o:["Came","Comed","Coming","Comes"],a:0},
+{q:"Past see?",o:["Saw","Seed","Seeing","Sees"],a:0}
 ]
 ],
 
 gk:[
-Array.from({length:10},()=>({
-q:"Capital of India?",
-o:["Delhi","Mumbai","Goa","Chennai"],
-a:0
-})),
-Array.from({length:10},()=>({
-q:"Sun is a ?",
-o:["Star","Planet","Moon","Rock"],
-a:0
-})),
-Array.from({length:10},()=>({
-q:"Water formula?",
-o:["H2O","CO2","O2","NaCl"],
-a:0
-}))
+[
+{q:"Capital India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
+{q:"Sun is?",o:["Star","Planet","Moon","Rock"],a:0},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
+{q:"Rainbow colors?",o:["7","5","6","8"],a:0}
+],
+[
+{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
+{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
+{q:"Sun rises?",o:["East","West","North","South"],a:0},
+{q:"Water boils?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"Plants make food?",o:["Photosynthesis","Jump","Run","Sleep"],a:0}
+],
+[
+{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
+{q:"Gravity?",o:["Newton","Tesla","Einstein","Darwin"],a:0},
+{q:"DNA is?",o:["Genetic","Metal","Gas","Stone"],a:0},
+{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
+{q:"Atom is?",o:["Smallest","Big","Huge","Large"],a:0}
+]
 ]
 };
 
-/* 🔒 LOCK SYSTEM */
-let unlock={math:0,english:0,gk:0};
+/* ===== GAME ===== */
+let cat="",level=0,i=0,stars=0,coins=0,time=10,timer;
 
-let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
+/* ===== THEME ===== */
+function changeTheme(){
+let c=document.getElementById("card");
+if(c.classList.contains("dark")) c.className="card neon";
+else if(c.classList.contains("neon")) c.className="card kids";
+else c.className="card dark";
+}
+
+/* ===== SOUND ===== */
+function beep(){
+new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg").play();
+}
+
+/* ===== CONFETTI ===== */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let parts=[];
+function blast(){
+for(let i=0;i<80;i++){
+parts.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6+2,c:`hsl(${Math.random()*360},100%,50%)`});
+}
+}
+
+function draw(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+parts.forEach(p=>{
+ctx.fillStyle=p.c;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.y+=3;
+});
+parts=parts.filter(p=>p.y<canvas.height);
+requestAnimationFrame(draw);
+}
+draw();
+
+/* ===== GAME ===== */
+function startGame(){show("catScreen");}
+function selectCat(c){cat=c;show("levelScreen");}
+function selectLevel(l){level=l;i=0;show("gameScreen");load();}
 
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 
-let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
-
 let html="";
-options.forEach(op=>{
-html+=`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`;
+q.o.forEach((o,idx)=>{
+html+=`<button class="btn p1" onclick="check(${idx})">${o}</button>`;
 });
 document.getElementById("opts").innerHTML=html;
 startTimer();
 }
 
-function check(btn,ok){
+function check(ans){
 clearInterval(timer);
-if(ok){
-btn.classList.add("correct");
-stars++; coins+=10;
-}else{
-btn.classList.add("wrong");
+let q=data[cat][level][i];
+if(ans==q.a){
+stars++;coins+=10;
+blast();beep();
 }
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
-setTimeout(nextQ,600);
+setTimeout(nextQ,500);
 }
 
+/* ===== AI DIFFICULTY ===== */
 function startTimer(){
-clearInterval(timer);
-time=10;
+time=10-(level*2);
 document.getElementById("time").innerText=time;
 timer=setInterval(()=>{
 time--;
@@ -237,25 +279,11 @@ if(time<=0) nextQ();
 }
 
 function nextQ(){
-if(i < data[cat][level].length-1){
+if(i<data[cat][level].length-1){
 i++;load();
 }else{
-if(level===0) unlock[cat]=1;
-if(level===1) unlock[cat]=2;
-goHome();
+i=0;show("catScreen");
 }
-}
-
-function prevQ(){if(i>0){i--;load();}}
-
-function goHome(){
-i=0;
-clearInterval(timer);
-show("catScreen");
-}
-
-function startApp(){
-show("catScreen");
 }
 
 function show(id){
@@ -264,34 +292,6 @@ function show(id){
 document.getElementById(id).classList.remove("hidden");
 }
 
-function selectCat(c){
-cat=c;
-
-document.getElementById("medBtn").innerText =
-unlock[cat]>=1 ? "Medium" : "Medium 🔒";
-
-document.getElementById("hardBtn").innerText =
-unlock[cat]>=2 ? "Hard" : "Hard 🔒";
-
-show("levelScreen");
-}
-
-function selectLevel(l){
-
-if(l===1 && unlock[cat]<1){
-alert("Complete Easy first");return;
-}
-if(l===2 && unlock[cat]<2){
-alert("Complete Medium first");return;
-}
-
-level=l;
-i=0;
-show("gameScreen");
-load();
-}
-
 </script>
-
 </body>
 </html>
