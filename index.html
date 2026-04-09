@@ -30,8 +30,8 @@ border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
-z-index:2;
 position:relative;
+z-index:2;
 }
 
 .card.dark{background:#1e1e1e;color:white;}
@@ -55,15 +55,15 @@ cursor:pointer;
 
 .hidden{display:none;}
 
-/* 🎉 FIXED CONFETTI (VISIBLE ON SCREEN) */
+/* 🎉 CONFETTI */
 .confetti{
 position:fixed;
 top:-10px;
-width:10px;
-height:10px;
+width:8px;
+height:8px;
 border-radius:50%;
 animation:fall linear forwards;
-z-index:9999; /* 🔥 IMPORTANT FIX */
+z-index:9999;
 }
 
 @keyframes fall{
@@ -116,7 +116,9 @@ z-index:9999; /* 🔥 IMPORTANT FIX */
 
 <script>
 
-/* 🔊 FIXED SOUND SYSTEM */
+/* =========================
+   🔊 SOUND FIXED
+========================= */
 function sound(type){
 let audio=new Audio();
 
@@ -133,7 +135,9 @@ audio.src="https://actions.google.com/sounds/v1/cartoon/boing.ogg";
 audio.play();
 }
 
-/* VOICE */
+/* =========================
+   🎤 VOICE
+========================= */
 function speak(text){
 let msg=new SpeechSynthesisUtterance(text);
 msg.rate=0.75;
@@ -141,7 +145,9 @@ msg.pitch=1.8;
 speechSynthesis.speak(msg);
 }
 
-/* 🎉 CONFETTI FIX (VISIBLE + FRONT) */
+/* =========================
+   🎉 CONFETTI FIX
+========================= */
 function blast(){
 for(let i=0;i<80;i++){
 let c=document.createElement("div");
@@ -149,14 +155,15 @@ c.className="confetti";
 c.style.left=Math.random()*window.innerWidth+"px";
 c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
 c.style.animationDuration=(2+Math.random()*2)+"s";
-c.style.zIndex=9999; // 🔥 FIX
 document.body.appendChild(c);
 
 setTimeout(()=>c.remove(),4000);
 }
 }
 
-/* 📚 QUESTIONS (FULL RESTORED) */
+/* =========================
+   📚 QUESTIONS (RESTORED)
+========================= */
 const data={
 math:[
 [
@@ -196,20 +203,43 @@ gk:[
 ]
 };
 
-/* STATE */
+/* =========================
+   🔥 STATE
+========================= */
 let cat="",level=0,i=0;
 let unlock=JSON.parse(localStorage.getItem("unlock"))||[true,false,false];
 
-/* 🎮 START */
+/* =========================
+   🧠 RESET FIX (IMPORTANT)
+========================= */
+function resetGame(){
+i=0;
+level=0;
+cat="";
+speechSynthesis.cancel();
+}
+
+/* =========================
+   🎮 START FIX
+========================= */
 function startGame(){
-sound("welcome"); // 🔥 FIXED
+resetGame();
+sound("welcome");
 show("catScreen");
 }
 
-/* CATEGORY */
-function selectCat(c){cat=c;show("levelScreen");}
+/* =========================
+   📂 CATEGORY FIX
+========================= */
+function selectCat(c){
+resetGame();
+cat=c;
+show("levelScreen");
+}
 
-/* 🔓 LEVEL LOCK FIX */
+/* =========================
+   🔓 LEVEL LOCK FIX
+========================= */
 function selectLevel(l){
 
 if(!unlock[l]){
@@ -217,10 +247,15 @@ alert("Level locked! Complete previous level");
 return;
 }
 
-level=l;i=0;show("gameScreen");load();
+level=l;
+i=0;
+show("gameScreen");
+load();
 }
 
-/* LOAD */
+/* =========================
+   📖 LOAD QUESTION
+========================= */
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
@@ -231,16 +266,18 @@ html+=`<button class="btn p1" onclick="check(${idx})">${o}</button>`;
 });
 document.getElementById("opts").innerHTML=html;
 
-/* voice */
 speechSynthesis.cancel();
 speak(q.q);
 }
 
+/* =========================
+   ✅ ANSWER CHECK
+========================= */
 function check(ans){
 let q=data[cat][level][i];
 
 if(ans==q.a){
-sound("correct"); // 🔥 FIXED
+sound("correct");
 blast();
 }else{
 sound("wrong");
@@ -249,12 +286,15 @@ sound("wrong");
 setTimeout(nextQ,500);
 }
 
+/* =========================
+   ➡ NEXT
+========================= */
 function nextQ(){
 if(i<data[cat][level].length-1){
-i++;load();
+i++;
+load();
 }else{
 
-/* unlock next level */
 unlock[level+1]=true;
 localStorage.setItem("unlock",JSON.stringify(unlock));
 
@@ -263,14 +303,37 @@ show("catScreen");
 }
 
 function prevQ(){if(i>0){i--;load();}}
-function goHome(){show("catScreen");}
+function goHome(){resetGame();show("catScreen");}
 function backToCategory(){show("catScreen");}
 
-/* SCREEN */
+/* =========================
+   🎨 SCREEN MANAGER
+========================= */
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
+}
+
+/* =========================
+   🎨 THEME FIX
+========================= */
+function changeTheme(){
+let body=document.body;
+let card=document.getElementById("card");
+
+if(body.classList.contains("kids")){
+body.className="dark";
+card.className="card dark";
+}
+else if(body.classList.contains("dark")){
+body.className="neon";
+card.className="card neon";
+}
+else{
+body.className="kids";
+card.className="card kids";
+}
 }
 
 </script>
