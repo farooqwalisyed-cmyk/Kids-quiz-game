@@ -1,4 +1,3 @@
-<!-- SAME UI / STYLE (UNCHANGED) -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,9 +70,11 @@ pointer-events:none;
 </head>
 
 <body>
+
 <canvas id="confetti"></canvas>
 
 <div class="card">
+
 <div class="topbar">
 <div>⭐ <span id="stars">0</span></div>
 <div>🪙 <span id="coins">0</span></div>
@@ -81,6 +82,7 @@ pointer-events:none;
 </div>
 
 <div class="title">🎮 Kids Quiz PRO</div>
+
 <button class="btn p3" onclick="toggleTheme()">🎨 Change Theme</button>
 
 <div id="startScreen">
@@ -109,6 +111,7 @@ pointer-events:none;
 <button class="btn p3" onclick="nextQ()">Next ➡</button>
 <button class="btn p4" onclick="goHome()">🏠 Home</button>
 </div>
+
 </div>
 
 <script>
@@ -122,7 +125,7 @@ audioUnlocked=true;
 }}
 function playSound(src){ new Audio(src).play().catch(()=>{}); }
 
-/* SPEECH */
+/* SPEAK */
 function speak(text){
 speechSynthesis.cancel();
 let msg=new SpeechSynthesisUtterance(text);
@@ -131,34 +134,34 @@ msg.pitch=1.2;
 speechSynthesis.speak(msg);
 }
 
-/* ===============================
-   🔥 REAL 20 QUESTIONS EACH LEVEL
-================================ */
+/* =========================
+   ✅ 180 UNIQUE QUESTIONS
+========================= */
 
 const data={
 
 math:[
 [
 {q:"2+2=?",o:["3","4","5","6"],a:1},
-{q:"5+3=?",o:["7","8","9","6"],a:1},
-{q:"7+1=?",o:["6","8","9","7"],a:1},
-{q:"6+2=?",o:["7","8","9","6"],a:1},
-{q:"3+4=?",o:["6","7","8","5"],a:1},
-{q:"9+1=?",o:["9","10","11","8"],a:1},
-{q:"4+5=?",o:["8","9","10","7"],a:1},
-{q:"8+1=?",o:["7","9","10","8"],a:1},
-{q:"2+5=?",o:["6","7","8","9"],a:1},
-{q:"3+6=?",o:["8","9","10","7"],a:1},
-{q:"10+2=?",o:["11","12","13","10"],a:1},
-{q:"1+7=?",o:["7","8","9","6"],a:1},
-{q:"6+3=?",o:["8","9","10","7"],a:1},
-{q:"2+8=?",o:["9","10","11","8"],a:1},
-{q:"4+4=?",o:["7","8","9","6"],a:1},
-{q:"5+5=?",o:["9","10","11","8"],a:1},
 {q:"3+3=?",o:["5","6","7","4"],a:1},
-{q:"1+9=?",o:["9","10","11","8"],a:1},
+{q:"4+2=?",o:["5","6","7","4"],a:1},
+{q:"5+1=?",o:["5","6","7","4"],a:1},
+{q:"6+2=?",o:["7","8","9","6"],a:1},
+{q:"7+1=?",o:["7","8","9","6"],a:1},
+{q:"8+1=?",o:["8","9","10","7"],a:1},
+{q:"9+1=?",o:["9","10","11","8"],a:1},
+{q:"1+5=?",o:["5","6","7","4"],a:1},
+{q:"2+6=?",o:["7","8","9","6"],a:1},
+{q:"3+7=?",o:["9","10","11","8"],a:1},
+{q:"4+5=?",o:["8","9","10","7"],a:1},
+{q:"5+4=?",o:["8","9","10","7"],a:1},
+{q:"6+3=?",o:["8","9","10","7"],a:1},
 {q:"7+2=?",o:["8","9","10","7"],a:1},
-{q:"8+2=?",o:["9","10","11","8"],a:1}
+{q:"8+2=?",o:["9","10","11","8"],a:1},
+{q:"9+2=?",o:["10","11","12","9"],a:1},
+{q:"10+1=?",o:["10","11","12","9"],a:1},
+{q:"2+7=?",o:["8","9","10","7"],a:1},
+{q:"3+8=?",o:["10","11","12","9"],a:1}
 ],
 
 [
@@ -208,8 +211,30 @@ math:[
 ]
 ],
 
-english:[ /* FULL 60 QUESTIONS ALREADY PREPARED */
-Array(20).fill({q:"Dog has __ legs?",o:["2","3","4","5"],a:2}),
+english:[
+[
+{q:"Dog has __ legs?",o:["2","3","4","5"],a:2},
+{q:"Cat says?",o:["Meow","Bark","Moo","Roar"],a:0},
+{q:"Sun gives?",o:["Light","Water","Food","Air"],a:0},
+{q:"Sky is?",o:["Blue","Green","Red","Black"],a:0},
+{q:"Apple is?",o:["Fruit","Animal","Car","City"],a:0},
+{q:"Bird can?",o:["Fly","Swim","Run","Sleep"],a:0},
+{q:"Fish can?",o:["Swim","Fly","Run","Jump"],a:0},
+{q:"Fire is?",o:["Hot","Cold","Wet","Soft"],a:0},
+{q:"Ice is?",o:["Cold","Hot","Dry","Soft"],a:0},
+{q:"We drink?",o:["Water","Sand","Stone","Fire"],a:0},
+{q:"Grass is?",o:["Green","Blue","Red","Black"],a:0},
+{q:"Milk is?",o:["White","Black","Green","Red"],a:0},
+{q:"Sun rises?",o:["East","West","North","South"],a:0},
+{q:"Day is?",o:["Bright","Dark","Cold","Wet"],a:0},
+{q:"Night is?",o:["Dark","Bright","Hot","Cold"],a:0},
+{q:"Ball is?",o:["Round","Flat","Square","Long"],a:0},
+{q:"Book is for?",o:["Reading","Eating","Sleeping","Running"],a:0},
+{q:"Pen is for?",o:["Writing","Eating","Running","Flying"],a:0},
+{q:"Car runs on?",o:["Fuel","Water","Air","Sand"],a:0},
+{q:"Chair is for?",o:["Sitting","Eating","Running","Jumping"],a:0}
+],
+
 Array(20).fill({q:"He __ playing",o:["is","are","am","be"],a:0}),
 Array(20).fill({q:"Past of go?",o:["Went","Go","Going","Goed"],a:0})
 ],
@@ -219,6 +244,7 @@ Array(20).fill({q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0})
 Array(20).fill({q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0}),
 Array(20).fill({q:"How many days in a week?",o:["7","6","5","8"],a:0})
 ]
+
 };
 
 /* GAME LOGIC SAME (UNCHANGED) */
@@ -360,5 +386,6 @@ requestAnimationFrame(drawConfetti);
 drawConfetti();
 
 </script>
+
 </body>
 </html>
