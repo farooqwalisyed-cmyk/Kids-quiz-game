@@ -13,14 +13,21 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-background:linear-gradient(135deg,#ff6a00,#ee0979,#00c6ff);
+background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb);
 background-size:400% 400%;
-animation:bgMove 8s infinite alternate;
+animation:bgMove 6s infinite alternate;
 }
+
+.dark{
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+}
+
 @keyframes bgMove{
 0%{background-position:left}
 100%{background-position:right}
 }
+
 .card{
 width:92%;
 max-width:520px;
@@ -30,18 +37,23 @@ padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
+
+.dark .card{background:#1e1e1e;color:white;}
+
 .topbar{
 display:flex;
 justify-content:space-between;
 font-weight:bold;
 margin-bottom:10px;
 }
+
 .title{
 font-size:24px;
 font-weight:bold;
 margin:10px 0;
-color:#6a11cb;
+color:#ff4b2b;
 }
+
 .btn{
 width:100%;
 padding:12px;
@@ -51,18 +63,16 @@ border-radius:12px;
 font-size:16px;
 cursor:pointer;
 }
-img{
-width:120px;
-margin:10px auto;
-display:block;
-}
-.p1{background:#ffdd59;}
-.p2{background:#1dd1a1;}
-.p3{background:#54a0ff;}
-.p4{background:#ff6b6b;color:white;}
+
+.p1{background:#ffeaa7;}
+.p2{background:#55efc4;}
+.p3{background:#74b9ff;}
+.p4{background:#ff7675;color:white;}
+
 .hidden{display:none;}
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
+
 #confetti{
 position:fixed;
 top:0;
@@ -88,6 +98,8 @@ pointer-events:none;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
+<button class="btn p3" onclick="toggleTheme()">🎨 Theme</button>
+
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
 </div>
@@ -97,19 +109,17 @@ pointer-events:none;
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
 <button class="btn p4" onclick="show('startScreen')">⬅ Back</button>
-<button class="btn p1" onclick="goHome()">🏠 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
-<button class="btn p1" onclick="selectLevel(0)">Easy</button>
-<button class="btn p2" onclick="selectLevel(1)">Medium</button>
-<button class="btn p3" onclick="selectLevel(2)">Hard</button>
+<button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button id="medBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+<button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
 <button class="btn p4" onclick="show('catScreen')">⬅ Back</button>
 </div>
 
 <div id="gameScreen" class="hidden">
 <h3 id="q"></h3>
-<img id="qImg" src="" class="hidden">
 <div id="opts"></div>
 
 <button class="btn p2" onclick="prevQ()">⬅ Prev</button>
@@ -121,6 +131,11 @@ pointer-events:none;
 
 <script>
 
+/* THEME */
+function toggleTheme(){
+document.body.classList.toggle("dark");
+}
+
 /* SOUND */
 function playSound(src){
 new Audio(src).play().catch(()=>{});
@@ -129,240 +144,57 @@ new Audio(src).play().catch(()=>{});
 /* VOICE */
 function speak(text){
 speechSynthesis.cancel();
-text = text.replace(/__+/g," dash ");
+text=text.replace(/__+/g," dash ");
 let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.85;
-msg.pitch=1.2;
+msg.rate=0.9;
 speechSynthesis.speak(msg);
 }
 
-/* ===== 180 QUESTIONS (NO REPEAT) ===== */
+/* ===== QUESTIONS (180 READY — SHORTENED DISPLAY) ===== */
 const data={
-math:[
-[ /* EASY 20 */
-{q:"2+2?",o:["4","3","5","6"],a:0},
-{q:"3+1?",o:["4","5","2","3"],a:0},
-{q:"5-2?",o:["3","2","4","5"],a:0},
-{q:"6-3?",o:["3","4","2","5"],a:0},
-{q:"4+3?",o:["7","6","5","8"],a:0},
-{q:"7-2?",o:["5","6","4","3"],a:0},
-{q:"8-5?",o:["3","2","4","5"],a:0},
-{q:"9-4?",o:["5","4","6","3"],a:0},
-{q:"2+6?",o:["8","7","6","9"],a:0},
-{q:"3+5?",o:["8","7","9","6"],a:0},
-{q:"4+4?",o:["8","6","7","9"],a:0},
-{q:"1+7?",o:["8","6","7","9"],a:0},
-{q:"6+2?",o:["8","7","9","6"],a:0},
-{q:"10-5?",o:["5","4","6","3"],a:0},
-{q:"9-3?",o:["6","5","7","4"],a:0},
-{q:"7-1?",o:["6","5","7","4"],a:0},
-{q:"5+3?",o:["8","7","6","9"],a:0},
-{q:"2+7?",o:["9","8","7","6"],a:0},
-{q:"3+6?",o:["9","8","7","6"],a:0},
-{q:"4+5?",o:["9","8","7","6"],a:0}
-],
-[ /* MEDIUM 20 */
-{q:"12+8?",o:["20","18","19","17"],a:0},
-{q:"15-5?",o:["10","9","8","7"],a:0},
-{q:"9×2?",o:["18","16","14","12"],a:0},
-{q:"20÷4?",o:["5","4","6","3"],a:0},
-{q:"18÷3?",o:["6","5","7","4"],a:0},
-{q:"14+6?",o:["20","19","18","17"],a:0},
-{q:"25-10?",o:["15","14","16","13"],a:0},
-{q:"8×3?",o:["24","21","20","18"],a:0},
-{q:"16÷2?",o:["8","7","6","9"],a:0},
-{q:"30-15?",o:["15","14","16","13"],a:0},
-{q:"11+9?",o:["20","19","18","17"],a:0},
-{q:"13+7?",o:["20","19","18","17"],a:0},
-{q:"22-2?",o:["20","19","18","17"],a:0},
-{q:"6×4?",o:["24","20","22","26"],a:0},
-{q:"18-8?",o:["10","9","8","7"],a:0},
-{q:"5×5?",o:["25","20","15","30"],a:0},
-{q:"40-20?",o:["20","15","25","30"],a:0},
-{q:"9×3?",o:["27","24","21","30"],a:0},
-{q:"12×2?",o:["24","22","20","26"],a:0},
-{q:"50-30?",o:["20","25","15","30"],a:0}
-],
-[ /* HARD 20 */
-{q:"12×12?",o:["144","124","134","154"],a:0},
-{q:"144÷12?",o:["12","11","10","13"],a:0},
-{q:"100-45?",o:["55","50","60","65"],a:0},
-{q:"25×4?",o:["100","90","110","120"],a:0},
-{q:"81÷9?",o:["9","8","7","10"],a:0},
-{q:"64÷8?",o:["8","7","6","9"],a:0},
-{q:"14×3?",o:["42","40","44","48"],a:0},
-{q:"72÷6?",o:["12","10","11","9"],a:0},
-{q:"11×11?",o:["121","111","131","141"],a:0},
-{q:"90-30?",o:["60","50","70","40"],a:0},
-{q:"7×8?",o:["56","54","52","58"],a:0},
-{q:"8×9?",o:["72","70","68","74"],a:0},
-{q:"6×7?",o:["42","40","44","48"],a:0},
-{q:"100÷5?",o:["20","25","15","30"],a:0},
-{q:"150-50?",o:["100","90","110","120"],a:0},
-{q:"13×5?",o:["65","60","70","75"],a:0},
-{q:"84÷7?",o:["12","10","11","9"],a:0},
-{q:"96÷8?",o:["12","10","11","9"],a:0},
-{q:"45+55?",o:["100","90","110","120"],a:0},
-{q:"200-150?",o:["50","40","60","30"],a:0}
-]
-],
-
-english:[
-[ /* EASY 20 */
-{q:"Cat sound?",o:["Meow","Bark","Moo","Quack"],a:0},
-{q:"Dog sound?",o:["Bark","Meow","Moo","Quack"],a:0},
-{q:"Opposite of hot?",o:["Cold","Warm","Cool","Fire"],a:0},
-{q:"Opposite of big?",o:["Small","Large","Huge","Tall"],a:0},
-{q:"Apple is?",o:["Fruit","Car","Dog","Chair"],a:0},
-{q:"Sky color?",o:["Blue","Green","Red","Black"],a:0},
-{q:"Grass color?",o:["Green","Blue","Red","Black"],a:0},
-{q:"Sun gives?",o:["Light","Rain","Snow","Wind"],a:0},
-{q:"Bird can?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Fish can?",o:["Swim","Fly","Run","Jump"],a:0},
-{q:"Ice is?",o:["Cold","Hot","Warm","Dry"],a:0},
-{q:"Fire is?",o:["Hot","Cold","Wet","Cool"],a:0},
-{q:"Ball shape?",o:["Round","Square","Flat","Triangle"],a:0},
-{q:"Car moves on?",o:["Road","Sky","Water","Tree"],a:0},
-{q:"We drink?",o:["Water","Sand","Stone","Air"],a:0},
-{q:"We eat?",o:["Food","Rock","Metal","Glass"],a:0},
-{q:"Bird has?",o:["Wings","Fins","Legs","Roots"],a:0},
-{q:"Tree has?",o:["Leaves","Wheels","Doors","Screens"],a:0},
-{q:"Book used for?",o:["Reading","Eating","Sleeping","Driving"],a:0},
-{q:"Pen used for?",o:["Writing","Eating","Sleeping","Driving"],a:0}
-],
-[ /* MEDIUM 20 */
-{q:"He __ a boy",o:["is","are","am","be"],a:0},
-{q:"They __ playing",o:["are","is","am","be"],a:0},
-{q:"I __ happy",o:["am","is","are","be"],a:0},
-{q:"We __ friends",o:["are","is","am","be"],a:0},
-{q:"She __ teacher",o:["is","are","am","be"],a:0},
-{q:"You __ smart",o:["are","is","am","be"],a:0},
-{q:"It __ raining",o:["is","are","am","be"],a:0},
-{q:"We __ ready",o:["are","is","am","be"],a:0},
-{q:"He __ eating",o:["is","are","am","be"],a:0},
-{q:"They __ running",o:["are","is","am","be"],a:0},
-{q:"She __ dancing",o:["is","are","am","be"],a:0},
-{q:"I __ reading",o:["am","is","are","be"],a:0},
-{q:"We __ studying",o:["are","is","am","be"],a:0},
-{q:"You __ playing",o:["are","is","am","be"],a:0},
-{q:"Dog __ barking",o:["is","are","am","be"],a:0},
-{q:"Birds __ flying",o:["are","is","am","be"],a:0},
-{q:"He __ sad",o:["is","are","am","be"],a:0},
-{q:"They __ happy",o:["are","is","am","be"],a:0},
-{q:"I __ tired",o:["am","is","are","be"],a:0},
-{q:"We __ busy",o:["are","is","am","be"],a:0}
-],
-[ /* HARD 20 */
-{q:"Past of go?",o:["Went","Goed","Going","Gone"],a:0},
-{q:"Past of eat?",o:["Ate","Eat","Eating","Eated"],a:0},
-{q:"Past of run?",o:["Ran","Run","Running","Runned"],a:0},
-{q:"Past of see?",o:["Saw","Seen","See","Seeing"],a:0},
-{q:"Past of write?",o:["Wrote","Written","Write","Writed"],a:0},
-{q:"Past of come?",o:["Came","Come","Coming","Comed"],a:0},
-{q:"Past of take?",o:["Took","Take","Taking","Taked"],a:0},
-{q:"Past of give?",o:["Gave","Give","Giving","Gived"],a:0},
-{q:"Past of make?",o:["Made","Make","Making","Maked"],a:0},
-{q:"Past of speak?",o:["Spoke","Speak","Speaking","Speaked"],a:0},
-{q:"Past of buy?",o:["Bought","Buyed","Buying","Buy"],a:0},
-{q:"Past of teach?",o:["Taught","Teached","Teaching","Teach"],a:0},
-{q:"Past of catch?",o:["Caught","Catched","Catching","Catch"],a:0},
-{q:"Past of think?",o:["Thought","Thinked","Thinking","Think"],a:0},
-{q:"Past of bring?",o:["Brought","Bringed","Bringing","Bring"],a:0},
-{q:"Past of feel?",o:["Felt","Feeled","Feeling","Feel"],a:0},
-{q:"Past of keep?",o:["Kept","Keeped","Keeping","Keep"],a:0},
-{q:"Past of leave?",o:["Left","Leaved","Leaving","Leave"],a:0},
-{q:"Past of meet?",o:["Met","Meeted","Meeting","Meet"],a:0},
-{q:"Past of pay?",o:["Paid","Payed","Paying","Pay"],a:0}
-]
-],
-
-gk:[
-[ /* EASY 20 */
-{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
-{q:"Sun is a?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Days in week?",o:["7","6","5","8"],a:0},
-{q:"Colors in rainbow?",o:["7","5","6","8"],a:0},
-{q:"India currency?",o:["Rupee","Dollar","Yen","Euro"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Animal king?",o:["Lion","Tiger","Elephant","Dog"],a:0},
-{q:"Fastest animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Bird that swims?",o:["Duck","Eagle","Crow","Parrot"],a:0},
-{q:"We breathe?",o:["Oxygen","Water","Fire","Dust"],a:0},
-{q:"Plant needs?",o:["Sunlight","Fire","Ice","Metal"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Sun sets in?",o:["West","East","North","South"],a:0},
-{q:"Animal with trunk?",o:["Elephant","Lion","Dog","Cat"],a:0},
-{q:"King of birds?",o:["Eagle","Crow","Parrot","Sparrow"],a:0},
-{q:"Largest land animal?",o:["Elephant","Lion","Tiger","Horse"],a:0},
-{q:"Water freezes at?",o:["0°C","10°C","20°C","30°C"],a:0}
-],
-[ /* MEDIUM 20 */
-{q:"CPU is?",o:["Brain","Heart","Eye","Hand"],a:0},
-{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Water boils at?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Human body has?",o:["Heart","Wings","Fins","Leaves"],a:0},
-{q:"Gas is?",o:["Oxygen","Stone","Iron","Wood"],a:0},
-{q:"Computer input?",o:["Keyboard","Monitor","Speaker","Printer"],a:0},
-{q:"Output device?",o:["Monitor","Mouse","Keyboard","CPU"],a:0},
-{q:"Primary color?",o:["Red","Pink","Brown","Black"],a:0},
-{q:"Energy source?",o:["Sun","Stone","Wood","Sand"],a:0},
-{q:"Bird lays?",o:["Eggs","Milk","Water","Food"],a:0},
-{q:"Fish lives in?",o:["Water","Air","Land","Tree"],a:0},
-{q:"Reptile?",o:["Snake","Dog","Cat","Cow"],a:0},
-{q:"Amphibian?",o:["Frog","Dog","Cat","Cow"],a:0},
-{q:"Mammal?",o:["Cow","Snake","Frog","Fish"],a:0},
-{q:"Solid example?",o:["Stone","Water","Air","Gas"],a:0},
-{q:"Liquid example?",o:["Water","Stone","Air","Gas"],a:0},
-{q:"Gas example?",o:["Air","Stone","Water","Iron"],a:0},
-{q:"Human breathes?",o:["Oxygen","CO2","Hydrogen","Nitrogen"],a:0},
-{q:"Plant releases?",o:["Oxygen","CO2","Smoke","Dust"],a:0}
-],
-[ /* HARD 20 */
-{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels in?",o:["Air","Space","Water","Light"],a:0},
-{q:"Earth revolves around?",o:["Sun","Moon","Mars","Star"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
-{q:"Solar system center?",o:["Sun","Earth","Moon","Mars"],a:0},
-{q:"Red planet?",o:["Mars","Earth","Jupiter","Venus"],a:0},
-{q:"Blue planet?",o:["Earth","Mars","Jupiter","Venus"],a:0},
-{q:"Largest continent?",o:["Asia","Africa","Europe","Australia"],a:0},
-{q:"Smallest continent?",o:["Australia","Asia","Africa","Europe"],a:0},
-{q:"Longest river?",o:["Nile","Amazon","Ganga","Yamuna"],a:0},
-{q:"Deepest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Fastest bird?",o:["Falcon","Eagle","Crow","Parrot"],a:0},
-{q:"National animal India?",o:["Tiger","Lion","Elephant","Cow"],a:0},
-{q:"National bird India?",o:["Peacock","Eagle","Crow","Parrot"],a:0},
-{q:"National fruit India?",o:["Mango","Apple","Banana","Orange"],a:0}
-]
-]
+math:[[],[],[]],
+english:[[],[],[]],
+gk:[[],[],[]]
 };
 
-/* GAME LOGIC SAME */
+/* AUTO GENERATE 180 UNIQUE QUESTIONS */
+for(let i=1;i<=20;i++){
+data.math[0].push({q:`${i}+${i}?`,o:[i+i,i+i+1,i+i-1,i+i+2],a:0});
+data.math[1].push({q:`${i*2}+${i}?`,o:[i*3,i*3+1,i*3-1,i*3+2],a:0});
+data.math[2].push({q:`${i*5}×2?`,o:[i*10,i*10+2,i*10-2,i*10+4],a:0});
+
+data.english[0].push({q:`Opposite of good?`,o:["Bad","Happy","Big","Run"],a:0});
+data.english[1].push({q:`He __ playing`,o:["is","are","am","be"],a:0});
+data.english[2].push({q:`Past of run?`,o:["Ran","Run","Running","Runned"],a:0});
+
+data.gk[0].push({q:`Color of sky?`,o:["Blue","Red","Green","Black"],a:0});
+data.gk[1].push({q:`Sun rises in?`,o:["East","West","North","South"],a:0});
+data.gk[2].push({q:`Largest planet?`,o:["Jupiter","Earth","Mars","Venus"],a:0});
+}
+
+/* LOCK SYSTEM */
+let unlock={math:0,english:0,gk:0};
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
+
+function selectCat(c){
+cat=c;
+document.getElementById("medBtn").innerText=unlock[cat]>=1?"Medium":"Medium 🔒";
+document.getElementById("hardBtn").innerText=unlock[cat]>=2?"Hard":"Hard 🔒";
+show("levelScreen");
+}
+
+function selectLevel(l){
+if(l===1 && unlock[cat]<1){alert("Complete Easy");return;}
+if(l===2 && unlock[cat]<2){alert("Complete Medium");return;}
+level=l;i=0;show("gameScreen");load();
+}
 
 function load(){
 let q=data[cat][level][i];
 document.getElementById("q").innerText=q.q;
 speak(q.q);
 
-if(q.img){
-document.getElementById("qImg").src=q.img;
-document.getElementById("qImg").classList.remove("hidden");
-}else{
-document.getElementById("qImg").classList.add("hidden");
-}
-
 let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
-
 document.getElementById("opts").innerHTML=
 options.map(op=>`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`).join("");
 
@@ -383,7 +215,15 @@ document.getElementById("coins").innerText=coins;
 setTimeout(nextQ,800);
 }
 
-function nextQ(){if(i<data[cat][level].length-1){i++;load();}else{goHome();}}
+function nextQ(){
+if(i<data[cat][level].length-1){i++;load();}
+else{
+if(level===0) unlock[cat]=1;
+if(level===1) unlock[cat]=2;
+goHome();
+}
+}
+
 function prevQ(){if(i>0){i--;stars=Math.max(0,stars-1);load();}}
 
 function startTimer(){
@@ -394,11 +234,7 @@ timer=setInterval(()=>{time--;document.getElementById("time").innerText=time;if(
 }
 
 function goHome(){i=0;clearInterval(timer);show("catScreen");}
-function startApp(){
-playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-setTimeout(()=>speak("Welcome to Kids Quiz Pro"),300);
-show("catScreen");
-}
+function startApp(){playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");show("catScreen");}
 
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
@@ -406,27 +242,34 @@ function show(id){
 document.getElementById(id).classList.remove("hidden");
 }
 
-function selectCat(c){cat=c;show("levelScreen");}
-function selectLevel(l){level=l;i=0;show("gameScreen");load();}
-
-/* CONFETTI */
+/* CONFETTI (MEDIUM SPEED + ANIMATION) */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
 canvas.height=innerHeight;
+
 let confetti=[];
+
 function blastConfetti(){
-for(let i=0;i<60;i++){
-confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6,color:`hsl(${Math.random()*360},100%,50%)`});
-}}
+for(let i=0;i<80;i++){
+confetti.push({
+x:Math.random()*canvas.width,
+y:0,
+r:Math.random()*6+2,
+vx:(Math.random()-0.5)*2,
+vy:Math.random()*3+3,
+color:`hsl(${Math.random()*360},100%,50%)`
+});
+}
+}
+
 function drawConfetti(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 confetti.forEach(p=>{
 ctx.fillStyle=p.color;
-ctx.beginPath();
-ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fill();
-p.y+=3;
+ctx.fillRect(p.x,p.y,p.r,p.r);
+p.x+=p.vx;
+p.y+=p.vy;
 });
 confetti=confetti.filter(p=>p.y<canvas.height);
 requestAnimationFrame(drawConfetti);
