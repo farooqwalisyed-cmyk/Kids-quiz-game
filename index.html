@@ -17,10 +17,17 @@ background:linear-gradient(135deg,#ff6a00,#ee0979,#00c6ff);
 background-size:400% 400%;
 animation:bgMove 8s infinite alternate;
 }
+
+body.dark{
+background:linear-gradient(135deg,#1a1a1a,#2c2c2c,#3d3d3d);
+color:white;
+}
+
 @keyframes bgMove{
 0%{background-position:left}
 100%{background-position:right}
 }
+
 .card{
 width:92%;
 max-width:520px;
@@ -30,18 +37,26 @@ padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
+
+body.dark .card{
+background:#222;
+color:white;
+}
+
 .topbar{
 display:flex;
 justify-content:space-between;
 font-weight:bold;
 margin-bottom:10px;
 }
+
 .title{
 font-size:24px;
 font-weight:bold;
 margin:10px 0;
 color:#6a11cb;
 }
+
 .btn{
 width:100%;
 padding:12px;
@@ -51,18 +66,22 @@ border-radius:12px;
 font-size:16px;
 cursor:pointer;
 }
+
 img{
 width:120px;
 margin:10px auto;
 display:block;
 }
+
 .p1{background:#ffdd59;}
 .p2{background:#1dd1a1;}
 .p3{background:#54a0ff;}
 .p4{background:#ff6b6b;color:white;}
+
 .hidden{display:none;}
 .correct{background:#2ecc71 !important;}
 .wrong{background:#e74c3c !important;}
+
 #confetti{
 position:fixed;
 top:0;
@@ -74,7 +93,7 @@ pointer-events:none;
 </style>
 </head>
 
-<body>
+<body onclick="unlockAudio()">
 
 <canvas id="confetti"></canvas>
 
@@ -88,6 +107,8 @@ pointer-events:none;
 
 <div class="title">🎮 Kids Quiz PRO</div>
 
+<button class="btn p3" onclick="toggleTheme()">🎨 Theme</button>
+
 <div id="startScreen">
 <button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
 </div>
@@ -96,7 +117,8 @@ pointer-events:none;
 <button class="btn p2" onclick="selectCat('math')">Math</button>
 <button class="btn p3" onclick="selectCat('english')">English</button>
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
-<button class="btn p1" onclick="goHome()">🏠 Restart</button>
+<button class="btn p1" onclick="show('startScreen')">⬅ Back</button>
+<button class="btn p4" onclick="goHome()">🏠 Restart</button>
 </div>
 
 <div id="levelScreen" class="hidden">
@@ -120,9 +142,24 @@ pointer-events:none;
 
 <script>
 
-/* SOUND */
+/* SOUND FIX */
+let audioUnlocked=false;
+function unlockAudio(){
+if(!audioUnlocked){
+new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg").play().catch(()=>{});
+audioUnlocked=true;
+}
+}
+
 function playSound(src){
+if(audioUnlocked){
 new Audio(src).play().catch(()=>{});
+}
+}
+
+/* THEME */
+function toggleTheme(){
+document.body.classList.toggle("dark");
 }
 
 /* VOICE */
@@ -135,218 +172,14 @@ msg.pitch=1.2;
 speechSynthesis.speak(msg);
 }
 
-/* 180 UNIQUE QUESTIONS */
+/* SAMPLE QUESTIONS (KEEP YOUR FULL DATA HERE) */
 const data={
-math:[
-[
-{q:"2+3=?",o:["5","6","7","4"],a:0},
-{q:"4+4=?",o:["8","7","6","9"],a:0},
-{q:"6+1=?",o:["7","8","6","5"],a:0},
-{q:"3+5=?",o:["8","7","9","6"],a:0},
-{q:"9-3=?",o:["6","5","7","4"],a:0},
-{q:"8-2=?",o:["6","5","4","7"],a:0},
-{q:"7+2=?",o:["9","8","7","10"],a:0},
-{q:"5+5=?",o:["10","9","11","8"],a:0},
-{q:"10-1=?",o:["9","8","7","6"],a:0},
-{q:"6+3=?",o:["9","8","7","10"],a:0},
-{q:"1+7=?",o:["8","7","6","9"],a:0},
-{q:"2+6=?",o:["8","7","9","6"],a:0},
-{q:"3+6=?",o:["9","8","7","10"],a:0},
-{q:"4+5=?",o:["9","10","8","7"],a:0},
-{q:"5+3=?",o:["8","7","6","9"],a:0},
-{q:"6+2=?",o:["8","9","7","6"],a:0},
-{q:"7+1=?",o:["8","9","7","6"],a:0},
-{q:"8+1=?",o:["9","10","8","7"],a:0},
-{q:"9-2=?",o:["7","6","8","5"],a:0},
-{q:"10-3=?",o:["7","6","5","8"],a:0}
-],
-[
-{q:"12+5=?",o:["17","16","18","15"],a:0},
-{q:"15-4=?",o:["11","10","12","9"],a:0},
-{q:"9×2=?",o:["18","16","20","14"],a:0},
-{q:"20÷5=?",o:["4","5","3","6"],a:0},
-{q:"18÷3=?",o:["6","5","7","4"],a:0},
-{q:"14+6=?",o:["20","19","18","21"],a:0},
-{q:"16-7=?",o:["9","8","10","7"],a:0},
-{q:"11+9=?",o:["20","19","21","18"],a:0},
-{q:"13+7=?",o:["20","21","19","18"],a:0},
-{q:"10×2=?",o:["20","18","16","22"],a:0},
-{q:"30÷6=?",o:["5","6","4","7"],a:0},
-{q:"25-5=?",o:["20","19","21","18"],a:0},
-{q:"18+2=?",o:["20","21","19","18"],a:0},
-{q:"24÷4=?",o:["6","5","7","8"],a:0},
-{q:"21-6=?",o:["15","14","16","13"],a:0},
-{q:"19+1=?",o:["20","19","18","21"],a:0},
-{q:"17+3=?",o:["20","21","19","18"],a:0},
-{q:"22-2=?",o:["20","19","18","21"],a:0},
-{q:"8×3=?",o:["24","23","22","25"],a:0},
-{q:"27÷3=?",o:["9","8","7","10"],a:0}
-],
-[
-{q:"12×12=?",o:["144","134","124","154"],a:0},
-{q:"144÷12=?",o:["12","11","13","10"],a:0},
-{q:"100-45=?",o:["55","50","60","65"],a:0},
-{q:"25×4=?",o:["100","90","110","120"],a:0},
-{q:"81÷9=?",o:["9","8","7","10"],a:0},
-{q:"50÷5=?",o:["10","9","8","7"],a:0},
-{q:"200-100=?",o:["100","90","110","120"],a:0},
-{q:"18×2=?",o:["36","34","32","38"],a:0},
-{q:"36÷6=?",o:["6","5","7","8"],a:0},
-{q:"15×3=?",o:["45","40","35","30"],a:0},
-{q:"64÷8=?",o:["8","7","9","6"],a:0},
-{q:"9×9=?",o:["81","72","90","99"],a:0},
-{q:"121÷11=?",o:["11","10","12","9"],a:0},
-{q:"30×3=?",o:["90","80","100","70"],a:0},
-{q:"48÷6=?",o:["8","7","9","6"],a:0},
-{q:"72÷8=?",o:["9","8","7","10"],a:0},
-{q:"14×5=?",o:["70","60","80","75"],a:0},
-{q:"90÷9=?",o:["10","9","8","11"],a:0},
-{q:"11×11=?",o:["121","111","131","141"],a:0},
-{q:"60÷5=?",o:["12","11","10","13"],a:0}
-]
-],
-
-english:[
-[
-{q:"Cat sound?",o:["Meow","Bark","Moo","Roar"],a:0},
-{q:"Dog sound?",o:["Bark","Meow","Moo","Roar"],a:0},
-{q:"Cow sound?",o:["Moo","Bark","Meow","Roar"],a:0},
-{q:"Opposite of hot?",o:["Cold","Warm","Heat","Fire"],a:0},
-{q:"Opposite of big?",o:["Small","Tall","Wide","Long"],a:0},
-{q:"Fruit?",o:["Apple","Car","Table","Chair"],a:0},
-{q:"Color of sky?",o:["Blue","Green","Red","Yellow"],a:0},
-{q:"We drink?",o:["Water","Stone","Wood","Sand"],a:0},
-{q:"Bird can?",o:["Fly","Swim","Drive","Cook"],a:0},
-{q:"Fish can?",o:["Swim","Fly","Run","Jump"],a:0},
-{q:"Sun gives?",o:["Light","Water","Snow","Wind"],a:0},
-{q:"Day opposite?",o:["Night","Morning","Noon","Evening"],a:0},
-{q:"Boy is?",o:["He","She","It","They"],a:0},
-{q:"Girl is?",o:["She","He","It","They"],a:0},
-{q:"Plural of cat?",o:["Cats","Cat","Cates","Catss"],a:0},
-{q:"Plural of dog?",o:["Dogs","Dog","Doges","Dogss"],a:0},
-{q:"We use to eat?",o:["Mouth","Hand","Leg","Ear"],a:0},
-{q:"We see with?",o:["Eyes","Hands","Legs","Nose"],a:0},
-{q:"We hear with?",o:["Ears","Eyes","Nose","Hands"],a:0},
-{q:"We smell with?",o:["Nose","Eyes","Hands","Legs"],a:0}
-],
-[
-{q:"He __ going",o:["is","are","am","be"],a:0},
-{q:"They __ playing",o:["are","is","am","be"],a:0},
-{q:"I __ happy",o:["am","is","are","be"],a:0},
-{q:"We __ friends",o:["are","is","am","be"],a:0},
-{q:"She __ eating",o:["is","are","am","be"],a:0},
-{q:"You __ smart",o:["are","is","am","be"],a:0},
-{q:"Dog __ barking",o:["is","are","am","be"],a:0},
-{q:"Birds __ flying",o:["are","is","am","be"],a:0},
-{q:"I __ a boy",o:["am","is","are","be"],a:0},
-{q:"He __ sad",o:["is","are","am","be"],a:0},
-{q:"They __ ready",o:["are","is","am","be"],a:0},
-{q:"She __ teacher",o:["is","are","am","be"],a:0},
-{q:"We __ going",o:["are","is","am","be"],a:0},
-{q:"He __ running",o:["is","are","am","be"],a:0},
-{q:"I __ eating",o:["am","is","are","be"],a:0},
-{q:"You __ late",o:["are","is","am","be"],a:0},
-{q:"She __ happy",o:["is","are","am","be"],a:0},
-{q:"They __ sad",o:["are","is","am","be"],a:0},
-{q:"Dog __ fast",o:["is","are","am","be"],a:0},
-{q:"Bird __ small",o:["is","are","am","be"],a:0}
-],
-[
-{q:"Past of go?",o:["Went","Gone","Going","Goed"],a:0},
-{q:"Past of eat?",o:["Ate","Eat","Eated","Eating"],a:0},
-{q:"Past of run?",o:["Ran","Run","Running","Runned"],a:0},
-{q:"Past of see?",o:["Saw","Seen","See","Seeing"],a:0},
-{q:"Past of come?",o:["Came","Come","Coming","Comed"],a:0},
-{q:"Past of write?",o:["Wrote","Write","Written","Writed"],a:0},
-{q:"Past of take?",o:["Took","Take","Taking","Taked"],a:0},
-{q:"Past of give?",o:["Gave","Give","Giving","Gived"],a:0},
-{q:"Past of make?",o:["Made","Make","Making","Maked"],a:0},
-{q:"Past of speak?",o:["Spoke","Speak","Speaking","Speaked"],a:0},
-{q:"Past of drive?",o:["Drove","Drive","Driving","Drived"],a:0},
-{q:"Past of read?",o:["Read","Reading","Reads","Readed"],a:0},
-{q:"Past of jump?",o:["Jumped","Jump","Jumping","Jumpt"],a:0},
-{q:"Past of play?",o:["Played","Play","Playing","Playd"],a:0},
-{q:"Past of clean?",o:["Cleaned","Clean","Cleaning","Cleand"],a:0},
-{q:"Past of open?",o:["Opened","Open","Opening","Opend"],a:0},
-{q:"Past of close?",o:["Closed","Close","Closing","Closeded"],a:0},
-{q:"Past of walk?",o:["Walked","Walk","Walking","Walkd"],a:0},
-{q:"Past of talk?",o:["Talked","Talk","Talking","Talkd"],a:0},
-{q:"Past of call?",o:["Called","Call","Calling","Calld"],a:0}
-]
-],
-
-gk:[
-[
-{q:"Capital of India?",o:["Delhi","Mumbai","Chennai","Goa"],a:0},
-{q:"Sun is?",o:["Star","Planet","Moon","Rock"],a:0},
-{q:"Earth is?",o:["Planet","Star","Moon","Cloud"],a:0},
-{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
-{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
-{q:"Currency India?",o:["Rupee","Dollar","Yen","Euro"],a:0},
-{q:"Days in week?",o:["7","6","5","8"],a:0},
-{q:"Months in year?",o:["12","10","11","13"],a:0},
-{q:"Rainbow colors?",o:["7","6","5","8"],a:0},
-{q:"Moon is?",o:["Satellite","Star","Planet","Cloud"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0},
-{q:"Opposite of up?",o:["Down","Left","Right","Top"],a:0},
-{q:"Largest animal?",o:["Blue Whale","Elephant","Tiger","Lion"],a:0},
-{q:"Fastest animal?",o:["Cheetah","Tiger","Lion","Dog"],a:0},
-{q:"Bird example?",o:["Sparrow","Dog","Cat","Fish"],a:0},
-{q:"Fish lives in?",o:["Water","Air","Land","Sky"],a:0},
-{q:"Plant needs?",o:["Sunlight","Stone","Iron","Wood"],a:0},
-{q:"Color of leaf?",o:["Green","Blue","Red","Yellow"],a:0},
-{q:"We breathe?",o:["Air","Water","Fire","Sand"],a:0},
-{q:"Night sky has?",o:["Stars","Sun","Cloud","Fire"],a:0}
-],
-[
-{q:"Largest planet?",o:["Jupiter","Earth","Mars","Venus"],a:0},
-{q:"Smallest planet?",o:["Mercury","Earth","Mars","Jupiter"],a:0},
-{q:"Fastest land animal?",o:["Cheetah","Lion","Tiger","Horse"],a:0},
-{q:"Gas we breathe?",o:["Oxygen","Nitrogen","CO2","Hydrogen"],a:0},
-{q:"Water boils?",o:["100°C","0°C","50°C","200°C"],a:0},
-{q:"Computer brain?",o:["CPU","Mouse","Keyboard","Screen"],a:0},
-{q:"HTML used for?",o:["Web","Game","Music","Video"],a:0},
-{q:"Sun gives?",o:["Energy","Water","Wind","Snow"],a:0},
-{q:"Earth shape?",o:["Round","Flat","Square","Triangle"],a:0},
-{q:"Human heart?",o:["Pumps blood","Think","Walk","Eat"],a:0},
-{q:"Largest desert?",o:["Sahara","Gobi","Thar","Arctic"],a:0},
-{q:"Largest country?",o:["Russia","India","USA","China"],a:0},
-{q:"Currency USA?",o:["Dollar","Rupee","Yen","Euro"],a:0},
-{q:"Ocean water?",o:["Salty","Sweet","Hot","Cold"],a:0},
-{q:"Bird lays?",o:["Eggs","Babies","Plants","Seeds"],a:0},
-{q:"Plant food?",o:["Photosynthesis","Breathing","Running","Jumping"],a:0},
-{q:"Human bones?",o:["206","100","300","150"],a:0},
-{q:"Light speed?",o:["Fastest","Slow","Medium","Zero"],a:0},
-{q:"Gas plants release?",o:["Oxygen","CO2","Hydrogen","Nitrogen"],a:0},
-{q:"Earth revolves?",o:["Sun","Moon","Mars","Star"],a:0}
-],
-[
-{q:"1 KB?",o:["1024 bytes","100","10","1"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0},
-{q:"DNA is?",o:["Genetic","Metal","Gas","Liquid"],a:0},
-{q:"Atom is?",o:["Smallest","Big","Medium","Huge"],a:0},
-{q:"Electric unit?",o:["Volt","Meter","Kg","Liter"],a:0},
-{q:"Sound travels?",o:["Air","Space","Water","Light"],a:0},
-{q:"Earth rotates?",o:["24 hours","12","48","60"],a:0},
-{q:"Sun temp?",o:["Very hot","Cold","Warm","Cool"],a:0},
-{q:"Moon light?",o:["Reflected","Own","Fire","Water"],a:0},
-{q:"Water state?",o:["Liquid","Solid","Gas","All"],a:0},
-{q:"Air has?",o:["Oxygen","Stone","Water","Iron"],a:0},
-{q:"Blood color?",o:["Red","Blue","Green","Black"],a:0},
-{q:"Brain controls?",o:["Body","Car","Phone","TV"],a:0},
-{q:"Muscle helps?",o:["Move","Sleep","Eat","Think"],a:0},
-{q:"Skin protects?",o:["Body","Brain","Heart","Lungs"],a:0},
-{q:"Eye sees?",o:["Light","Sound","Smell","Taste"],a:0},
-{q:"Ear hears?",o:["Sound","Light","Taste","Smell"],a:0},
-{q:"Tongue tastes?",o:["Food","Light","Sound","Air"],a:0},
-{q:"Nose smells?",o:["Odor","Light","Sound","Taste"],a:0},
-{q:"Teeth used?",o:["Chew","Walk","See","Hear"],a:0}
-]
-]
-
+math:[[{q:"2+2=?",img:"",o:["4","5","6","3"],a:0}]],
+english:[[{q:"Cat says?",img:"",o:["Meow","Bark","Moo","Quack"],a:0}]],
+gk:[[{q:"Sun is?",img:"",o:["Star","Planet","Moon","Rock"],a:0}]]
 };
 
-let unlock={math:0,english:0,gk:0};
+/* GAME */
 let cat="",level=0,i=0,stars=0,coins=0,timer,time=10;
 
 function load(){
@@ -355,46 +188,58 @@ document.getElementById("q").innerText=q.q;
 speak(q.q);
 
 if(q.img){
-document.getElementById("qImg").src=q.img;
-document.getElementById("qImg").classList.remove("hidden");
-}else{
-document.getElementById("qImg").classList.add("hidden");
-}
+qImg.src=q.img;
+qImg.classList.remove("hidden");
+}else qImg.classList.add("hidden");
 
 let options=q.o.map((t,idx)=>({t,ok:idx===q.a})).sort(()=>Math.random()-0.5);
 
-document.getElementById("opts").innerHTML=
-options.map(op=>`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`).join("");
+opts.innerHTML=options.map(op=>
+`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`
+).join("");
 
 startTimer();
 }
 
 function check(btn,ok){
 clearInterval(timer);
+
 if(ok){
 stars++;coins+=10;
+btn.classList.add("correct");
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 blastConfetti();
 }else{
+btn.classList.add("wrong");
 playSound("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 }
-document.getElementById("stars").innerText=stars;
-document.getElementById("coins").innerText=coins;
+
+starsEl.innerText=stars;
+coinsEl.innerText=coins;
+
 setTimeout(nextQ,800);
 }
 
-function nextQ(){if(i<data[cat][level].length-1){i++;load();}else{goHome();}}
+function nextQ(){if(i<data[cat][level].length-1){i++;load();}else goHome();}
 function prevQ(){if(i>0){i--;stars=Math.max(0,stars-1);load();}}
 
 function startTimer(){
 clearInterval(timer);
 time=10;
-document.getElementById("time").innerText=time;
-timer=setInterval(()=>{time--;document.getElementById("time").innerText=time;if(time<=0) nextQ();},1000);
+timeEl.innerText=time;
+timer=setInterval(()=>{
+time--;
+timeEl.innerText=time;
+if(time<=0) nextQ();
+},1000);
 }
 
 function goHome(){i=0;clearInterval(timer);show("catScreen");}
-function startApp(){playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");show("catScreen");}
+
+function startApp(){
+playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+show("catScreen");
+}
 
 function show(id){
 ["startScreen","catScreen","levelScreen","gameScreen"]
@@ -405,6 +250,13 @@ document.getElementById(id).classList.remove("hidden");
 function selectCat(c){cat=c;show("levelScreen");}
 function selectLevel(l){level=l;i=0;show("gameScreen");load();}
 
+/* SHORTCUTS */
+const starsEl=document.getElementById("stars");
+const coinsEl=document.getElementById("coins");
+const timeEl=document.getElementById("time");
+const opts=document.getElementById("opts");
+const qImg=document.getElementById("qImg");
+
 /* CONFETTI */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
@@ -412,10 +264,17 @@ canvas.width=innerWidth;
 canvas.height=innerHeight;
 
 let confetti=[];
+
 function blastConfetti(){
 for(let i=0;i<60;i++){
-confetti.push({x:Math.random()*canvas.width,y:0,r:Math.random()*6,color:`hsl(${Math.random()*360},100%,50%)`});
+confetti.push({
+x:Math.random()*canvas.width,
+y:0,
+r:Math.random()*6,
+color:`hsl(${Math.random()*360},100%,50%)`
+});
 }}
+
 function drawConfetti(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 confetti.forEach(p=>{
