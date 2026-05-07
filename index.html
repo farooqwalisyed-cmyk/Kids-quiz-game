@@ -1,4 +1,4 @@
-HTML
+Html id="4jv8pz"
 Copy code
 <!DOCTYPE html>
 <html>
@@ -161,6 +161,7 @@ left:0;
 width:100%;
 height:100%;
 pointer-events:none;
+z-index:999;
 }
 
 </style>
@@ -202,17 +203,27 @@ pointer-events:none;
 </div>
 
 <div id="catScreen" class="hidden">
+
 <button class="btn p2" onclick="selectCat('math')">Math</button>
+
 <button class="btn p3" onclick="selectCat('english')">English</button>
+
 <button class="btn p4" onclick="selectCat('gk')">GK</button>
+
 <button class="btn p1" onclick="resetGame()">🔄 Full Restart</button>
+
 </div>
 
 <div id="levelScreen" class="hidden">
+
 <button id="easyBtn" class="btn p1" onclick="selectLevel(0)">Easy</button>
+
 <button id="mediumBtn" class="btn p2" onclick="selectLevel(1)">Medium 🔒</button>
+
 <button id="hardBtn" class="btn p3" onclick="selectLevel(2)">Hard 🔒</button>
+
 <button class="btn p4" onclick="show('catScreen')">⬅ Back</button>
+
 </div>
 
 <div id="gameScreen" class="hidden">
@@ -222,8 +233,10 @@ pointer-events:none;
 <div id="opts"></div>
 
 <button class="btn p2" onclick="prevQ()">⬅ Prev</button>
+
+<button class="btn p1" onclick="goHome()">🏠 Home</button>
+
 <button class="btn p3" onclick="nextQ()">Next ➡</button>
-<button class="btn p4" onclick="goHome()">🏠 Home</button>
 
 </div>
 
@@ -289,7 +302,7 @@ update();
 updateLevels();
 }
 
-/* DAILY REWARD ONCE */
+/* DAILY REWARD */
 function dailyReward(){
 
 let today=new Date().toDateString();
@@ -351,7 +364,6 @@ saveGame();
 /* LEVEL UPDATE */
 function updateLevels(){
 
-let easy=document.getElementById("easyBtn");
 let medium=document.getElementById("mediumBtn");
 let hard=document.getElementById("hardBtn");
 
@@ -666,16 +678,14 @@ update();
 /* HOME */
 function goHome(){
 
-i=0;
-
 clearInterval(timer);
 
-show("catScreen");
-
 saveGame();
+
+show("catScreen");
 }
 
-/* CONFETTI */
+/* CONFETTI FRONT BURST */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 
@@ -686,15 +696,21 @@ let confetti=[];
 
 function blastConfetti(){
 
-for(let i=0;i<60;i++){
+for(let i=0;i<80;i++){
 
 confetti.push({
-x:Math.random()*canvas.width,
-y:-10,
+
+x:canvas.width/2,
+y:canvas.height/2,
+
 r:Math.random()*6+2,
-vx:(Math.random()-0.5)*2,
-vy:Math.random()*3+3,
+
+vx:(Math.random()-0.5)*12,
+
+vy:(Math.random()-0.5)*12,
+
 color:`hsl(${Math.random()*360},100%,50%)`
+
 });
 }
 }
@@ -716,6 +732,8 @@ ctx.fill();
 p.x+=p.vx;
 
 p.y+=p.vy;
+
+p.vy+=0.1;
 
 });
 
