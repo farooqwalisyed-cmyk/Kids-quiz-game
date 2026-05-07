@@ -1,4 +1,4 @@
-Html id="4jv8pz"
+Html id="8k2mxq"
 Copy code
 <!DOCTYPE html>
 <html>
@@ -38,6 +38,7 @@ box-shadow:0 10px 25px rgba(0,0,0,0.3);
 position:relative;
 max-height:95vh;
 overflow:auto;
+z-index:10;
 }
 
 .topbar{
@@ -244,6 +245,9 @@ z-index:999;
 
 <script>
 
+/* REMOVE BACKGROUND TEXT */
+document.body.innerHTML=document.body.innerHTML.replace(/Html id="[^"]*"/g,'');
+
 /* SOUND */
 function playSound(src){
 new Audio(src).play().catch(()=>{});
@@ -317,18 +321,6 @@ coins+=50;
 
 update();
 
-let pop=document.createElement("div");
-
-pop.className="rewardPopup";
-
-pop.innerText="🎁 Daily Reward +50 Coins!";
-
-document.body.appendChild(pop);
-
-setTimeout(()=>{
-pop.remove();
-},2000);
-
 saveGame();
 }
 
@@ -345,8 +337,6 @@ streak=0;
 unlockedLevels=[true,false,false];
 
 update();
-
-alert("Game Reset Complete!");
 
 location.reload();
 }
@@ -507,12 +497,6 @@ blastConfetti();
 
 playSound("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
 
-if(streak>=5){
-
-document.getElementById("badge").innerText="🏅 Quiz Master!";
-coins+=50;
-}
-
 }else{
 
 btn.style.background="#ff4757";
@@ -568,12 +552,19 @@ goHome();
 }
 }
 
-/* PREV */
+/* PREVIOUS WITH COIN DECREASE */
 function prevQ(){
 
 if(i>0){
 
 i--;
+
+coins=Math.max(0,coins-10);
+stars=Math.max(0,stars-1);
+
+update();
+
+saveGame();
 
 load();
 }
@@ -685,7 +676,7 @@ saveGame();
 show("catScreen");
 }
 
-/* CONFETTI FRONT BURST */
+/* CONFETTI */
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
 
@@ -744,7 +735,7 @@ requestAnimationFrame(drawConfetti);
 
 drawConfetti();
 
-/* STARTUP */
+/* START */
 window.onload=()=>{
 
 loadSave();
