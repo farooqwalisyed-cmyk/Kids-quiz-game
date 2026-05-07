@@ -245,8 +245,15 @@ z-index:999;
 
 <script>
 
-/* REMOVE BACKGROUND TEXT */
-document.body.innerHTML=document.body.innerHTML.replace(/Html id="[^"]*"/g,'');
+window.onload=function(){
+
+document.body.style.overflow="hidden";
+
+loadSave();
+
+dailyReward();
+
+}
 
 /* SOUND */
 function playSound(src){
