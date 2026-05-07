@@ -215,9 +215,21 @@ z-index:999;
 
 <script>
 
-/* REMOVE BACKGROUND TEXT */
-document.body.innerHTML=document.body.innerHTML.replace(/Html id="[^"]*"/gi,"");
+window.onload=function(){
 
+loadSave();
+
+setTimeout(()=>{
+location.hash='loaded';
+},100);
+
+};
+
+window.addEventListener('pageshow',()=>{
+
+document.body.style.display='flex';
+
+});
 /* VARIABLES */
 
 let cat="";
