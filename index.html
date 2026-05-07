@@ -1,7 +1,5 @@
-Html id="kq9m2x"
-Copy code
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,75 +7,93 @@ Copy code
 
 <style>
 
-html,body{
+*{
 margin:0;
 padding:0;
+box-sizing:border-box;
+}
+
+html,body{
 width:100%;
 height:100%;
 overflow:hidden;
-font-family:Arial;
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#ff6a00,#ff00cc,#00f2ff,#00ff88);
+background-size:400% 400%;
+animation:bgMove 8s infinite alternate;
+}
+
+@keyframes bgMove{
+0%{background-position:left;}
+100%{background-position:right;}
 }
 
 body{
 display:flex;
 justify-content:center;
 align-items:center;
-background:linear-gradient(135deg,#ff6a00,#ff00cc,#00f2ff,#00ff88);
-background-size:400% 400%;
-animation:bgMove 6s infinite alternate;
-position:fixed;
-inset:0;
-}
-
-@keyframes bgMove{
-0%{background-position:left}
-100%{background-position:right}
 }
 
 .card{
 width:92%;
 max-width:520px;
-background:white;
+background:#fff;
 border-radius:20px;
 padding:18px;
 text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,0.3);
 position:relative;
-z-index:10;
+z-index:5;
 max-height:95vh;
-overflow:auto;
+overflow-y:auto;
 }
 
 .topbar{
 display:flex;
 justify-content:space-between;
 font-weight:bold;
+font-size:18px;
 margin-bottom:10px;
-font-size:20px;
 flex-wrap:wrap;
 }
 
+.progressBox{
+width:100%;
+height:14px;
+background:#ddd;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:15px;
+}
+
+#progressBar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00ff88,#00c3ff);
+transition:0.4s;
+}
+
 .title{
-font-size:24px;
+font-size:30px;
 font-weight:bold;
-margin:10px 0;
+margin:12px 0;
 color:#6a11cb;
 }
 
 .btn{
 width:100%;
 padding:14px;
-margin:6px 0;
+margin:7px 0;
 border:none;
-border-radius:12px;
-font-size:16px;
-cursor:pointer;
+border-radius:14px;
+font-size:18px;
 font-weight:bold;
+cursor:pointer;
 transition:0.25s;
 }
 
 .btn:hover{
-transform:scale(1.04);
+transform:scale(1.03);
 }
 
 .p1{background:#ffe066;}
@@ -87,22 +103,6 @@ transform:scale(1.04);
 
 .hidden{
 display:none;
-}
-
-.progressBox{
-width:100%;
-height:14px;
-background:#ddd;
-border-radius:20px;
-overflow:hidden;
-margin-bottom:12px;
-}
-
-#progressBar{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#00ff88,#00ccff);
-transition:0.4s;
 }
 
 .avatarBox{
@@ -117,13 +117,13 @@ flex-wrap:wrap;
 font-size:35px;
 padding:10px;
 border-radius:50%;
-cursor:pointer;
 background:#eee;
-transition:0.3s;
+cursor:pointer;
+transition:0.25s;
 }
 
 .avatar:hover{
-transform:scale(1.2);
+transform:scale(1.15);
 background:#ffe066;
 }
 
@@ -170,7 +170,7 @@ z-index:999;
 <h2 id="playerAvatar">😀</h2>
 
 <div id="startScreen">
-<button class="btn p1" onclick="startApp()">🔊 Tap to Start</button>
+<button class="btn p1" onclick="startApp()">🔊 Tap To Start</button>
 </div>
 
 <div id="catScreen" class="hidden">
@@ -199,7 +199,7 @@ z-index:999;
 
 <div id="gameScreen" class="hidden">
 
-<h3 id="q"></h3>
+<h2 id="q"></h2>
 
 <div id="opts"></div>
 
@@ -215,42 +215,59 @@ z-index:999;
 
 <script>
 
-/* FORCE CLEAN PAGE */
-window.addEventListener("load",()=>{
+/* REMOVE BACKGROUND TEXT */
+document.body.innerHTML=document.body.innerHTML.replace(/Html id="[^"]*"/gi,"");
 
-document.body.style.margin="0";
-document.body.style.overflow="hidden";
+/* VARIABLES */
 
-});
+let cat="";
+let level=0;
+let i=0;
 
-/* SOUND */
-function playSound(src){
-new Audio(src).play().catch(()=>{});
-}
+let stars=0;
+let coins=0;
+let lives=3;
+let streak=0;
 
-/* VOICE */
+let timer;
+let time=10;
+
+let avatar="😀";
+
+/* SOUNDS */
+
+const correctSound=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+
+const wrongSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+const startSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+
+/* SPEAK */
+
 function speak(text){
+
 speechSynthesis.cancel();
+
 let msg=new SpeechSynthesisUtterance(text);
+
 speechSynthesis.speak(msg);
+
 }
 
 /* START */
+
 function startApp(){
-playSound("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+
+startSound.play();
+
 speak("Welcome to Kids Quiz Pro");
+
 show("catScreen");
+
 }
 
-/* VARIABLES */
-let cat="",level=0,i=0;
-let stars=0,coins=0;
-let lives=3;
-let streak=0;
-let timer,time=10;
-let avatar="😀";
-
 /* SAVE */
+
 function saveGame(){
 
 localStorage.setItem("quizStars",stars);
@@ -260,9 +277,11 @@ localStorage.setItem("quizAvatar",avatar);
 }
 
 /* LOAD */
+
 function loadSave(){
 
 stars=parseInt(localStorage.getItem("quizStars"))||0;
+
 coins=parseInt(localStorage.getItem("quizCoins"))||0;
 
 avatar=localStorage.getItem("quizAvatar")||"😀";
@@ -270,17 +289,21 @@ avatar=localStorage.getItem("quizAvatar")||"😀";
 document.getElementById("playerAvatar").innerText=avatar;
 
 update();
+
 }
 
 /* RESET */
+
 function resetGame(){
 
 localStorage.clear();
 
-location.reload();
+location.reload(true);
+
 }
 
 /* AVATAR */
+
 function chooseAvatar(a){
 
 avatar=a;
@@ -288,9 +311,11 @@ avatar=a;
 document.getElementById("playerAvatar").innerText=a;
 
 saveGame();
+
 }
 
 /* QUESTIONS */
+
 const data={
 
 math:[
@@ -298,28 +323,26 @@ math:[
 {q:"2+2?",o:["4","5","6","7"],a:0},
 {q:"3+4?",o:["7","6","5","8"],a:0},
 {q:"5+5?",o:["10","11","9","12"],a:0},
-{q:"7+2?",o:["9","8","7","10"],a:0},
-{q:"10-5?",o:["5","6","4","3"],a:0}
+{q:"6+2?",o:["8","7","9","10"],a:0},
+{q:"9-3?",o:["6","7","5","4"],a:0}
 ],
 
 [
 {q:"12+8?",o:["20","18","19","17"],a:0},
-{q:"15-5?",o:["10","9","8","7"],a:0},
-{q:"9×2?",o:["18","16","14","12"],a:0}
+{q:"9×2?",o:["18","16","20","14"],a:0},
+{q:"20÷4?",o:["5","6","4","3"],a:0}
 ],
 
 [
 {q:"12×12?",o:["144","124","154","164"],a:0},
-{q:"144÷12?",o:["12","10","11","13"],a:0},
-{q:"100-45?",o:["55","50","60","65"],a:0}
+{q:"144÷12?",o:["12","11","10","13"],a:0}
 ]
 ],
 
 english:[
 [
 {q:"Opposite of hot?",o:["Cold","Warm","Heat","Fire"],a:0},
-{q:"Plural of cat?",o:["Cats","Cat","Cates","Caties"],a:0},
-{q:"Sun rises in?",o:["East","West","North","South"],a:0}
+{q:"Plural of cat?",o:["Cats","Cat","Cates","Caties"],a:0}
 ],
 
 [
@@ -329,7 +352,7 @@ english:[
 
 [
 {q:"Past of go?",o:["Went","Goed","Gone","Going"],a:0},
-{q:"Past of eat?",o:["Ate","Eat","Eating","Eated"],a:0}
+{q:"Past of eat?",o:["Ate","Eating","Eat","Eated"],a:0}
 ]
 ],
 
@@ -340,19 +363,20 @@ gk:[
 ],
 
 [
-{q:"Boiling point water?",o:["100°C","50°C","0°C","200°C"],a:0},
-{q:"Gas breathe?",o:["Oxygen","Nitrogen","Hydrogen","Carbon"],a:0}
+{q:"Boiling point of water?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"Gas we breathe?",o:["Oxygen","Nitrogen","Hydrogen","Carbon"],a:0}
 ],
 
 [
 {q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
-{q:"Gravity by?",o:["Newton","Einstein","Tesla","Darwin"],a:0}
+{q:"Gravity discovered by?",o:["Newton","Tesla","Einstein","Darwin"],a:0}
 ]
 ]
 
 };
 
 /* LOAD QUESTION */
+
 function load(){
 
 let q=data[cat][level][i];
@@ -373,9 +397,11 @@ options.map(op=>
 updateProgress();
 
 startTimer();
+
 }
 
 /* CHECK */
+
 function check(btn,ok){
 
 clearInterval(timer);
@@ -383,6 +409,9 @@ clearInterval(timer);
 if(ok){
 
 btn.style.background="#2ed573";
+
+correctSound.currentTime=0;
+correctSound.play();
 
 stars++;
 coins+=10;
@@ -394,27 +423,33 @@ blastConfetti();
 
 btn.style.background="#ff4757";
 
+wrongSound.currentTime=0;
+wrongSound.play();
+
 lives--;
 streak=0;
 
 if(lives<=0){
 
-alert("💀 Game Over!");
+alert("💀 Game Over");
 
 goHome();
 
 return;
 }
+
 }
 
 update();
 
 saveGame();
 
-setTimeout(nextQ,700);
+setTimeout(nextQ,800);
+
 }
 
 /* NEXT */
+
 function nextQ(){
 
 if(i<data[cat][level].length-1){
@@ -428,10 +463,13 @@ load();
 alert("🏆 Level Completed!");
 
 goHome();
-}
+
 }
 
-/* PREVIOUS */
+}
+
+/* PREV */
+
 function prevQ(){
 
 if(i>0){
@@ -439,6 +477,7 @@ if(i>0){
 i--;
 
 coins=Math.max(0,coins-10);
+
 stars=Math.max(0,stars-1);
 
 update();
@@ -446,29 +485,24 @@ update();
 saveGame();
 
 load();
+
 }
+
 }
 
 /* UPDATE */
+
 function update(){
 
 document.getElementById("stars").innerText=stars;
 document.getElementById("coins").innerText=coins;
 document.getElementById("lives").innerText=lives;
 document.getElementById("streak").innerText=streak;
-}
 
-/* PROGRESS */
-function updateProgress(){
-
-let total=data[cat][level].length;
-
-let progress=((i+1)/total)*100;
-
-document.getElementById("progressBar").style.width=progress+"%";
 }
 
 /* TIMER */
+
 function startTimer(){
 
 clearInterval(timer);
@@ -486,29 +520,46 @@ document.getElementById("time").innerText=time;
 if(time<=0){
 
 nextQ();
+
 }
 
 },1000);
+
+}
+
+/* PROGRESS */
+
+function updateProgress(){
+
+let total=data[cat][level].length;
+
+let progress=((i+1)/total)*100;
+
+document.getElementById("progressBar").style.width=progress+"%";
+
 }
 
 /* SHOW */
+
 function show(id){
 
 ["startScreen","catScreen","levelScreen","gameScreen"]
 .forEach(x=>document.getElementById(x).classList.add("hidden"));
 
 document.getElementById(id).classList.remove("hidden");
+
 }
 
-/* CATEGORY */
+/* SELECT */
+
 function selectCat(c){
 
 cat=c;
 
 show("levelScreen");
+
 }
 
-/* LEVEL */
 function selectLevel(l){
 
 level=l;
@@ -524,9 +575,11 @@ show("gameScreen");
 load();
 
 update();
+
 }
 
 /* HOME */
+
 function goHome(){
 
 clearInterval(timer);
@@ -534,20 +587,24 @@ clearInterval(timer);
 saveGame();
 
 show("catScreen");
+
 }
 
 /* CONFETTI */
+
 const canvas=document.getElementById("confetti");
+
 const ctx=canvas.getContext("2d");
 
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+canvas.width=window.innerWidth;
+
+canvas.height=window.innerHeight;
 
 let confetti=[];
 
 function blastConfetti(){
 
-for(let i=0;i<80;i++){
+for(let i=0;i<90;i++){
 
 confetti.push({
 
@@ -563,7 +620,9 @@ vy:(Math.random()-0.5)*12,
 color:`hsl(${Math.random()*360},100%,50%)`
 
 });
+
 }
+
 }
 
 function drawConfetti(){
@@ -591,12 +650,22 @@ p.vy+=0.1;
 confetti=confetti.filter(p=>p.y<canvas.height);
 
 requestAnimationFrame(drawConfetti);
+
 }
 
 drawConfetti();
 
+/* REFRESH FIX */
+
+window.onbeforeunload=function(){
+
+return null;
+
+};
+
 /* START */
-window.onload=()=>{
+
+window.onload=function(){
 
 loadSave();
 
