@@ -270,43 +270,104 @@ saveGame();
 }
 
 /* QUESTIONS */
-const data={
+const data = {
+
 math:[
 [
 {q:"2+2?",o:["4","5","6","7"],a:0},
-{q:"3+4?",o:["7","6","5","8"],a:0}
+{q:"3+4?",o:["7","6","5","8"],a:0},
+{q:"5+5?",o:["10","11","9","12"],a:0},
+{q:"6+2?",o:["8","7","9","10"],a:0},
+{q:"9-3?",o:["6","7","5","4"],a:0},
+{q:"10-5?",o:["5","6","4","7"],a:0},
+{q:"7+3?",o:["10","9","11","8"],a:0}
 ],
+
 [
-{q:"12+8?",o:["20","18","19","17"],a:0}
+{q:"12+8?",o:["20","18","19","17"],a:0},
+{q:"15-5?",o:["10","9","11","12"],a:0},
+{q:"9×2?",o:["18","16","20","14"],a:0},
+{q:"20÷4?",o:["5","6","4","3"],a:0},
+{q:"14+6?",o:["20","18","19","21"],a:0},
+{q:"16-6?",o:["10","9","8","11"],a:0},
+{q:"8×2?",o:["16","14","18","12"],a:0}
 ],
+
 [
-{q:"12×12?",o:["144","124","154","164"],a:0}
+{q:"12×12?",o:["144","124","154","164"],a:0},
+{q:"144÷12?",o:["12","11","10","13"],a:0},
+{q:"25×4?",o:["100","90","110","120"],a:0},
+{q:"50÷5?",o:["10","9","11","8"],a:0},
+{q:"15×3?",o:["45","40","50","35"],a:0},
+{q:"81÷9?",o:["9","8","7","10"],a:0},
+{q:"100-55?",o:["45","40","50","35"],a:0}
 ]
 ],
 
 english:[
 [
-{q:"Opposite of hot?",o:["Cold","Warm","Heat","Fire"],a:0}
+{q:"Opposite of hot?",o:["Cold","Warm","Heat","Fire"],a:0},
+{q:"Plural of cat?",o:["Cats","Cat","Cates","Caties"],a:0},
+{q:"A is a vowel?",o:["Yes","No","Maybe","None"],a:0},
+{q:"Opposite of big?",o:["Small","Tall","Large","Huge"],a:0},
+{q:"Bird can ____?",o:["Fly","Run","Walk","Swim"],a:0},
+{q:"Sun is ____?",o:["Hot","Cold","Small","Blue"],a:0},
+{q:"Sky is ____?",o:["Blue","Green","Red","Yellow"],a:0}
 ],
+
 [
-{q:"He __ going",o:["is","are","am","be"],a:0}
+{q:"He __ going",o:["is","are","am","be"],a:0},
+{q:"They __ playing",o:["are","is","am","be"],a:0},
+{q:"She __ reading",o:["is","are","am","be"],a:0},
+{q:"We __ happy",o:["are","is","am","be"],a:0},
+{q:"I __ a boy",o:["am","is","are","be"],a:0},
+{q:"Dog __ barking",o:["is","are","am","be"],a:0},
+{q:"Birds __ flying",o:["are","is","am","be"],a:0}
 ],
+
 [
-{q:"Past of go?",o:["Went","Goed","Gone","Going"],a:0}
+{q:"Past of go?",o:["Went","Goed","Gone","Going"],a:0},
+{q:"Past of eat?",o:["Ate","Eating","Eat","Eated"],a:0},
+{q:"Past of run?",o:["Ran","Runned","Running","Run"],a:0},
+{q:"Past of see?",o:["Saw","Seed","Seen","Seeing"],a:0},
+{q:"Past of write?",o:["Wrote","Written","Writed","Write"],a:0},
+{q:"Past of come?",o:["Came","Comed","Coming","Come"],a:0},
+{q:"Past of take?",o:["Took","Taken","Taked","Take"],a:0}
 ]
 ],
 
 gk:[
 [
-{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
+{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0},
+{q:"Largest ocean?",o:["Pacific","Atlantic","Indian","Arctic"],a:0},
+{q:"India is in?",o:["Asia","Europe","Africa","USA"],a:0},
+{q:"National animal of India?",o:["Tiger","Lion","Elephant","Leopard"],a:0},
+{q:"National bird of India?",o:["Peacock","Parrot","Sparrow","Crow"],a:0},
+{q:"Sun rises in?",o:["East","West","North","South"],a:0},
+{q:"Earth is a?",o:["Planet","Star","Moon","Sun"],a:0}
 ],
+
 [
-{q:"Boiling point of water?",o:["100°C","50°C","0°C","200°C"],a:0}
+{q:"Boiling point of water?",o:["100°C","50°C","0°C","200°C"],a:0},
+{q:"Gas we breathe?",o:["Oxygen","Nitrogen","Hydrogen","Carbon"],a:0},
+{q:"Water formula?",o:["H2O","CO2","O2","NaCl"],a:0},
+{q:"Humans have __ senses?",o:["5","4","6","7"],a:0},
+{q:"Day has __ hours?",o:["24","12","48","36"],a:0},
+{q:"Year has __ months?",o:["12","10","11","13"],a:0},
+{q:"H2 is element of?",o:["Hydrogen","Oxygen","Carbon","Helium"],a:0}
 ],
+
 [
-{q:"Gravity discovered by?",o:["Newton","Tesla","Einstein","Darwin"],a:0}
+{q:"1 KB=?",o:["1024 bytes","100","10","1"],a:0},
+{q:"Gravity discovered by?",o:["Newton","Tesla","Einstein","Darwin"],a:0},
+{q:"CPU is?",o:["Brain of computer","Screen","Mouse","Printer"],a:0},
+{q:"WWW stands for?",o:["World Wide Web","World Web Work","Web World Wide","Wide Web World"],a:0},
+{q:"Keyboard is input device?",o:["Yes","No","Maybe","None"],a:0},
+{q:"RAM is?",o:["Memory","Storage","CPU","Screen"],a:0},
+{q:"Monitor shows?",o:["Output","Input","Code","Sound"],a:0}
 ]
 ]
+
 };
 
 /* LOAD QUESTION */
