@@ -1,171 +1,495 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Kids Quiz</title>
+<title>Kids Quiz PRO</title>
 
 <style>
-body{
+
+*{
 margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb,#a18cd1);
+padding:0;
+box-sizing:border-box;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#ff6a00,#ff00cc,#00f2ff,#00ff88);
+background-size:400% 400%;
+animation:bgMove 8s infinite alternate;
+}
+
+@keyframes bgMove{
+0%{background-position:left;}
+100%{background-position:right;}
+}
+
+body{
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
 }
 
-.container{
-width:90%;
-max-width:400px;
-background:white;
-padding:20px;
-border-radius:15px;
+.card{
+width:92%;
+max-width:520px;
+background:#fff;
+border-radius:20px;
+padding:18px;
 text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+position:relative;
+z-index:5;
+max-height:95vh;
+overflow-y:auto;
 }
 
-h1{
-color:#ff4d6d;
+.topbar{
+display:flex;
+justify-content:space-between;
+font-weight:bold;
+font-size:18px;
+margin-bottom:10px;
+flex-wrap:wrap;
 }
 
-button{
-padding:10px;
-margin:5px;
+.progressBox{
+width:100%;
+height:14px;
+background:#ddd;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:15px;
+}
+
+#progressBar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00ff88,#00c3ff);
+transition:0.4s;
+}
+
+.title{
+font-size:30px;
+font-weight:bold;
+margin:12px 0;
+color:#6a11cb;
+}
+
+.btn{
+width:100%;
+padding:14px;
+margin:7px 0;
 border:none;
-border-radius:8px;
-background:#6c63ff;
-color:white;
-font-size:16px;
-width:90%;
-}
-
-button:hover{
-background:#574b90;
+border-radius:14px;
+font-size:18px;
+font-weight:bold;
 cursor:pointer;
+transition:0.25s;
 }
 
-.option{
-display:block;
-margin:8px 0;
-background:#f1f1f1;
-color:black;
+.btn:hover{
+transform:scale(1.03);
 }
 
-.correct{background:#4CAF50 !important;color:white;}
-.wrong{background:#f44336 !important;color:white;}
+.p1{background:#ffe066;}
+.p2{background:#2ed573;}
+.p3{background:#1e90ff;color:white;}
+.p4{background:#ff4757;color:white;}
 
-.hidden{display:none;}
+.hidden{
+display:none;
+}
+
+.avatarBox{
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:12px;
+flex-wrap:wrap;
+}
+
+.avatar{
+font-size:35px;
+padding:10px;
+border-radius:50%;
+background:#eee;
+cursor:pointer;
+transition:0.25s;
+}
+
+.avatar:hover{
+transform:scale(1.15);
+background:#ffe066;
+}
+
+#confetti{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+z-index:999;
+}
 
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<canvas id="confetti"></canvas>
 
-<h1>Smart Kids Quiz 🎨</h1>
+<div class="card">
 
-<div id="menu">
-<p>Choose Category</p>
-<button onclick="startQuiz('math')">Math</button>
-<button onclick="startQuiz('gk')">GK</button>
-<button onclick="startQuiz('english')">English</button>
+<div class="topbar">
+<div>⭐ <span id="stars">0</span></div>
+<div>🪙 <span id="coins">0</span></div>
+<div>❤️ <span id="lives">3</span></div>
+<div>🔥 <span id="streak">0</span></div>
+<div>⏱️ <span id="time">10</span></div>
 </div>
 
-<div id="quiz" class="hidden">
-<h2 id="question"></h2>
-<div id="options"></div>
-<p id="score"></p>
-<button onclick="nextQuestion()">Next</button>
-<button onclick="restart()">Restart</button>
+<div class="progressBox">
+<div id="progressBar"></div>
+</div>
+
+<div class="title">🎮 Smart Kids Quiz</div>
+
+<div class="avatarBox">
+<div class="avatar" onclick="chooseAvatar('🐱')">🐱</div>
+<div class="avatar" onclick="chooseAvatar('🦁')">🦁</div>
+<div class="avatar" onclick="chooseAvatar('🐼')">🐼</div>
+<div class="avatar" onclick="chooseAvatar('🐸')">🐸</div>
+</div>
+
+<h2 id="playerAvatar">😀</h2>
+
+<div id="startScreen">
+<button class="btn p1" onclick="startApp()">🔊 Tap To Start</button>
+</div>
+
+<div id="catScreen" class="hidden">
+
+<button class="btn p2" onclick="selectCat('math')">Math</button>
+<button class="btn p3" onclick="selectCat('english')">English</button>
+<button class="btn p4" onclick="selectCat('gk')">GK</button>
+<button class="btn p1" onclick="resetGame()">🔄 Full Restart</button>
+
+</div>
+
+<div id="levelScreen" class="hidden">
+
+<button class="btn p1" onclick="selectLevel(0)">Easy</button>
+<button class="btn p2" onclick="selectLevel(1)">Medium</button>
+<button class="btn p3" onclick="selectLevel(2)">Hard</button>
+<button class="btn p4" onclick="show('catScreen')">⬅ Back</button>
+
+</div>
+
+<div id="gameScreen" class="hidden">
+
+<h2 id="q"></h2>
+<div id="opts"></div>
+
+<button class="btn p2" onclick="prevQ()">⬅ Prev</button>
+<button class="btn p1" onclick="goHome()">🏠 Home</button>
+<button class="btn p3" onclick="nextQ()">Next ➡</button>
+
 </div>
 
 </div>
 
 <script>
 
-const questions = {
+/* VARIABLES */
+let cat="";
+let level=0;
+let i=0;
+
+let stars=0;
+let coins=0;
+let lives=3;
+let streak=0;
+
+let timer;
+let time=10;
+
+let avatar="😀";
+
+/* SOUNDS */
+const correctSound=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const wrongSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+const startSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+
+/* SPEAK */
+function speak(text){
+speechSynthesis.cancel();
+let msg=new SpeechSynthesisUtterance(text);
+speechSynthesis.speak(msg);
+}
+
+/* START */
+function startApp(){
+startSound.play();
+speak("Welcome to Smart Kids Quiz");
+show("catScreen");
+}
+
+/* SAVE */
+function saveGame(){
+localStorage.setItem("quizStars",stars);
+localStorage.setItem("quizCoins",coins);
+localStorage.setItem("quizAvatar",avatar);
+}
+
+/* LOAD */
+function loadSave(){
+stars=parseInt(localStorage.getItem("quizStars"))||0;
+coins=parseInt(localStorage.getItem("quizCoins"))||0;
+avatar=localStorage.getItem("quizAvatar")||"😀";
+document.getElementById("playerAvatar").innerText=avatar;
+update();
+}
+
+/* RESET */
+function resetGame(){
+localStorage.clear();
+location.reload();
+}
+
+/* AVATAR */
+function chooseAvatar(a){
+avatar=a;
+document.getElementById("playerAvatar").innerText=a;
+saveGame();
+}
+
+/* QUESTIONS */
+const data={
 math:[
-{q:"2 + 2 = ?", a:["3","4","5","6"], correct:1},
-{q:"5 x 3 = ?", a:["15","10","20","25"], correct:0}
+[
+{q:"2+2?",o:["4","5","6","7"],a:0},
+{q:"3+4?",o:["7","6","5","8"],a:0}
 ],
-gk:[
-{q:"Capital of India?", a:["Mumbai","Delhi","Chennai","Kolkata"], correct:1},
-{q:"Sun is a?", a:["Planet","Star","Moon","Comet"], correct:1}
+[
+{q:"12+8?",o:["20","18","19","17"],a:0}
 ],
+[
+{q:"12×12?",o:["144","124","154","164"],a:0}
+]
+],
+
 english:[
-{q:"Apple is a?", a:["Verb","Noun","Adjective","Adverb"], correct:1},
-{q:"Cat is spelled?", a:["Kat","Cat","Cut","Cot"], correct:1}
+[
+{q:"Opposite of hot?",o:["Cold","Warm","Heat","Fire"],a:0}
+],
+[
+{q:"He __ going",o:["is","are","am","be"],a:0}
+],
+[
+{q:"Past of go?",o:["Went","Goed","Gone","Going"],a:0}
+]
+],
+
+gk:[
+[
+{q:"Capital of India?",o:["Delhi","Mumbai","Goa","Chennai"],a:0}
+],
+[
+{q:"Boiling point of water?",o:["100°C","50°C","0°C","200°C"],a:0}
+],
+[
+{q:"Gravity discovered by?",o:["Newton","Tesla","Einstein","Darwin"],a:0}
+]
 ]
 };
 
-let currentCategory;
-let index = 0;
-let score = 0;
+/* LOAD QUESTION */
+function load(){
 
-function startQuiz(cat){
-currentCategory = cat;
-index = 0;
-score = 0;
-document.getElementById("menu").classList.add("hidden");
-document.getElementById("quiz").classList.remove("hidden");
-loadQuestion();
+if(!data[cat] || !data[cat][level]) return;
+
+let q=data[cat][level][i];
+
+document.getElementById("q").innerText=q.q;
+speak(q.q);
+
+let options=q.o
+.map((t,idx)=>({t,ok:idx===q.a}))
+.sort(()=>Math.random()-0.5);
+
+document.getElementById("opts").innerHTML=
+options.map(op=>
+`<button class="btn p1" onclick="check(this,${op.ok})">${op.t}</button>`
+).join("");
+
+updateProgress();
+startTimer();
 }
 
-function loadQuestion(){
-let q = questions[currentCategory][index];
-document.getElementById("question").innerText = q.q;
+/* CHECK */
+function check(btn,ok){
 
-let optionsDiv = document.getElementById("options");
-optionsDiv.innerHTML = "";
+clearInterval(timer);
 
-q.a.forEach((opt,i)=>{
-let btn = document.createElement("button");
-btn.innerText = opt;
-btn.classList.add("option");
-btn.onclick = ()=>checkAnswer(i);
-optionsDiv.appendChild(btn);
-});
-
-document.getElementById("score").innerText = "Score: " + score;
-}
-
-function checkAnswer(i){
-let q = questions[currentCategory][index];
-let buttons = document.querySelectorAll(".option");
-
-buttons.forEach((btn,idx)=>{
-if(idx === q.correct){
-btn.classList.add("correct");
-}
-if(idx === i && i !== q.correct){
-btn.classList.add("wrong");
-}
-});
-
-if(i === q.correct){
-score++;
-}
-
-document.getElementById("score").innerText = "Score: " + score;
-}
-
-function nextQuestion(){
-index++;
-if(index < questions[currentCategory].length){
-loadQuestion();
+if(ok){
+btn.style.background="#2ed573";
+correctSound.play();
+stars++;
+coins+=10;
+streak++;
+blastConfetti();
 }else{
-alert("Quiz Finished! Your Score: " + score);
-restart();
+btn.style.background="#ff4757";
+wrongSound.play();
+lives--;
+streak=0;
+if(lives<=0){
+alert("Game Over");
+goHome();
+return;
 }
 }
 
-function restart(){
-document.getElementById("menu").classList.remove("hidden");
-document.getElementById("quiz").classList.add("hidden");
+update();
+saveGame();
+setTimeout(nextQ,800);
 }
+
+/* NEXT */
+function nextQ(){
+if(i<data[cat][level].length-1){
+i++;
+load();
+}else{
+alert("Level Completed!");
+goHome();
+}
+}
+
+/* PREV */
+function prevQ(){
+if(i>0){
+i--;
+coins=Math.max(0,coins-10);
+stars=Math.max(0,stars-1);
+update();
+saveGame();
+load();
+}
+}
+
+/* UPDATE */
+function update(){
+document.getElementById("stars").innerText=stars;
+document.getElementById("coins").innerText=coins;
+document.getElementById("lives").innerText=lives;
+document.getElementById("streak").innerText=streak;
+}
+
+/* TIMER */
+function startTimer(){
+clearInterval(timer);
+time=10;
+document.getElementById("time").innerText=time;
+
+timer=setInterval(()=>{
+time--;
+document.getElementById("time").innerText=time;
+if(time<=0){
+clearInterval(timer);
+nextQ();
+}
+},1000);
+}
+
+/* PROGRESS */
+function updateProgress(){
+let total=data[cat][level].length;
+let progress=((i+1)/total)*100;
+document.getElementById("progressBar").style.width=progress+"%";
+}
+
+/* SHOW */
+function show(id){
+["startScreen","catScreen","levelScreen","gameScreen"]
+.forEach(x=>document.getElementById(x).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+}
+
+/* SELECT */
+function selectCat(c){
+cat=c;
+show("levelScreen");
+}
+
+function selectLevel(l){
+level=l;
+i=0;
+lives=3;
+streak=0;
+show("gameScreen");
+load();
+update();
+}
+
+/* HOME */
+function goHome(){
+clearInterval(timer);
+saveGame();
+show("catScreen");
+}
+
+/* CONFETTI */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let confetti=[];
+
+function blastConfetti(){
+for(let i=0;i<90;i++){
+confetti.push({
+x:canvas.width/2,
+y:canvas.height/2,
+r:Math.random()*6+2,
+vx:(Math.random()-0.5)*12,
+vy:(Math.random()-0.5)*12,
+color:`hsl(${Math.random()*360},100%,50%)`
+});
+}
+}
+
+function drawConfetti(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+confetti.forEach(p=>{
+ctx.fillStyle=p.color;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.x+=p.vx;
+p.y+=p.vy;
+p.vy+=0.1;
+});
+
+confetti=confetti.filter(p=>p.y<canvas.height);
+requestAnimationFrame(drawConfetti);
+}
+drawConfetti();
+
+/* INIT */
+window.onload=function(){
+loadSave();
+show("startScreen");
+};
 
 </script>
 
